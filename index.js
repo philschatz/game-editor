@@ -4,12 +4,10 @@ var lsb = require('lsb')
 var voxelShare = require('voxel-share')
 var request = require('browser-request')
 var Convert = require('voxel-critter/lib/convert.js')
-var voxel2dprinter = require('voxel-2d-print')
 var ndarray = require('ndarray')
 var ndarrayFill = require('ndarray-fill')
-var orthogamiExport = require('./js/orthogami.js')
 
-module.exports = function() {
+window.startEditor = function() {
   var container
   var camera, renderer, brush
   var projector, plane, scene, grid, shareDialog
@@ -29,8 +27,9 @@ module.exports = function() {
   var wireframeMaterial = new THREE.MeshBasicMaterial(wireframeOptions)
   var animationFrames = []
   var currentFrame = 0
-  var colors = ['2ECC71', '3498DB', '34495E', 'E67E22', 'ECF0F1'].map(function(c) { return hex2rgb(c) })
-  for( var c = 0; c < 5; c++ ) {
+  //var colors = ['000000', 'FFF500', ].map(function(c) { return hex2rgb(c) })
+  var colors = ['000000', '2ECC71', '3498DB', '34495E', 'E67E22', 'ECF0F1', 'FFF500', 'FF0000', '00FF38', 'BD00FF', '08c9ff', 'D32020'].map(function(c) { return hex2rgb(c); })
+  for( var c = 0; c < 12; c++ ) {
     addColorToPalette(c)
   }
 
@@ -53,123 +52,7 @@ module.exports = function() {
     $('#about').modal()
   }
 
-  exports.share = function() {
-    var fakeGame = {
-      renderer: {
-        render: function() {}
-      },
-      scene: {},
-      camera: {},
-      element: getExportCanvas(800, 600)
-    }
-    shareDialog = voxelShare({
-      game: fakeGame,
-      // api v3 key from imgur.com
-      key: 'cda7e5d26c82bea',
-      message: 'Check out my voxel critter! Made with ' + window.location.href,
-      hashtags: 'voxelcritter',
-      afterUpload: function(link) {
-        request({
-          method: "POST",
-          url: "http://cors.maxogden.com/http://max.ic.ht/critters",
-          json: true,
-          body: {
-            link: link,
-            author: $('#share .author').val(),
-            name: $('#share .name').val(),
-            date: new Date()
-          }
-        }, function(err, resp, body) {
-          shareDialog.close()
-          window.open(link)
-        })
-      }
-    })
-    $('#share .modal-footer .btn-primary').remove()
-    $('#share').modal()
-    var modalBody = $('#share .modal-body .share-form')
-    shareDialog.open(modalBody[0])
-    $('#share .voxel-share button').addClass('btn btn-primary').prependTo($('#share .modal-footer'))
-    shareDialog.close = function() {
-      $('#share .modal-footer .btn-cancel').click()
-    }
-  }
-  
-  exports.orthogamiExport = function() {
-    var data = getVoxels()
-    try {
-      var svgs = orthogamiExport(data.voxels, data.colors)
-      $('#orthogamiExport').modal()
-      var content = $('#orthogamiExport .orthogami')
-      content.html('')
-      svgs.map(function(svg) {
-        var svgUri = encodeSVGDatauri(svg)
-        content.append($('<a href="' + svgUri + '">' + svg + '</a>'))
-      })      
-    } catch(e) {
-      alert('Unable to export current design, sorry! Try making it a bit simpler')
-    }
-  }
-  
-  exports.paperstackExport = function() {
-    var data = getVoxels()
-    console.log(data)
-    var stack = voxel2dprinter(data.voxels, data.colors, 80)
-    
-    $('#paperstackExport').modal()
-    var content = $('#paperstackExport .canvases')
-    content.html('')
-    console.log(stack)
-    stack.canvases.map(function(canv) {
-      var pngUri = canv.toDataURL('image/png')
-      var link = $('<a href="' + pngUri + '"></a>')
-      link.append(canv)
-      content.append(link)
-    })
-  }
 
-  exports.loadExample = function() {
-    window.location.replace( '#C/2ecc713498db34495ee67e22ecf0f11d2999000000:A/bdhiSeVhhSiSfVheUhSfSiXhfjfhffcSi')
-    buildFromHash()
-  }
-
-  exports.browseTwitter = function() {
-    $('#browse').modal()
-    var content = $('#browse .demo-browser-content')
-    content.html('')
-    var links = $("iframe:first").contents().find('.tweet .e-entry-title a')
-    links = links.filter(function(i, link) {
-      var url = $(link).attr('data-expanded-url')
-      if (!url) return
-      if (url.match(/imgur/)) return true
-      return false
-    })
-    links = links.map(function(i, link) {
-      var url = $(link).attr('data-expanded-url')
-      content.append('<img src="' + url + '"/>')
-    })
-  }
-
-  exports.browseRecent = function() {
-    $('#browse').modal()
-    var content = $('#browse .demo-browser-content')
-    content.html('<p>Loading...</p>')
-    request({
-        url: 'http://cors.maxogden.com/http://max.ic.ht/critters/_all_docs?include_docs=true',
-        json: true
-      }, function(err, resp, data) {
-      if (err) {
-        alert('error loading recent creations')
-        $('#browse .modal-footer .btn-cancel').click()
-        return
-      }
-      content.html('')
-      data.rows.map(function(row) {
-        if (!row || !row.doc) return
-        if (row.doc.link && row.doc.link.match(/imgur/)) content.append('<img src="' + row.doc.link + '"/>')
-      })
-    })
-  }
 
   exports.getImage = function(imgURL, cb) {
     var img = new Image()
@@ -178,12 +61,6 @@ module.exports = function() {
     img.onload = function() {
       cb(img)
     }
-  }
-
-  exports.export = function() {
-    var voxels = updateHash()
-    if (voxels.length === 0) return
-    window.open(exportImage(800, 600).src, 'voxel-painter-window')
   }
 
   exports.reset = function() {
@@ -202,11 +79,6 @@ module.exports = function() {
     scene.children
       .filter(function(el) { return el.isVoxel })
       .map(function(mesh) { mesh.wireMesh.visible = bool })
-  }
-
-  exports.toggleAnimation = function(bool) {
-    animation = bool
-    $('.animationControls').toggle()
   }
 
   exports.setFill = function(bool) {
@@ -229,13 +101,6 @@ module.exports = function() {
     buildFromHash()
   }
 
-  exports.playPause = function() {
-    animating = !animating
-    playPauseEl.toggleClass('fui-play', !animating).toggleClass('fui-pause', animating)
-    if (animating) animationInterval = setInterval(changeFrame, 250)
-    else clearInterval(animationInterval)
-  }
-  
   function getVoxels() {
     var hash = window.location.hash.substr(1)
     var convert = new Convert()
@@ -245,38 +110,22 @@ module.exports = function() {
     var d = [ h[0]-l[0] + 1, h[1]-l[1] + 1, h[2]-l[2] + 1]
     var len = d[0] * d[1] * d[2]
     var voxels = ndarray(new Int32Array(len), [d[0], d[1], d[2]])
-    
+
     var colors = [undefined]
     data.colors.map(function(c) {
       colors.push('#' + rgb2hex(c))
     })
-    
+
     function generateVoxels(x, y, z) {
       var offset = [x + l[0], y + l[1], z + l[2]]
       var val = data.voxels[offset.join('|')]
       return data.colors[val] ? val + 1: 0
     }
-    
+
     ndarrayFill(voxels, generateVoxels)
     return {voxels: voxels, colors: colors}
   }
-  
-  function encodeSVGDatauri(str, type) {
-    var prefix = 'data:image/svg+xml'
-    // base64
-    if (!type || type === 'base64') {
-      prefix += ';base64,'
-      str = prefix + new Buffer(str).toString('base64')
-    // URI encoded
-    } else if (type === 'enc') {
-      str = prefix + ',' + encodeURIComponent(str)
-    // unencoded
-    } else if (type === 'unenc') {
-      str = prefix + ',' + str
-    }
-    return str
-  }
-  
+
   function addVoxel(x, y, z, c) {
     var cubeMaterial = new CubeMaterial( { vertexColors: THREE.VertexColors, transparent: true } )
     var col = colors[c] || colors[0]
@@ -525,7 +374,10 @@ module.exports = function() {
     container = document.createElement( 'div' )
     document.body.appendChild( container )
 
-    camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 10000 )
+    //new THREE.OrthographicCamera(this.width/-2, this.width/2, this.height/2, this.height/-2, this.nearPlane, this.farPlane)):(new THREE.PerspectiveCamera(this.fov, this.aspectRatio, this.nearPlane, this.farPlane))
+
+    //camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 10000 )
+    camera = new THREE.OrthographicCamera(window.innerWidth / -1, window.innerWidth / 1, window.innerHeight / 1, window.innerHeight / -1, 1, 10000 )
     camera.position.x = radius * Math.sin( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
     camera.position.y = radius * Math.sin( phi * Math.PI / 360 )
     camera.position.z = radius * Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
@@ -767,6 +619,7 @@ module.exports = function() {
   }
 
   function onDocumentKeyDown( event ) {
+    console.log(event.keyCode);
     switch( event.keyCode ) {
       case 189: zoom(100); break
       case 187: zoom(-100); break
@@ -1014,9 +867,10 @@ module.exports = function() {
     animationFrames[currentFrame] = data
 
     var cData = '';
-    for (var i = 0; i < colors.length; i++){
-      cData += rgb2hex(colors[i]);
-    }
+    // ignore color data
+    // for (var i = 0; i < colors.length; i++){
+    //   cData += rgb2hex(colors[i]);
+    // }
 
     var outHash = "#" + (cData ? ("C/" + cData) : '')
     for (var i = 0; i < animationFrames.length; i++) {
@@ -1032,22 +886,38 @@ module.exports = function() {
 
     window.location.replace(outHash)
 
+    // Update the Play Level link
+    $('.play-level').attr('href', 'http://philschatz.com/game/#' + outHash);
+
     setTimeout(function() {
       window.updatingHash = false
     }, 1)
-    
+
     return voxels
   }
 
+  // Update the Play Level link
+  $('.play-level').attr('href', 'http://philschatz.com/game/' + window.location.hash);
+
+
   function exportFunction(voxels) {
     var dimensions = getDimensions(voxels)
-    voxels = voxels.map(function(v) { return [v.x, v.y, v.z, v.c + 1]})
+    voxels = voxels.map(function(v) { return [v.x, v.y, v.z, v.c]})
     var funcString = "var voxels = " + JSON.stringify(voxels) + ";"
     funcString += 'var dimensions = ' + JSON.stringify(dimensions) + ';'
     funcString += 'voxels.map(function(voxel) {' +
-    'game.setBlock([position.x + voxel[0], position.y + voxel[1], position.z + voxel[2]], voxel[3])' +
+    'if (colorMapper(voxel[3])) { addBlock([position.x + voxel[0], position.y + voxel[1], position.z + voxel[2]], colorMapper(voxel[3])) }' +
     '});'
     return funcString
+  }
+
+
+
+  window.exportMap = function() {
+    var voxels = scene.children
+      .filter(function(el) { return el.isVoxel });
+    var voxelsReal = voxels.map(function(v) { return {x:(v.position.x-25)/50, y:(v.position.y-25)/50, z:(v.position.z-25)/50, c:v.wireMesh.material.color.getHexString()};});
+    console.log(exportFunction(voxelsReal));
   }
 
   // skips every fourth byte when encoding images,
