@@ -888,7 +888,7 @@ window.startEditor = function() {
     window.location.replace(outHash)
 
     // Update the Play Level link
-    $('.play-level').attr('href', 'http://philschatz.com/game/#' + outHash);
+    $('.play-level').attr('href', 'http://philschatz.com/game/' + outHash);
 
     setTimeout(function() {
       window.updatingHash = false
