@@ -5,9 +5,9 @@ module.exports = (Input, SceneManager) ->
 
       interact: ->
         return  if typeof SceneManager.raycaster is "undefined"
-        if @objectHovered
-          @objectHovered.material.opacity = 1
-          @objectHovered = null
+        if @_objectHovered
+          @_objectHovered.material.opacity = 1
+          @_objectHovered = null
         intersect = SceneManager.getIntersecting()
         if intersect
           updateBrush = ->
@@ -37,8 +37,8 @@ module.exports = (Input, SceneManager) ->
             return SceneManager.brush.currentCube = newCube
           else if Input.isShiftDown
             if intersect.object isnt SceneManager.plane
-              @objectHovered = intersect.object
-              @objectHovered.material.opacity = 0.5
+              @_objectHovered = intersect.object
+              @_objectHovered.material.opacity = 0.5
               SceneManager.brush.position.y = 2000
               return
           else

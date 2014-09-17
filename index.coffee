@@ -298,7 +298,7 @@ window.startEditor = ->
     SceneManager.grid.material.visible = bool
     return
 
-  $(".play-level").attr "href", "http://SceneManager.philschatz.com/game/" + window.location.hash
+  $(".play-level").attr "href", "http://philschatz.com/game/" + window.location.hash
   window.exportMap = ->
     voxels = SceneManager.scene.children.filter((el) ->
       el.isVoxel

@@ -4,42 +4,45 @@ module.exports = (THREE, Input) ->
     # To limit the scope of requiring THREE
     THREE: -> THREE
 
+    container: null
     radius: 1600
-    CubeMaterial: THREE.MeshBasicMaterial
-    cube: new THREE.CubeGeometry( 50, 50, 50 )
     camera: null
-    axisCamera: null
+
     renderer: null
     brush: null
-    brushMaterials: null
     scene: null
     raycaster: null
-    projector: null
+
     plane: null
-    size: 500
-    step: 50
 
     theta: 90
     phi: 60
-    showWireframe: true
+
+    _CubeMaterial: THREE.MeshBasicMaterial
+    _cube: new THREE.CubeGeometry( 50, 50, 50 )
+    _axisCamera: null
+    _projector: null
+    _size: 500
+    _step: 50
+    _showWireframe: true
 
     init: (@container) ->
       @camera = new THREE.OrthographicCamera(container.clientWidth / -1, container.clientWidth / 1, container.clientHeight / 1, container.clientHeight / -1, 1, 10000)
       @camera.position.x = @radius * Math.sin(@theta * Math.PI / 360) * Math.cos(@phi * Math.PI / 360)
       @camera.position.y = @radius * Math.sin(@phi * Math.PI / 360)
       @camera.position.z = @radius * Math.cos(@theta * Math.PI / 360) * Math.cos(@phi * Math.PI / 360)
-      @axisCamera = new THREE.OrthographicCamera(container.clientWidth / -2, container.clientWidth / 2, container.clientHeight / 2, container.clientHeight / -2, 1, 10000)
+      @_axisCamera = new THREE.OrthographicCamera(container.clientWidth / -2, container.clientWidth / 2, container.clientHeight / 2, container.clientHeight / -2, 1, 10000)
       @scene = new THREE.Scene()
       window.scene = @scene
       geometry = new THREE.Geometry()
-      i = -@size
+      i = -@_size
 
-      while i <= @size
-        geometry.vertices.push new THREE.Vector3(-@size, 0, i)
-        geometry.vertices.push new THREE.Vector3(@size, 0, i)
-        geometry.vertices.push new THREE.Vector3(i, 0, -@size)
-        geometry.vertices.push new THREE.Vector3(i, 0, @size)
-        i += @step
+      while i <= @_size
+        geometry.vertices.push new THREE.Vector3(-@_size, 0, i)
+        geometry.vertices.push new THREE.Vector3(@_size, 0, i)
+        geometry.vertices.push new THREE.Vector3(i, 0, -@_size)
+        geometry.vertices.push new THREE.Vector3(i, 0, @_size)
+        i += @_step
       material = new THREE.LineBasicMaterial(
         color: 0x000000
         opacity: 0.2
@@ -47,14 +50,14 @@ module.exports = (THREE, Input) ->
       @grid = new THREE.Line(geometry, material)
       @grid.type = THREE.LinePieces
       @scene.add(@grid)
-      @projector = new THREE.Projector()
+      @_projector = new THREE.Projector()
       @plane = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), new THREE.MeshBasicMaterial())
       @plane.rotation.x = -Math.PI / 2
       @plane.visible = false
       @plane.isPlane = true
       @scene.add(@plane)
-      @brushMaterials = [
-        new @CubeMaterial(
+      brushMaterials = [
+        new @_CubeMaterial(
           vertexColors: THREE.VertexColors
           opacity: 0.5
           transparent: true
@@ -64,8 +67,8 @@ module.exports = (THREE, Input) ->
           wireframe: true
         )
       ]
-      @brushMaterials[0].color.setRGB(0, 0, 0) # black
-      @brush = THREE.SceneUtils.createMultiMaterialObject(@cube, @brushMaterials)
+      brushMaterials[0].color.setRGB(0, 0, 0) # black
+      @brush = THREE.SceneUtils.createMultiMaterialObject(@_cube, brushMaterials)
       @brush.isBrush = true
       @brush.position.y = 2000
       @brush.overdraw = false
@@ -90,7 +93,7 @@ module.exports = (THREE, Input) ->
 
 
     addVoxel: (x, y, z, col) ->
-      cubeMaterial = new @CubeMaterial(
+      cubeMaterial = new @_CubeMaterial(
         vertexColors: THREE.VertexColors
         transparent: true
       )
@@ -106,14 +109,14 @@ module.exports = (THREE, Input) ->
       cubeMaterial.color.setRGB col[0], col[1], col[2]
       wireframeMaterial = new THREE.MeshBasicMaterial(wireframeOptions)
       wireframeMaterial.color.setRGB col[0] - 0.05, col[1] - 0.05, col[2] - 0.05
-      voxel = new THREE.Mesh(@cube, cubeMaterial)
+      voxel = new THREE.Mesh(@_cube, cubeMaterial)
       voxel.wireMesh = new THREE.Mesh(wireframeCube, wireframeMaterial)
       voxel.isVoxel = true
       voxel.position.x = x
       voxel.position.y = y
       voxel.position.z = z
       voxel.wireMesh.position.copy voxel.position
-      voxel.wireMesh.visible = @showWireframe
+      voxel.wireMesh.visible = @_showWireframe
       voxel.matrixAutoUpdate = false
       voxel.updateMatrix()
       voxel.name = x + "," + y + "," + z
@@ -126,7 +129,7 @@ module.exports = (THREE, Input) ->
     render: (target) ->
       return console.warn 'Trying to render scene before initialized' unless @camera
       @camera.lookAt(target)
-      @raycaster = @projector.pickingRay(Input.mouse2D.clone(), @camera)
+      @raycaster = @_projector.pickingRay(Input.mouse2D.clone(), @camera)
       @renderer.setViewport()
       @renderer.setScissor() # TODO: this might ned to become 0,0,@renderer.domElement.width,@renderer.domElement.height
       @renderer.enableScissorTest(false)
@@ -153,11 +156,11 @@ module.exports = (THREE, Input) ->
       @renderer.setScissor left, bottom, width, height
       @renderer.enableScissorTest true
       @renderer.setClearColor view.background
-      @axisCamera.position.x = 1000
-      @axisCamera.position.y = target.y
-      @axisCamera.position.z = target.z
-      @axisCamera.lookAt(target)
-      @renderer.render(@scene, @axisCamera)
+      @_axisCamera.position.x = 1000
+      @_axisCamera.position.y = target.y
+      @_axisCamera.position.z = target.z
+      @_axisCamera.lookAt(target)
+      @renderer.render(@scene, @_axisCamera)
       return
 
 

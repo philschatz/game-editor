@@ -50,12 +50,15 @@ module.exports = (SceneManager, Interactions, Input, HashManager, target) ->
           SceneManager.camera.position.z = target.z + SceneManager.radius * Math.cos(SceneManager.theta * Math.PI / 360) * Math.cos(SceneManager.phi * Math.PI / 360)
           SceneManager.camera.updateMatrix()
       else if Input.isMouseDown is 2 # middle click
+
+        # Pan the camera
         SceneManager.theta = -((event.clientX - Input.onMouseDownPosition.x) * 0.5) + Input.onMouseDownTheta
         SceneManager.phi = ((event.clientY - Input.onMouseDownPosition.y) * 0.5) + Input.onMouseDownPhi
         SceneManager.phi = Math.min(180, Math.max(0, SceneManager.phi))
         target.x += Math.sin(SceneManager.theta * Math.PI / 360) * Math.cos(SceneManager.phi * Math.PI / 360)
         target.y += Math.sin(SceneManager.phi * Math.PI / 360)
         target.z += Math.cos(SceneManager.theta * Math.PI / 360) * Math.cos(SceneManager.phi * Math.PI / 360)
+
       Input.mouse2D.x = (event.clientX / SceneManager.container.clientWidth) * 2 - 1
       Input.mouse2D.y = -(event.clientY / SceneManager.container.clientHeight) * 2 + 1
       Interactions.interact()
