@@ -202,7 +202,7 @@ window.startEditor = function() {
     if (delta > 0 && tooFar) return
     if (delta < 0 && tooClose) return
     radius = distance // for mouse drag calculations to be correct
-    aspect = window.innerWidth / window.innerHeight
+    aspect = container.clientWidth / container.clientHeight
     camera.top += delta / 2;
     camera.bottom -= delta / 2;
     camera.left -= delta * aspect / 2;
@@ -380,19 +380,22 @@ window.startEditor = function() {
     bindEventsAndPlugins()
     setupImageDropImport(document.body)
 
-    container = document.createElement( 'div' )
-    document.body.appendChild( container )
+    container = document.getElementById( 'editor-area' )
+    // container.id = ''
+    // document.body.appendChild( container )
+    // container.style.width = '100%';
+    // container.style.height = '100%';
 
     //new THREE.OrthographicCamera(this.width/-2, this.width/2, this.height/2, this.height/-2, this.nearPlane, this.farPlane)):(new THREE.PerspectiveCamera(this.fov, this.aspectRatio, this.nearPlane, this.farPlane))
 
-    //camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 10000 )
-    camera = new THREE.OrthographicCamera(window.innerWidth / -1, window.innerWidth / 1, window.innerHeight / 1, window.innerHeight / -1, 1, 10000 )
+    //camera = new THREE.PerspectiveCamera( 40, container.clientWidth / container.clientHeight, 1, 10000 )
+    camera = new THREE.OrthographicCamera(container.clientWidth / -1, container.clientWidth / 1, container.clientHeight / 1, container.clientHeight / -1, 1, 10000 )
     camera.position.x = radius * Math.sin( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
     camera.position.y = radius * Math.sin( phi * Math.PI / 360 )
     camera.position.z = radius * Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
 
 
-    axisCamera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / -2, 1, 10000 )
+    axisCamera = new THREE.OrthographicCamera(container.clientWidth / -2, container.clientWidth / 2, container.clientHeight / 2, container.clientHeight / -2, 1, 10000 )
 
 
     scene = new THREE.Scene()
@@ -475,14 +478,14 @@ window.startEditor = function() {
     if (hasWebGL) renderer = new THREE.WebGLRenderer({antialias: true})
     else renderer = new THREE.CanvasRenderer()
 
-    renderer.setSize( window.innerWidth, window.innerHeight )
+    renderer.setSize( container.clientWidth, container.clientHeight )
 
     container.appendChild(renderer.domElement)
 
 // renderer2 = new THREE.WebGLRenderer({antialias: true})
 // // else renderer2 = new THREE.CanvasRenderer()
 //
-// renderer2.setSize( window.innerWidth, window.innerHeight )
+// renderer2.setSize( container.clientWidth, container.clientHeight )
 
 // container2 = document.createElement('section')
 // document.body.appendChild(container2) //, document.body.firstChild
@@ -515,11 +518,11 @@ window.startEditor = function() {
 
   function onWindowResize() {
 
-    camera.aspect = window.innerWidth / window.innerHeight
+    camera.aspect = container.clientWidth / container.clientHeight
     camera.updateProjectionMatrix()
 
-    renderer.setSize( window.innerWidth, window.innerHeight )
-    // renderer2.setSize( window.innerWidth, window.innerHeight )
+    renderer.setSize( container.clientWidth, container.clientHeight )
+    // renderer2.setSize( container.clientWidth, container.clientHeight )
     interact()
   }
 
@@ -614,8 +617,8 @@ target.z += Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
     }
 
 
-    mouse2D.x = ( event.clientX / window.innerWidth ) * 2 - 1
-    mouse2D.y = - ( event.clientY / window.innerHeight ) * 2 + 1
+    mouse2D.x = ( event.clientX / container.clientWidth ) * 2 - 1
+    mouse2D.y = - ( event.clientY / container.clientHeight ) * 2 + 1
 
     interact()
   }
@@ -1054,9 +1057,7 @@ target.z += Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
 
   function render() {
 
-    window.PHIL = target;
     camera.lookAt( target )
-    axisCamera.lookAt(target)
     raycaster = projector.pickingRay( mouse2D.clone(), camera )
 
 
@@ -1071,13 +1072,13 @@ target.z += Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
 
 
           // camera 2
-          windowWidth = window.innerWidth;
-          windowHeight = window.innerHeight;
+          windowWidth = container.clientWidth;
+          windowHeight = container.clientHeight;
           view = {
-            left: 2/3,
+            left: 3/4,
             bottom: 0,
-            width: 1/3,
-            height: 1/3,
+            width: 1/4,
+            height: 1/4,
             background: new THREE.Color().setRGB( 0.5, 0.5, 0.7 )
           }
           var left   = Math.floor( windowWidth  * view.left );
@@ -1089,75 +1090,62 @@ target.z += Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
 					renderer.enableScissorTest ( true );
 					renderer.setClearColor( view.background );
 
-					// axisCamera.aspect = width / height;
-					// axisCamera.updateProjectionMatrix();
-
           axisCamera.position.x = 1000;
           axisCamera.position.y = target.y;
           axisCamera.position.z = target.z;
           axisCamera.lookAt(target);
 
-          // camera.lookAt(new THREE.Vector3(0, camera.position.y, camera.position.z));
           renderer.render(scene, axisCamera)
 
 
-          // camera 2
-          windowWidth = window.innerWidth;
-          windowHeight = window.innerHeight;
-          view = {
-            left: 2/3,
-            bottom: 1/3,
-            width: 1/3,
-            height: 1/3,
-            background: new THREE.Color().setRGB( 0.7, 0.5, 0.5 )
-          }
-          var left   = Math.floor( windowWidth  * view.left );
-          var bottom = Math.floor( windowHeight * view.bottom );
-          var width  = Math.floor( windowWidth  * view.width );
-          var height = Math.floor( windowHeight * view.height );
-          renderer.setViewport( left, bottom, width, height );
-          renderer.setScissor( left, bottom, width, height );
-          renderer.enableScissorTest ( true );
-          renderer.setClearColor( view.background );
+          // // camera 2
+          // windowWidth = container.clientWidth;
+          // windowHeight = container.clientHeight;
+          // view = {
+          //   left: 2/3,
+          //   bottom: 1/3,
+          //   width: 1/3,
+          //   height: 1/3,
+          //   background: new THREE.Color().setRGB( 0.7, 0.5, 0.5 )
+          // }
+          // var left   = Math.floor( windowWidth  * view.left );
+          // var bottom = Math.floor( windowHeight * view.bottom );
+          // var width  = Math.floor( windowWidth  * view.width );
+          // var height = Math.floor( windowHeight * view.height );
+          // renderer.setViewport( left, bottom, width, height );
+          // renderer.setScissor( left, bottom, width, height );
+          // renderer.enableScissorTest ( true );
+          // renderer.setClearColor( view.background );
+          //
+          // axisCamera.position.x = target.x;
+          // axisCamera.position.y = 1000;
+          // axisCamera.position.z = target.z;
+          // axisCamera.lookAt(target);
+          // renderer.render(scene, axisCamera)
 
-          // camera3.aspect = width / height;
-          // camera3.updateProjectionMatrix();
 
-          axisCamera.position.x = target.x;
-          axisCamera.position.y = 1000;
-          axisCamera.position.z = target.z;
-          axisCamera.lookAt(target);
-
-          // camera.lookAt(new THREE.Vector3(camera.position.x, camera.position.y, 0));
-          renderer.render(scene, axisCamera)
-
-view = {
-  left: 2/3,
-  bottom: 2/3,
-  width: 1/3,
-  height: 1/3,
-  background: new THREE.Color().setRGB( 0.5, 0.7, 0.5 )
-}
-var left   = Math.floor( windowWidth  * view.left );
-var bottom = Math.floor( windowHeight * view.bottom );
-var width  = Math.floor( windowWidth  * view.width );
-var height = Math.floor( windowHeight * view.height );
-renderer.setViewport( left, bottom, width, height );
-renderer.setScissor( left, bottom, width, height );
-renderer.enableScissorTest ( true );
-renderer.setClearColor( view.background );
-
-// camera3.aspect = width / height;
-// camera3.updateProjectionMatrix();
-
-axisCamera.position.x = target.x;
-axisCamera.position.y = target.y;
-axisCamera.position.z = 1000;
-axisCamera.lookAt(target);
-
-// camera.lookAt(new THREE.Vector3(camera.position.x, 0, camera.position.z));
-
-renderer.render(scene, axisCamera)
+          // view = {
+          //   left: 2/3,
+          //   bottom: 2/3,
+          //   width: 1/3,
+          //   height: 1/3,
+          //   background: new THREE.Color().setRGB( 0.5, 0.7, 0.5 )
+          // }
+          // var left   = Math.floor( windowWidth  * view.left );
+          // var bottom = Math.floor( windowHeight * view.bottom );
+          // var width  = Math.floor( windowWidth  * view.width );
+          // var height = Math.floor( windowHeight * view.height );
+          // renderer.setViewport( left, bottom, width, height );
+          // renderer.setScissor( left, bottom, width, height );
+          // renderer.enableScissorTest ( true );
+          // renderer.setClearColor( view.background );
+          //
+          // axisCamera.position.x = target.x;
+          // axisCamera.position.y = target.y;
+          // axisCamera.position.z = 1000;
+          // axisCamera.lookAt(target);
+          //
+          // renderer.render(scene, axisCamera)
 
 
   }
