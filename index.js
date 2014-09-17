@@ -5,6 +5,8 @@ var raf = require('raf')
 // var ndarray = require('ndarray')
 // var ndarrayFill = require('ndarray-fill')
 
+ColorUtils = require('./src/color-utils')
+
 window.startEditor = function() {
   var container
   var camera, renderer, brush, axisCamera
@@ -25,8 +27,8 @@ window.startEditor = function() {
   var wireframeMaterial = new THREE.MeshBasicMaterial(wireframeOptions)
   var animationFrames = []
   var currentFrame = 0
-  //var colors = ['000000', 'FFF500', ].map(function(c) { return hex2rgb(c) })
-  var colors = ['000000', '2ECC71', '3498DB', '34495E', 'E67E22', 'ECF0F1', 'FFF500', 'FF0000', '00FF38', 'BD00FF', '08c9ff', 'D32020'].map(function(c) { return hex2rgb(c); })
+  //var colors = ['000000', 'FFF500', ].map(function(c) { return ColorUtils.hex2rgb(c) })
+  var colors = ['000000', '2ECC71', '3498DB', '34495E', 'E67E22', 'ECF0F1', 'FFF500', 'FF0000', '00FF38', 'BD00FF', '08c9ff', 'D32020'].map(function(c) { return ColorUtils.hex2rgb(c); })
   for( var c = 0; c < 12; c++ ) {
     addColorToPalette(c)
   }
@@ -73,7 +75,7 @@ window.startEditor = function() {
   //
   //   var colors = [undefined]
   //   data.colors.map(function(c) {
-  //     colors.push('#' + rgb2hex(c))
+  //     colors.push('#' + ColorUtils.rgb2hex(c))
   //   })
   //
   //   function generateVoxels(x, y, z) {
@@ -108,24 +110,6 @@ window.startEditor = function() {
     scene.add( voxel.wireMesh )
   }
 
-  function v2h(value) {
-    value = parseInt(value).toString(16)
-    return value.length < 2 ? '0' + value : value
-  }
-
-  function rgb2hex(rgb) {
-    return v2h( rgb[ 0 ] * 255 ) + v2h( rgb[ 1 ] * 255 ) + v2h( rgb[ 2 ] * 255 );
-  }
-
-  function hex2rgb(hex) {
-    if(hex[0]=='#') hex = hex.substr(1)
-    return [parseInt(hex.substr(0,2), 16)/255, parseInt(hex.substr(2,2), 16)/255, parseInt(hex.substr(4,2), 16)/255]
-  }
-
-  function scale( x, fromLow, fromHigh, toLow, toHigh ) {
-    return ( x - fromLow ) * ( toHigh - toLow ) / ( fromHigh - fromLow ) + toLow
-  }
-
   function addColorToPalette(idx) {
     // add a button to the group
     var colorBox = $('i[data-color="' + idx + '"]')
@@ -147,8 +131,8 @@ window.startEditor = function() {
       clone.on("contextmenu", changeColor)
     }
 
-    colorBox.parent().attr('data-color','#'+rgb2hex(colors[idx]))
-    colorBox.css('background',"#"+rgb2hex(colors[idx]))
+    colorBox.parent().attr('data-color','#'+ColorUtils.rgb2hex(colors[idx]))
+    colorBox.css('background',"#"+ColorUtils.rgb2hex(colors[idx]))
 
     if( color == idx && brush )
       brush.children[0].material.color.setRGB(colors[idx][0], colors[idx][1], colors[idx][2])
@@ -203,7 +187,7 @@ window.startEditor = function() {
     var picker = $('i[data-color="' + idx + '"]').parent().colorpicker('show')
 
     picker.on('changeColor', function(e) {
-      colors[idx]=hex2rgb(e.color.toHex())
+      colors[idx]=ColorUtils.hex2rgb(e.color.toHex())
       addColorToPalette(idx)
 
       // todo:  better way to update color of existing blocks
@@ -243,19 +227,6 @@ window.startEditor = function() {
       window.location.reload()
     })
 
-    $('#browse img').live('click', function(ev) {
-      var url = $(ev.target).attr('src')
-      $('#browse button').click()
-      exports.getImage(url, function(img) {
-        importImage(img)
-      })
-    })
-
-    $('#shareButton').click(function(e) {
-      e.preventDefault()
-      exports.share()
-      return false
-    })
 
     $('.colorPickButton').click(pickColor)
     $('.colorPickButton').on("contextmenu", changeColor)
@@ -281,10 +252,6 @@ window.startEditor = function() {
       }
     })
 
-    // Todo list
-    $(".todo li").click(function() {
-        $(this).toggleClass("todo-done");
-    });
 
     // Init tooltips
     $("[data-toggle=tooltip]").tooltip("show");
@@ -292,33 +259,6 @@ window.startEditor = function() {
     // Init tags input
     $("#tagsinput").tagsInput();
 
-    sliderEl = $("#slider")
-    playPauseEl = $('.play-pause')
-    var addFrameButton = $('.plus-button')
-    var removeFrameButton = $('.minus-button')
-
-    // Init jQuery UI slider
-    sliderEl.slider({
-      min: 1,
-      max: 1,
-      value: 1,
-      orientation: "horizontal",
-      range: "min",
-      change: function( event, ui ) {
-        if (manualAnimating) return
-        var val = ui.value
-        var nextFrame = val - 1
-        animate(nextFrame)
-        currentFrame = nextFrame
-      }
-    })
-
-    addFrameButton.click(addFrame)
-    removeFrameButton.click(removeFrame)
-
-    playPauseEl.click(function(e) {
-      exports.playPause()
-    })
 
     // JS input/textarea placeholder
     $("input, textarea").placeholder();
@@ -412,19 +352,6 @@ window.startEditor = function() {
 		directionalLight.position.set( 1, 0.75, 0.5 ).normalize();
 		scene.add( directionalLight );
 
-    // var directionalLight = new THREE.DirectionalLight( 0xffffff )
-    // directionalLight.position.x = Math.random() - 0.5
-    // directionalLight.position.y = Math.random() - 0.5
-    // directionalLight.position.z = Math.random() - 0.5
-    // directionalLight.position.normalize()
-    // scene.add( directionalLight )
-    //
-    // var directionalLight = new THREE.DirectionalLight( 0x808080 )
-    // directionalLight.position.x = Math.random() - 0.5
-    // directionalLight.position.y = Math.random() - 0.5
-    // directionalLight.position.z = Math.random() - 0.5
-    // directionalLight.position.normalize()
-    // scene.add( directionalLight )
 
     var hasWebGL =  ( function () { try { return !! window.WebGLRenderingContext && !! document.createElement( 'canvas' ).getContext( 'experimental-webgl' ); } catch( e ) { return false; } } )()
 
@@ -434,16 +361,6 @@ window.startEditor = function() {
     renderer.setSize( container.clientWidth, container.clientHeight )
 
     container.appendChild(renderer.domElement)
-
-// renderer2 = new THREE.WebGLRenderer({antialias: true})
-// // else renderer2 = new THREE.CanvasRenderer()
-//
-// renderer2.setSize( container.clientWidth, container.clientHeight )
-
-// container2 = document.createElement('section')
-// document.body.appendChild(container2) //, document.body.firstChild
-// container2.appendChild(renderer2.domElement)
-
 
 
     renderer.domElement.addEventListener( 'mousemove', onDocumentMouseMove, false )
@@ -481,10 +398,13 @@ window.startEditor = function() {
   function getIntersecting() {
     var intersectable = []
     scene.children.map(function(c) { if (c.isVoxel || c.isPlane) intersectable.push(c); })
-    var intersections = raycaster.intersectObjects( intersectable )
-    if (intersections.length > 0) {
-      var intersect = intersections[ 0 ].object.isBrush ? intersections[ 1 ] : intersections[ 0 ]
-      return intersect
+    if (raycaster) {
+      var intersections = raycaster.intersectObjects( intersectable )
+      if (intersections.length > 0) {
+        var intersect = intersections[ 0 ].object.isBrush ? intersections[ 1 ] : intersections[ 0 ]
+        return intersect
+      }
+
     }
   }
 
@@ -645,13 +565,10 @@ target.z += Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
       case 56: exports.setColor(7); break
       case 57: exports.setColor(8); break
       case 48: exports.setColor(9); break
-      case 32: exports.playPause(); break
       case 16: isShiftDown = true; break
       case 17: isCtrlDown = true; break
       case 18: isAltDown = true; break
-      case 81: changeFrame(); break
       case 65: setIsometricAngle(); break
-      case 87: addFrame(); break
     }
 
   }
@@ -665,100 +582,10 @@ target.z += Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
     }
   }
 
-  function changeFrame() {
-    if (animationFrames.length === 0) return
-    nextFrame = (currentFrame + 1) % animationFrames.length
-    animate(nextFrame)
-    currentFrame = nextFrame
-    manualAnimating = true
-    sliderEl.slider( "option", "value", currentFrame + 1)
-    manualAnimating = false
-  }
 
-  function addFrame() {
-    animationFrames.push(animationFrames[currentFrame])
-    changeFrame()
-    updateHash()
-    sliderEl.slider( "option", "max", animationFrames.length )
-  }
-
-  function removeFrame() {
-    animationFrames.splice(currentFrame, 1)
-    if (currentFrame === animationFrames.length) currentFrame--
-    loadCurrentFrame()
-    sliderEl.slider( "option", "max", animationFrames.length )
-    manualAnimating = true
-    sliderEl.slider( "option", "value", currentFrame + 1)
-    manualAnimating = false
-  }
-
-  function loadCurrentFrame() {
-    scene.children.filter(function(c) {
-      return (c.isVoxel)
-    }).map(function(c) {
-      scene.remove(c.wireMesh)
-      scene.remove(c)
-    })
-    var positions = getPositionsFromData(decode(animationFrames[currentFrame]))
-    for(var i = 0; i < positions.length; i++){
-      var v = positions[i].split(',')
-      addVoxel(v[0], v[1], v[2], v[3])
-    }
-  }
-
-  function animate(frame) {
-    diff = getFrameDiff(currentFrame, frame)
-    removed = diff[0]
-    added = diff[1]
-    remove = {}
-    removed.map(function(pos){
-      var p = pos.split(',')
-      var key = p[0] + "," + p[1] + "," + p[2]
-      remove[key] = 1
-    })
-    //go through this loop in reverse instead of decrementing the counter every time an item is removed
-    for ( i = scene.children.length - 1; i >= 0 ; i -- ) {
-      c = scene.children[ i ]
-      if (remove[c.name] == 1){
-        if ( c.isVoxel ) {
-          scene.remove(c.wireMesh)
-          scene.remove(c)
-        }
-      }
-    }
-
-    for(var i = 0; i < added.length; i++){
-      var v = added[i].split(',')
-      addVoxel(v[0], v[1], v[2], v[3])
-    }
-  }
-
-  Array.prototype.diff = function(a) {
-    return this.filter(function(i) {return !(a.indexOf(i) > -1);});
-  };
-
-  function getFrameDiff(frame1, frame2) {
-    pos1 = getPositionsFromData(decode(animationFrames[frame1]))
-    pos2 = getPositionsFromData(decode(animationFrames[frame2]))
-    removed = pos1.diff(pos2)
-    added = pos2.diff(pos1)
-    return [removed, added]
-  }
-
-  function getPositionsFromData(data) {
-    var current = { x: 0, y: 0, z: 0, c: 0 }
-    var voxels = []
-    var i = 0, l = data.length
-    while (i < l){
-    var code = data[ i ++ ].toString( 2 )
-      if ( code.charAt( 1 ) == "1" ) current.x += data[ i ++ ] - 32
-      if ( code.charAt( 2 ) == "1" ) current.y += data[ i ++ ] - 32
-      if ( code.charAt( 3 ) == "1" ) current.z += data[ i ++ ] - 32
-      if ( code.charAt( 4 ) == "1" ) current.c += data[ i ++ ] - 32
-      voxels.push((current.x * 50 + 25) + "," + (current.y * 50 + 25) + "," + (current.z * 50 + 25) + "," + current.c)
-    }
-    return voxels
-  }
+  // Array.prototype.diff = function(a) {
+  //   return this.filter(function(i) {return !(a.indexOf(i) > -1);});
+  // };
 
 
   function buildFromHash(hashMask) {
@@ -776,15 +603,13 @@ target.z += Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
       }
     }
 
-    sliderEl.slider( "option", "max", animationFrames.length)
-
     if ( (!hashMask || hashMask == 'C') && chunks['C'] )
     {
       // decode colors
       var hexColors = chunks['C']
       for(var c = 0, nC = hexColors.length/6; c < nC; c++) {
         var hex = hexColors.substr(c*6,6)
-        colors[c] = hex2rgb(hex)
+        colors[c] = ColorUtils.hex2rgb(hex)
         addColorToPalette(c)
       }
     }
@@ -881,7 +706,7 @@ target.z += Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
     var cData = '';
     // ignore color data
     // for (var i = 0; i < colors.length; i++){
-    //   cData += rgb2hex(colors[i]);
+    //   cData += ColorUtils.rgb2hex(colors[i]);
     // }
 
     var outHash = "#" + (cData ? ("C/" + cData) : '')
