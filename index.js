@@ -12,7 +12,7 @@ window.startEditor = function() {
   var camera, renderer, brush, axisCamera
   var projector, plane, scene, grid, shareDialog
   var mouse2D, mouse3D, raycaster, objectHovered
-  var isShiftDown = false, isCtrlDown = false, isMouseDown = false, isAltDown = false
+  var isShiftDown = false, isCtrlDown = false, isMouseRotating = false, isMouseDown = false, isAltDown = false
   var onMouseDownPosition = new THREE.Vector2(), onMouseDownPhi = 60, onMouseDownTheta = 45
   var radius = 1600, theta = 90, phi = 60
   var target = new THREE.Vector3( 0, 200, 0 ) // -1200, 300, 900
@@ -591,17 +591,35 @@ window.startEditor = function() {
   function onDocumentMouseMove( event ) {
     event.preventDefault()
 
+    if (!isMouseRotating) {
+      // change the mouse cursor to a + letting the user know they can rotate
+      intersecting = getIntersecting();
+      if (!intersecting) {
+        container.classList.add('rotatable');
+      } else {
+        container.classList.remove('rotatable');
+      }
+
+    }
+
     if ( isMouseDown == 1) { // left click
 
-      theta = - ( ( event.clientX - onMouseDownPosition.x ) * 0.5 ) + onMouseDownTheta
-      phi = ( ( event.clientY - onMouseDownPosition.y ) * 0.5 ) + onMouseDownPhi
 
-      phi = Math.min( 180, Math.max( 0, phi ) )
+      // Rotate only if you clicked outside a block
+      if (!intersecting) {
 
-      camera.position.x = target.x + radius * Math.sin( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
-      camera.position.y = target.y + radius * Math.sin( phi * Math.PI / 360 )
-      camera.position.z = target.z + radius * Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
-      camera.updateMatrix()
+        theta = - ( ( event.clientX - onMouseDownPosition.x ) * 0.5 ) + onMouseDownTheta
+        phi = ( ( event.clientY - onMouseDownPosition.y ) * 0.5 ) + onMouseDownPhi
+
+        phi = Math.min( 180, Math.max( 0, phi ) )
+
+        camera.position.x = target.x + radius * Math.sin( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
+        camera.position.y = target.y + radius * Math.sin( phi * Math.PI / 360 )
+        camera.position.z = target.z + radius * Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
+        camera.updateMatrix()
+
+      }
+
 
     } else if ( isMouseDown == 2) { // middle click
 
@@ -630,11 +648,13 @@ target.z += Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
     onMouseDownPhi = phi
     onMouseDownPosition.x = event.clientX
     onMouseDownPosition.y = event.clientY
+    isMouseRotating = !getIntersecting()
   }
 
   function onDocumentMouseUp( event ) {
     event.preventDefault()
     isMouseDown = false
+    isMouseRotating = false
     onMouseDownPosition.x = event.clientX - onMouseDownPosition.x
     onMouseDownPosition.y = event.clientY - onMouseDownPosition.y
 
