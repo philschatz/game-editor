@@ -1,4 +1,4 @@
-
+ColorManager = require './color-manager'
 
 module.exports = (Input, SceneManager) ->
   new class Interactions
@@ -31,9 +31,9 @@ module.exports = (Input, SceneManager) ->
                   SceneManager.scene.remove intersect.object.wireMesh
                   SceneManager.scene.remove intersect.object
               else
-                SceneManager.addVoxel SceneManager.brush.position.x, SceneManager.brush.position.y, SceneManager.brush.position.z, colors[color]  unless SceneManager.brush.position.y is 2000
+                SceneManager.addVoxel SceneManager.brush.position.x, SceneManager.brush.position.y, SceneManager.brush.position.z, ColorManager.colors[ColorManager.currentColor]  unless SceneManager.brush.position.y is 2000
             updateBrush()
-            HashManager.updateHash(colors)
+            HashManager.updateHash()
             return SceneManager.brush.currentCube = newCube
           else if Input.isShiftDown
             if intersect.object isnt SceneManager.plane

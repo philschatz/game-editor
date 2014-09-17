@@ -1,3 +1,6 @@
+ColorManager = require './color-manager'
+
+
 # https://gist.github.com/665235
 decode = (string) ->
   output = []
@@ -17,7 +20,7 @@ encode = (array) ->
 module.exports = (SceneManager) ->
   new class HashManager
 
-    updateHash: (colors) ->
+    updateHash: ->
       currentFrame = 0
       animationFrames = []
       data = []
@@ -52,8 +55,8 @@ module.exports = (SceneManager) ->
           # this string matching of floating point values to find an index seems a little sketchy
           i = 0
 
-          while i < colors.length
-            current.c = i  if colors[i].join("") is colorString
+          while i < ColorManager.colors.length
+            current.c = i  if ColorManager.colors[i].join("") is colorString
             i++
           voxels.push
             x: current.x
@@ -85,8 +88,8 @@ module.exports = (SceneManager) ->
       cData = ""
 
       # ignore color data
-      # for (var i = 0; i < colors.length; i++){
-      #   cData += ColorUtils.rgb2hex(colors[i]);
+      # for (var i = 0; i < ColorManager.colors.length; i++){
+      #   cData += ColorUtils.rgb2hex(ColorManager.colors[i]);
       # }
       outHash = "#" + ((if cData then ("C/" + cData) else ""))
       i = 0
@@ -111,7 +114,7 @@ module.exports = (SceneManager) ->
       voxels
 
 
-    buildFromHash: (colors) ->
+    buildFromHash: ->
       hashMask = null
       hash = window.location.hash.substr(1)
       hashChunks = hash.split(":")
@@ -127,14 +130,14 @@ module.exports = (SceneManager) ->
         j++
       if (not hashMask or hashMask is "C") and chunks["C"]
 
-        # decode colors
+        # decode ColorManager.colors
         hexColors = chunks["C"]
         c = 0
         nC = hexColors.length / 6
 
         while c < nC
           hex = hexColors.substr(c * 6, 6)
-          colors[c] = ColorUtils.hex2rgb(hex)
+          ColorManager.colors[c] = ColorUtils.hex2rgb(hex)
           addColorToPalette c
           c++
       frameMask = "A"
@@ -156,6 +159,6 @@ module.exports = (SceneManager) ->
           current.y += data[i++] - 32  if code.charAt(2) is "1"
           current.z += data[i++] - 32  if code.charAt(3) is "1"
           current.c += data[i++] - 32  if code.charAt(4) is "1"
-          SceneManager.addVoxel current.x * 50 + 25, current.y * 50 + 25, current.z * 50 + 25, colors[current.c]  if code.charAt(0) is "1"
-      @updateHash(colors)
+          SceneManager.addVoxel current.x * 50 + 25, current.y * 50 + 25, current.z * 50 + 25, ColorManager.colors[current.c]  if code.charAt(0) is "1"
+      @updateHash(ColorManager.colors)
       return

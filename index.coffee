@@ -6,38 +6,27 @@ raf = require("raf")
 # var ndarray = require('ndarray')
 # var ndarrayFill = require('ndarray-fill')
 ColorUtils = require './src/color-utils'
+ColorManager = require './src/color-manager'
 Input = require('./src/input-manager')(THREE)
 SceneManager = require('./src/scene-manager')(THREE, Input)
 HashManager = require('./src/hash-manager')(SceneManager)
 Interactions = require('./src/interactions')(Input, SceneManager)
+
+target = new THREE.Vector3( 0, 200, 0 ) # -1200, 300, 900
+
+KeyMouse = require('./src/key-mouse-handlers')(SceneManager, Interactions, Input, HashManager, target)
 
 window.startEditor = ->
   container = null
   shareDialog = null
   mouse3D = null
 
-  target = new THREE.Vector3( 0, 200, 0 ) # -1200, 300, 900
+
   color = 0
 
   fill = true
 
 
-  colors = [
-    "000000"
-    "2ECC71"
-    "3498DB"
-    "34495E"
-    "E67E22"
-    "ECF0F1"
-    "FFF500"
-    "FF0000"
-    "00FF38"
-    "BD00FF"
-    "08c9ff"
-    "D32020"
-  ].map((c) ->
-    ColorUtils.hex2rgb c
-  )
 
 
   showWelcome = ->
@@ -56,19 +45,19 @@ window.startEditor = ->
   #   var len = d[0] * d[1] * d[2]
   #   var voxels = ndarray(new Int32Array(len), [d[0], d[1], d[2]])
   #
-  #   var colors = [undefined]
-  #   data.colors.map(function(c) {
-  #     colors.push('#' + ColorUtils.rgb2hex(c))
+  #   var ColorManager.colors = [undefined]
+  #   data.ColorManager.colors.map(function(c) {
+  #     ColorManager.colors.push('#' + ColorUtils.rgb2hex(c))
   #   })
   #
   #   function generateVoxels(x, y, z) {
   #     var offset = [x + l[0], y + l[1], z + l[2]]
   #     var val = data.voxels[offset.join('|')]
-  #     return data.colors[val] ? val + 1: 0
+  #     return data.ColorManager.colors[val] ? val + 1: 0
   #   }
   #
   #   ndarrayFill(voxels, generateVoxels)
-  #   return {voxels: voxels, colors: colors}
+  #   return {voxels: voxels, ColorManager.colors: colors}
   # }
 
 
@@ -94,45 +83,37 @@ window.startEditor = ->
         return
 
       clone.on "contextmenu", changeColor
-    colorBox.parent().attr "data-color", "#" + ColorUtils.rgb2hex(colors[idx])
-    colorBox.css "background", "#" + ColorUtils.rgb2hex(colors[idx])
-    SceneManager.brush.children[0].material.color.setRGB colors[idx][0], colors[idx][1], colors[idx][2]  if color is idx and SceneManager.brush
+    colorBox.parent().attr "data-color", "#" + ColorUtils.rgb2hex(ColorManager.colors[idx])
+    colorBox.css "background", "#" + ColorUtils.rgb2hex(ColorManager.colors[idx])
+    SceneManager.brush.children[0].material.color.setRGB ColorManager.colors[idx][0], ColorManager.colors[idx][1], ColorManager.colors[idx][2]  if ColorManager.currentColor is idx and SceneManager.brush
     return
 
 
 
-  setIsometricAngle = ->
-    # Move up to the nearest 45 degree
-    SceneManager.theta = Math.floor((SceneManager.theta + 90) / 90) * 90
 
-    SceneManager.camera.position.x = SceneManager.radius * Math.sin(SceneManager.theta * Math.PI / 360) * Math.cos(SceneManager.phi * Math.PI / 360)
-    SceneManager.camera.position.y = SceneManager.radius * Math.sin(SceneManager.phi * Math.PI / 360)
-    SceneManager.camera.position.z = SceneManager.radius * Math.cos(SceneManager.theta * Math.PI / 360) * Math.cos(SceneManager.phi * Math.PI / 360)
-    SceneManager.camera.updateMatrix()
-    return
 
 
   addColor = (e) ->
 
     #add new color
-    colors.push [
+    ColorManager.colors.push [
       0.0
       0.0
       0.0
     ]
-    idx = colors.length - 1
-    color = idx
+    idx = ColorManager.colors.length - 1
+    ColorManager.currentColor = idx
     addColorToPalette idx
-    HashManager.updateHash(colors)
+    HashManager.updateHash()
     updateColor idx
     return
 
 
   updateColor = (idx) ->
-    color = idx
+    ColorManager.currentColor = idx
     picker = $("i[data-color=\"" + idx + "\"]").parent().colorpicker("show")
     picker.on "changeColor", (e) ->
-      colors[idx] = ColorUtils.hex2rgb(e.color.toHex())
+      ColorManager.colors[idx] = ColorUtils.hex2rgb(e.color.toHex())
       addColorToPalette idx
 
       # todo:  better way to update color of existing blocks
@@ -143,7 +124,7 @@ window.startEditor = ->
         SceneManager.scene.remove mesh
         return
 
-      HashManager.buildFromHash(colors)
+      HashManager.buildFromHash()
       return
 
     picker.on "hide", (e) ->
@@ -165,8 +146,8 @@ window.startEditor = ->
   pickColor = (e) ->
     targetEl = $(e.currentTarget)
     idx = +targetEl.find(".color").attr("data-color")
-    color = idx
-    SceneManager.brush.children[0].material.color.setRGB colors[idx][0], colors[idx][1], colors[idx][2]
+    ColorManager.currentColor = idx
+    SceneManager.brush.children[0].material.color.setRGB ColorManager.colors[idx][0], ColorManager.colors[idx][1], ColorManager.colors[idx][2]
     return
 
 
@@ -226,151 +207,18 @@ window.startEditor = ->
 
   init = ->
 
-    # Lights
-    mousewheel = (event) ->
-      # prevent zoom if a modal is open
-      return if $(".modal").hasClass("in")
-      SceneManager.zoom(event.wheelDeltaY or event.detail)
 
     bindEventsAndPlugins()
     container = document.getElementById("editor-area")
     SceneManager.init(container)
     container.appendChild(SceneManager.renderer.domElement)
-    SceneManager.renderer.domElement.addEventListener "mousemove", onDocumentMouseMove, false
-    SceneManager.renderer.domElement.addEventListener "mousedown", onDocumentMouseDown, false
-    SceneManager.renderer.domElement.addEventListener "mouseup", onDocumentMouseUp, false
-    document.addEventListener "keydown", onDocumentKeyDown, false
-    document.addEventListener "keyup", onDocumentKeyUp, false
-    window.addEventListener "DOMMouseScroll", mousewheel, false
-    window.addEventListener "mousewheel", mousewheel, false
-    window.addEventListener "resize", onWindowResize, false
-    HashManager.buildFromHash(colors)  if window.location.hash
-    HashManager.updateHash(colors)
-    return
-
-
-  onWindowResize = ->
-    SceneManager.camera.aspect = container.clientWidth / container.clientHeight
-    SceneManager.camera.updateProjectionMatrix()
-    SceneManager.renderer.setSize container.clientWidth, container.clientHeight
-    Interactions.interact()
+    KeyMouse.attachEvents()
+    HashManager.buildFromHash()  if window.location.hash
+    HashManager.updateHash()
     return
 
 
 
-
-
-
-  onDocumentMouseMove = (event) ->
-    event.preventDefault()
-    unless Input.isMouseRotating
-
-      # change the mouse cursor to a + letting the user know they can rotate
-      intersecting = SceneManager.getIntersecting()
-      unless intersecting
-        container.classList.add "rotatable"
-      else
-        container.classList.remove "rotatable"
-    if Input.isMouseDown is 1 # left click
-
-      # Rotate only if you clicked outside a block
-      unless intersecting
-        SceneManager.theta = -((event.clientX - Input.onMouseDownPosition.x) * 0.5) + Input.onMouseDownTheta
-        SceneManager.phi = ((event.clientY - Input.onMouseDownPosition.y) * 0.5) + Input.onMouseDownPhi
-        SceneManager.phi = Math.min(180, Math.max(0, SceneManager.phi))
-        SceneManager.camera.position.x = target.x + SceneManager.radius * Math.sin(SceneManager.theta * Math.PI / 360) * Math.cos(SceneManager.phi * Math.PI / 360)
-        SceneManager.camera.position.y = target.y + SceneManager.radius * Math.sin(SceneManager.phi * Math.PI / 360)
-        SceneManager.camera.position.z = target.z + SceneManager.radius * Math.cos(SceneManager.theta * Math.PI / 360) * Math.cos(SceneManager.phi * Math.PI / 360)
-        SceneManager.camera.updateMatrix()
-    else if Input.isMouseDown is 2 # middle click
-      SceneManager.theta = -((event.clientX - Input.onMouseDownPosition.x) * 0.5) + Input.onMouseDownTheta
-      SceneManager.phi = ((event.clientY - Input.onMouseDownPosition.y) * 0.5) + Input.onMouseDownPhi
-      SceneManager.phi = Math.min(180, Math.max(0, SceneManager.phi))
-      target.x += Math.sin(SceneManager.theta * Math.PI / 360) * Math.cos(SceneManager.phi * Math.PI / 360)
-      target.y += Math.sin(SceneManager.phi * Math.PI / 360)
-      target.z += Math.cos(SceneManager.theta * Math.PI / 360) * Math.cos(SceneManager.phi * Math.PI / 360)
-    Input.mouse2D.x = (event.clientX / container.clientWidth) * 2 - 1
-    Input.mouse2D.y = -(event.clientY / container.clientHeight) * 2 + 1
-    Interactions.interact()
-    return
-
-
-  onDocumentMouseDown = (event) ->
-    event.preventDefault()
-    Input.isMouseDown = event.which
-    Input.onMouseDownTheta = SceneManager.theta
-    Input.onMouseDownPhi = SceneManager.phi
-    Input.onMouseDownPosition.x = event.clientX
-    Input.onMouseDownPosition.y = event.clientY
-    Input.isMouseRotating = not SceneManager.getIntersecting()
-    return
-
-
-  onDocumentMouseUp = (event) ->
-    event.preventDefault()
-    Input.isMouseDown = false
-    Input.isMouseRotating = false
-    Input.onMouseDownPosition.x = event.clientX - Input.onMouseDownPosition.x
-    Input.onMouseDownPosition.y = event.clientY - Input.onMouseDownPosition.y
-    return  if Input.onMouseDownPosition.length() > 5
-    intersect = SceneManager.getIntersecting()
-    if intersect
-      if Input.isShiftDown
-        unless intersect.object is SceneManager.plane
-          SceneManager.scene.remove intersect.object.wireMesh
-          SceneManager.scene.remove intersect.object
-      else
-        SceneManager.addVoxel SceneManager.brush.position.x, SceneManager.brush.position.y, SceneManager.brush.position.z, colors[color]  unless SceneManager.brush.position.y is 2000
-    HashManager.updateHash(colors)
-    SceneManager.render(target)
-    Interactions.interact()
-    return
-
-
-  onDocumentKeyDown = (event) ->
-    switch event.keyCode
-      when 189
-        SceneManager.zoom(100)
-      when 187
-        SceneManager.zoom(-100)
-      when 49
-        exports.setColor 0
-      when 50
-        exports.setColor 1
-      when 51
-        exports.setColor 2
-      when 52
-        exports.setColor 3
-      when 53
-        exports.setColor 4
-      when 54
-        exports.setColor 5
-      when 55
-        exports.setColor 6
-      when 56
-        exports.setColor 7
-      when 57
-        exports.setColor 8
-      when 48
-        exports.setColor 9
-      when 16
-        Input.isShiftDown = true
-      when 17
-        Input.isCtrlDown = true
-      when 18
-        Input.isAltDown = true
-      when 65
-        setIsometricAngle()
-
-
-  onDocumentKeyUp = (event) ->
-    switch event.keyCode
-      when 16
-        Input.isShiftDown = false
-      when 17
-        Input.isCtrlDown = false
-      when 18
-        Input.isAltDown = false
 
 
 
