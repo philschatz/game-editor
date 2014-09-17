@@ -1,11 +1,9 @@
 var THREE = require('three')
 var raf = require('raf')
-var lsb = require('lsb')
-var voxelShare = require('voxel-share')
-var request = require('browser-request')
-var Convert = require('voxel-critter/lib/convert.js')
-var ndarray = require('ndarray')
-var ndarrayFill = require('ndarray-fill')
+// var lsb = require('lsb')
+// var Convert = require('voxel-critter/lib/convert.js')
+// var ndarray = require('ndarray')
+// var ndarrayFill = require('ndarray-fill')
 
 window.startEditor = function() {
   var container
@@ -48,21 +46,6 @@ window.startEditor = function() {
     $('#welcome').modal()
   }
 
-  exports.about = function() {
-    $('#about').modal()
-  }
-
-
-
-  exports.getImage = function(imgURL, cb) {
-    var img = new Image()
-    img.crossOrigin = ''
-    img.src = imgURL
-    img.onload = function() {
-      cb(img)
-    }
-  }
-
   exports.reset = function() {
     window.location.replace('#/')
     scene.children
@@ -74,57 +57,34 @@ window.startEditor = function() {
     $('i[data-color="' + idx + '"]').click()
   }
 
-  exports.setWireframe = function(bool) {
-    wireframe = bool
-    scene.children
-      .filter(function(el) { return el.isVoxel })
-      .map(function(mesh) { mesh.wireMesh.visible = bool })
-  }
-
-  exports.setFill = function(bool) {
-    fill = bool
-    scene.children
-      .filter(function(el) { return el.isVoxel })
-      .map(function(mesh) { mesh.material.visible = bool })
-  }
-
   exports.showGrid = function(bool) {
     grid.material.visible = bool
   }
 
-  exports.setShadows = function(bool) {
-    if (bool) CubeMaterial = THREE.MeshLambertMaterial
-    else CubeMaterial = THREE.MeshBasicMaterial
-    scene.children
-      .filter(function(el) { return el !== brush && el.isVoxel })
-      .map(function(cube) { scene.remove(cube) })
-    buildFromHash()
-  }
-
-  function getVoxels() {
-    var hash = window.location.hash.substr(1)
-    var convert = new Convert()
-    var data = convert.toVoxels(hash)
-    var l = data.bounds[0]
-    var h = data.bounds[1]
-    var d = [ h[0]-l[0] + 1, h[1]-l[1] + 1, h[2]-l[2] + 1]
-    var len = d[0] * d[1] * d[2]
-    var voxels = ndarray(new Int32Array(len), [d[0], d[1], d[2]])
-
-    var colors = [undefined]
-    data.colors.map(function(c) {
-      colors.push('#' + rgb2hex(c))
-    })
-
-    function generateVoxels(x, y, z) {
-      var offset = [x + l[0], y + l[1], z + l[2]]
-      var val = data.voxels[offset.join('|')]
-      return data.colors[val] ? val + 1: 0
-    }
-
-    ndarrayFill(voxels, generateVoxels)
-    return {voxels: voxels, colors: colors}
-  }
+  // function getVoxels() {
+  //   var hash = window.location.hash.substr(1)
+  //   var convert = new Convert()
+  //   var data = convert.toVoxels(hash)
+  //   var l = data.bounds[0]
+  //   var h = data.bounds[1]
+  //   var d = [ h[0]-l[0] + 1, h[1]-l[1] + 1, h[2]-l[2] + 1]
+  //   var len = d[0] * d[1] * d[2]
+  //   var voxels = ndarray(new Int32Array(len), [d[0], d[1], d[2]])
+  //
+  //   var colors = [undefined]
+  //   data.colors.map(function(c) {
+  //     colors.push('#' + rgb2hex(c))
+  //   })
+  //
+  //   function generateVoxels(x, y, z) {
+  //     var offset = [x + l[0], y + l[1], z + l[2]]
+  //     var val = data.voxels[offset.join('|')]
+  //     return data.colors[val] ? val + 1: 0
+  //   }
+  //
+  //   ndarrayFill(voxels, generateVoxels)
+  //   return {voxels: voxels, colors: colors}
+  // }
 
   function addVoxel(x, y, z, c) {
     var cubeMaterial = new CubeMaterial( { vertexColors: THREE.VertexColors, transparent: true } )
@@ -378,15 +338,8 @@ window.startEditor = function() {
   function init() {
 
     bindEventsAndPlugins()
-    setupImageDropImport(document.body)
 
     container = document.getElementById( 'editor-area' )
-    // container.id = ''
-    // document.body.appendChild( container )
-    // container.style.width = '100%';
-    // container.style.height = '100%';
-
-    //new THREE.OrthographicCamera(this.width/-2, this.width/2, this.height/2, this.height/-2, this.nearPlane, this.farPlane)):(new THREE.PerspectiveCamera(this.fov, this.aspectRatio, this.nearPlane, this.farPlane))
 
     //camera = new THREE.PerspectiveCamera( 40, container.clientWidth / container.clientHeight, 1, 10000 )
     camera = new THREE.OrthographicCamera(container.clientWidth / -1, container.clientWidth / 1, container.clientHeight / 1, container.clientHeight / -1, 1, 10000 )
@@ -522,7 +475,6 @@ window.startEditor = function() {
     camera.updateProjectionMatrix()
 
     renderer.setSize( container.clientWidth, container.clientHeight )
-    // renderer2.setSize( container.clientWidth, container.clientHeight )
     interact()
   }
 
@@ -995,54 +947,7 @@ target.z += Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
     return image
   }
 
-  function importImage(image) {
-    var canvas = document.createElement('canvas')
-    var ctx = canvas.getContext('2d')
-    var width = canvas.width = image.width
-    var height = canvas.height = image.height
 
-    ctx.fillStyle = 'rgb(255,255,255)'
-    ctx.fillRect(0, 0, width, height)
-    ctx.drawImage(image, 0, 0)
-
-    var imageData = ctx.getImageData(0, 0, width, height)
-    var text = lsb.decode(imageData.data, pickRGB)
-
-    // ignore images that weren't generated by voxel-painter
-    if (text.slice(0, 14) !== 'voxel-painter:') return false
-
-    window.location.hash = text.slice(14)
-    buildFromHash()
-    return true
-  }
-
-  function setupImageDropImport(element) {
-    element.ondragover = function(event) {
-      return event.preventDefault(event) && false
-    }
-    element.ondrop = function(event) {
-      event.preventDefault()
-      event.stopPropagation()
-
-      if (!event.dataTransfer) return false
-
-      var file = event.dataTransfer.files[0]
-      if (!file) return false
-      if (!file.type.match(/image/)) return false
-
-      var reader = new FileReader
-      reader.onload = function(event) {
-        var image = new Image
-        image.src = event.target.result
-        image.onload = function() {
-          if (importImage(image)) return
-          window.alert('Looks like that image doesn\'t have any voxels inside it...')
-        }
-      }
-      reader.readAsDataURL(file)
-      return false
-    }
-  }
 
   function getDimensions(voxels) {
     var low = [0,0,0], high = [0,0,0]
