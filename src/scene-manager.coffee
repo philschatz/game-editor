@@ -1,6 +1,9 @@
 module.exports = (THREE, Input) ->
   new class SceneManager
 
+    # To limit the scope of requiring THREE
+    THREE: -> THREE
+
     radius: 1600
     CubeMaterial: THREE.MeshBasicMaterial
     cube: new THREE.CubeGeometry( 50, 50, 50 )
@@ -155,4 +158,41 @@ module.exports = (THREE, Input) ->
       @axisCamera.position.z = target.z
       @axisCamera.lookAt(target)
       @renderer.render(@scene, @axisCamera)
+      return
+
+
+    getIntersecting: ->
+      intersectable = []
+      @scene.children.map (c) ->
+        intersectable.push c  if c.isVoxel or c.isPlane
+        return
+
+      if @raycaster
+        intersections = @raycaster.intersectObjects(intersectable)
+        if intersections.length > 0
+          intersect = (if intersections[0].object.isBrush then intersections[1] else intersections[0])
+          intersect
+
+
+    zoom: (delta) ->
+      origin =
+        x: 0
+        y: 0
+        z: 0
+
+      distance = @camera.position.distanceTo(origin)
+      tooFar = distance > 6000
+      tooClose = Math.abs(@camera.top) < 500
+      return  if delta > 0 and tooFar
+      return  if delta < 0 and tooClose
+      @radius = distance # for mouse drag calculations to be correct
+      aspect = @container.clientWidth / @container.clientHeight
+      @camera.top += delta / 2
+      @camera.bottom -= delta / 2
+      @camera.left -= delta * aspect / 2
+      @camera.right += delta * aspect / 2
+
+      # @camera.updateMatrix();
+      @camera.updateProjectionMatrix()
+      @camera.translateZ delta
       return

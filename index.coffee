@@ -9,12 +9,12 @@ ColorUtils = require './src/color-utils'
 Input = require('./src/input-manager')(THREE)
 SceneManager = require('./src/scene-manager')(THREE, Input)
 HashManager = require('./src/hash-manager')(SceneManager)
-
+Interactions = require('./src/interactions')(Input, SceneManager)
 
 window.startEditor = ->
   container = null
   shareDialog = null
-  mouse3D = objectHovered = null
+  mouse3D = null
 
   target = new THREE.Vector3( 0, 200, 0 ) # -1200, 300, 900
   color = 0
@@ -99,28 +99,6 @@ window.startEditor = ->
     SceneManager.brush.children[0].material.color.setRGB colors[idx][0], colors[idx][1], colors[idx][2]  if color is idx and SceneManager.brush
     return
 
-  zoom = (delta) ->
-    origin =
-      x: 0
-      y: 0
-      z: 0
-
-    distance = SceneManager.camera.position.distanceTo(origin)
-    tooFar = distance > 6000
-    tooClose = Math.abs(SceneManager.camera.top) < 1000
-    return  if delta > 0 and tooFar
-    return  if delta < 0 and tooClose
-    SceneManager.radius = distance # for mouse drag calculations to be correct
-    aspect = container.clientWidth / container.clientHeight
-    SceneManager.camera.top += delta / 2
-    SceneManager.camera.bottom -= delta / 2
-    SceneManager.camera.left -= delta * aspect / 2
-    SceneManager.camera.right += delta * aspect / 2
-
-    # SceneManager.camera.updateMatrix();
-    SceneManager.camera.updateProjectionMatrix()
-    SceneManager.camera.translateZ delta
-    return
 
 
   setIsometricAngle = ->
@@ -251,7 +229,8 @@ window.startEditor = ->
     # Lights
     mousewheel = (event) ->
       # prevent zoom if a modal is open
-      zoom event.wheelDeltaY or event.detail  if $(".modal").hasClass("in")
+      return if $(".modal").hasClass("in")
+      SceneManager.zoom(event.wheelDeltaY or event.detail)
 
     bindEventsAndPlugins()
     container = document.getElementById("editor-area")
@@ -274,66 +253,12 @@ window.startEditor = ->
     SceneManager.camera.aspect = container.clientWidth / container.clientHeight
     SceneManager.camera.updateProjectionMatrix()
     SceneManager.renderer.setSize container.clientWidth, container.clientHeight
-    interact()
+    Interactions.interact()
     return
 
 
-  getIntersecting = ->
-    intersectable = []
-    SceneManager.scene.children.map (c) ->
-      intersectable.push c  if c.isVoxel or c.isPlane
-      return
-
-    if SceneManager.raycaster
-      intersections = SceneManager.raycaster.intersectObjects(intersectable)
-      if intersections.length > 0
-        intersect = (if intersections[0].object.isBrush then intersections[1] else intersections[0])
-        intersect
 
 
-  interact = ->
-    return  if typeof SceneManager.raycaster is "undefined"
-    if objectHovered
-      objectHovered.material.opacity = 1
-      objectHovered = null
-    intersect = getIntersecting()
-    if intersect
-      updateBrush = ->
-        SceneManager.brush.position.x = Math.floor(position.x / 50) * 50 + 25
-        SceneManager.brush.position.y = Math.floor(position.y / 50) * 50 + 25
-        SceneManager.brush.position.z = Math.floor(position.z / 50) * 50 + 25
-        return
-      normal = intersect.face.normal.clone()
-      normal.applyMatrix4 intersect.object.matrixRotationWorld
-      position = new THREE.Vector3().addVectors(intersect.point, normal)
-      newCube = [
-        Math.floor(position.x / 50)
-        Math.floor(position.y / 50)
-        Math.floor(position.z / 50)
-      ]
-      if Input.isAltDown
-        SceneManager.brush.currentCube = newCube  unless SceneManager.brush.currentCube
-        if SceneManager.brush.currentCube.join("") isnt newCube.join("")
-          if Input.isShiftDown
-            if intersect.object isnt SceneManager.plane
-              SceneManager.scene.remove intersect.object.wireMesh
-              SceneManager.scene.remove intersect.object
-          else
-            SceneManager.addVoxel SceneManager.brush.position.x, SceneManager.brush.position.y, SceneManager.brush.position.z, colors[color]  unless SceneManager.brush.position.y is 2000
-        updateBrush()
-        HashManager.updateHash(colors)
-        return SceneManager.brush.currentCube = newCube
-      else if Input.isShiftDown
-        if intersect.object isnt SceneManager.plane
-          objectHovered = intersect.object
-          objectHovered.material.opacity = 0.5
-          SceneManager.brush.position.y = 2000
-          return
-      else
-        updateBrush()
-        return
-    SceneManager.brush.position.y = 2000
-    return
 
 
   onDocumentMouseMove = (event) ->
@@ -341,7 +266,7 @@ window.startEditor = ->
     unless Input.isMouseRotating
 
       # change the mouse cursor to a + letting the user know they can rotate
-      intersecting = getIntersecting()
+      intersecting = SceneManager.getIntersecting()
       unless intersecting
         container.classList.add "rotatable"
       else
@@ -366,7 +291,7 @@ window.startEditor = ->
       target.z += Math.cos(SceneManager.theta * Math.PI / 360) * Math.cos(SceneManager.phi * Math.PI / 360)
     Input.mouse2D.x = (event.clientX / container.clientWidth) * 2 - 1
     Input.mouse2D.y = -(event.clientY / container.clientHeight) * 2 + 1
-    interact()
+    Interactions.interact()
     return
 
 
@@ -377,7 +302,7 @@ window.startEditor = ->
     Input.onMouseDownPhi = SceneManager.phi
     Input.onMouseDownPosition.x = event.clientX
     Input.onMouseDownPosition.y = event.clientY
-    Input.isMouseRotating = not getIntersecting()
+    Input.isMouseRotating = not SceneManager.getIntersecting()
     return
 
 
@@ -388,7 +313,7 @@ window.startEditor = ->
     Input.onMouseDownPosition.x = event.clientX - Input.onMouseDownPosition.x
     Input.onMouseDownPosition.y = event.clientY - Input.onMouseDownPosition.y
     return  if Input.onMouseDownPosition.length() > 5
-    intersect = getIntersecting()
+    intersect = SceneManager.getIntersecting()
     if intersect
       if Input.isShiftDown
         unless intersect.object is SceneManager.plane
@@ -398,17 +323,16 @@ window.startEditor = ->
         SceneManager.addVoxel SceneManager.brush.position.x, SceneManager.brush.position.y, SceneManager.brush.position.z, colors[color]  unless SceneManager.brush.position.y is 2000
     HashManager.updateHash(colors)
     SceneManager.render(target)
-    interact()
+    Interactions.interact()
     return
 
 
   onDocumentKeyDown = (event) ->
-    console.log event.keyCode
     switch event.keyCode
       when 189
-        zoom 100
+        SceneManager.zoom(100)
       when 187
-        zoom -100
+        SceneManager.zoom(-100)
       when 49
         exports.setColor 0
       when 50
