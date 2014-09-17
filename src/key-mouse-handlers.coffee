@@ -7,11 +7,8 @@ module.exports = (SceneManager, Interactions, Input, HashManager, target) ->
   setIsometricAngle = ->
     # Move up to the nearest 45 degree
     SceneManager.theta = Math.floor((SceneManager.theta + 90) / 90) * 90
-
-    SceneManager.camera.position.x = SceneManager.radius * Math.sin(SceneManager.theta * Math.PI / 360) * Math.cos(SceneManager.phi * Math.PI / 360)
-    SceneManager.camera.position.y = SceneManager.radius * Math.sin(SceneManager.phi * Math.PI / 360)
-    SceneManager.camera.position.z = SceneManager.radius * Math.cos(SceneManager.theta * Math.PI / 360) * Math.cos(SceneManager.phi * Math.PI / 360)
-    SceneManager.camera.updateMatrix()
+    SceneManager.phi = 0 # The y angle
+    SceneManager.updateCamera(target)
     return
 
   return new class KeyMouseHandlers
@@ -44,20 +41,12 @@ module.exports = (SceneManager, Interactions, Input, HashManager, target) ->
         unless intersecting
           SceneManager.theta = -((event.clientX - Input.onMouseDownPosition.x) * 0.5) + Input.onMouseDownTheta
           SceneManager.phi = ((event.clientY - Input.onMouseDownPosition.y) * 0.5) + Input.onMouseDownPhi
-          SceneManager.phi = Math.min(180, Math.max(0, SceneManager.phi))
-          SceneManager.camera.position.x = target.x + SceneManager.radius * Math.sin(SceneManager.theta * Math.PI / 360) * Math.cos(SceneManager.phi * Math.PI / 360)
-          SceneManager.camera.position.y = target.y + SceneManager.radius * Math.sin(SceneManager.phi * Math.PI / 360)
-          SceneManager.camera.position.z = target.z + SceneManager.radius * Math.cos(SceneManager.theta * Math.PI / 360) * Math.cos(SceneManager.phi * Math.PI / 360)
-          SceneManager.camera.updateMatrix()
-      else if Input.isMouseDown is 2 # middle click
+          SceneManager.phi = Math.min(180, Math.max(-90, SceneManager.phi))
+          SceneManager.updateCamera(target)
 
-        # Pan the camera
-        SceneManager.theta = -((event.clientX - Input.onMouseDownPosition.x) * 0.5) + Input.onMouseDownTheta
-        SceneManager.phi = ((event.clientY - Input.onMouseDownPosition.y) * 0.5) + Input.onMouseDownPhi
-        SceneManager.phi = Math.min(180, Math.max(0, SceneManager.phi))
-        target.x += Math.sin(SceneManager.theta * Math.PI / 360) * Math.cos(SceneManager.phi * Math.PI / 360)
-        target.y += Math.sin(SceneManager.phi * Math.PI / 360)
-        target.z += Math.cos(SceneManager.theta * Math.PI / 360) * Math.cos(SceneManager.phi * Math.PI / 360)
+      # else if Input.isMouseDown is 2 # middle click
+      #   # Pan the camera
+      #   # TODO: Move the target and then update the camera
 
       Input.mouse2D.x = (event.clientX / SceneManager.container.clientWidth) * 2 - 1
       Input.mouse2D.y = -(event.clientY / SceneManager.container.clientHeight) * 2 + 1

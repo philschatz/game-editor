@@ -199,3 +199,9 @@ module.exports = (THREE, Input) ->
       @camera.updateProjectionMatrix()
       @camera.translateZ delta
       return
+
+    updateCamera: (target) ->
+      @camera.position.x = target.x + @radius * Math.sin(@theta * Math.PI / 360) * Math.cos(@phi * Math.PI / 360)
+      @camera.position.y = target.y + @radius * Math.sin(@phi * Math.PI / 360)
+      @camera.position.z = target.z + @radius * Math.cos(@theta * Math.PI / 360) * Math.cos(@phi * Math.PI / 360)
+      @camera.updateMatrix()
