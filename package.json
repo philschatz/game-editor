@@ -19,6 +19,7 @@
     "browserify": "^5.9.1"
   },
   "scripts": {
+    "test": "browserify index.js -o bundle.js",
     "start": "beefy index.js:bundle.js 8084"
   }
 }

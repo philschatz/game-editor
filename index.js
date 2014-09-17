@@ -197,11 +197,19 @@ window.startEditor = function() {
   function zoom(delta) {
     var origin = {x: 0, y: 0, z: 0}
     var distance = camera.position.distanceTo(origin)
-    var tooFar = distance  > 3000
-    var tooClose = distance < 300
+    var tooFar = distance  > 6000
+    var tooClose = Math.abs(camera.top) < 1000
     if (delta > 0 && tooFar) return
     if (delta < 0 && tooClose) return
     radius = distance // for mouse drag calculations to be correct
+    aspect = window.innerWidth / window.innerHeight
+    camera.top += delta / 2;
+    camera.bottom -= delta / 2;
+    camera.left -= delta * aspect / 2;
+    camera.right += delta * aspect / 2;
+    // camera.updateMatrix();
+    camera.updateProjectionMatrix();
+
     camera.translateZ( delta )
   }
 
