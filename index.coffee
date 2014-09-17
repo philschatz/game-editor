@@ -8,6 +8,8 @@ raf = require("raf")
 ColorUtils = require './src/color-utils'
 Input = require('./src/input-manager')(THREE)
 SceneManager = require('./src/scene-manager')(THREE, Input)
+HashManager = require('./src/hash-manager')(SceneManager)
+
 
 window.startEditor = ->
   container = null
@@ -122,7 +124,9 @@ window.startEditor = ->
 
 
   setIsometricAngle = ->
-    SceneManager.theta += 90
+    # Move up to the nearest 45 degree
+    SceneManager.theta = Math.floor((SceneManager.theta + 90) / 90) * 90
+
     SceneManager.camera.position.x = SceneManager.radius * Math.sin(SceneManager.theta * Math.PI / 360) * Math.cos(SceneManager.phi * Math.PI / 360)
     SceneManager.camera.position.y = SceneManager.radius * Math.sin(SceneManager.phi * Math.PI / 360)
     SceneManager.camera.position.z = SceneManager.radius * Math.cos(SceneManager.theta * Math.PI / 360) * Math.cos(SceneManager.phi * Math.PI / 360)
@@ -141,7 +145,7 @@ window.startEditor = ->
     idx = colors.length - 1
     color = idx
     addColorToPalette idx
-    updateHash()
+    HashManager.updateHash(colors)
     updateColor idx
     return
 
@@ -161,8 +165,7 @@ window.startEditor = ->
         SceneManager.scene.remove mesh
         return
 
-      frameMask = "A"
-      buildFromHash frameMask
+      HashManager.buildFromHash(colors)
       return
 
     picker.on "hide", (e) ->
@@ -262,8 +265,8 @@ window.startEditor = ->
     window.addEventListener "DOMMouseScroll", mousewheel, false
     window.addEventListener "mousewheel", mousewheel, false
     window.addEventListener "resize", onWindowResize, false
-    buildFromHash()  if window.location.hash
-    updateHash()
+    HashManager.buildFromHash(colors)  if window.location.hash
+    HashManager.updateHash(colors)
     return
 
 
@@ -318,7 +321,7 @@ window.startEditor = ->
           else
             SceneManager.addVoxel SceneManager.brush.position.x, SceneManager.brush.position.y, SceneManager.brush.position.z, colors[color]  unless SceneManager.brush.position.y is 2000
         updateBrush()
-        updateHash()
+        HashManager.updateHash(colors)
         return SceneManager.brush.currentCube = newCube
       else if Input.isShiftDown
         if intersect.object isnt SceneManager.plane
@@ -393,7 +396,7 @@ window.startEditor = ->
           SceneManager.scene.remove intersect.object
       else
         SceneManager.addVoxel SceneManager.brush.position.x, SceneManager.brush.position.y, SceneManager.brush.position.z, colors[color]  unless SceneManager.brush.position.y is 2000
-    updateHash()
+    HashManager.updateHash(colors)
     SceneManager.render(target)
     interact()
     return
@@ -445,150 +448,7 @@ window.startEditor = ->
       when 18
         Input.isAltDown = false
 
-  # Array.prototype.diff = function(a) {
-  #   return this.filter(function(i) {return !(a.indexOf(i) > -1);});
-  # };
-  buildFromHash = (hashMask) ->
-    hash = window.location.hash.substr(1)
-    hashChunks = hash.split(":")
-    chunks = {}
-    animationFrames = []
-    j = 0
-    n = hashChunks.length
 
-    while j < n
-      chunk = hashChunks[j].split("/")
-      chunks[chunk[0]] = chunk[1]
-      animationFrames.push chunk[1]  if chunk[0].charAt(0) is "A"
-      j++
-    if (not hashMask or hashMask is "C") and chunks["C"]
-
-      # decode colors
-      hexColors = chunks["C"]
-      c = 0
-      nC = hexColors.length / 6
-
-      while c < nC
-        hex = hexColors.substr(c * 6, 6)
-        colors[c] = ColorUtils.hex2rgb(hex)
-        addColorToPalette c
-        c++
-    frameMask = "A"
-    if (not hashMask or hashMask is frameMask) and chunks[frameMask]
-
-      # decode geo
-      current =
-        x: 0
-        y: 0
-        z: 0
-        c: 0
-
-      data = decode(chunks[frameMask])
-      i = 0
-      l = data.length
-      while i < l
-        code = data[i++].toString(2)
-        current.x += data[i++] - 32  if code.charAt(1) is "1"
-        current.y += data[i++] - 32  if code.charAt(2) is "1"
-        current.z += data[i++] - 32  if code.charAt(3) is "1"
-        current.c += data[i++] - 32  if code.charAt(4) is "1"
-        SceneManager.addVoxel current.x * 50 + 25, current.y * 50 + 25, current.z * 50 + 25, colors[current.c]  if code.charAt(0) is "1"
-    updateHash()
-    return
-
-
-  updateHash = ->
-    currentFrame = 0
-    animationFrames = []
-    data = []
-    voxels = []
-    code = undefined
-    current =
-      x: 0
-      y: 0
-      z: 0
-      c: 0
-
-    last =
-      x: 0
-      y: 0
-      z: 0
-      c: 0
-
-    for i of SceneManager.scene.children
-      object = SceneManager.scene.children[i]
-      if object.isVoxel and object isnt SceneManager.plane and object isnt SceneManager.brush
-        current.x = (object.position.x - 25) / 50
-        current.y = (object.position.y - 25) / 50
-        current.z = (object.position.z - 25) / 50
-        colorString = [
-          "r"
-          "g"
-          "b"
-        ].map((col) ->
-          object.material.color[col]
-        ).join("")
-
-        # this string matching of floating point values to find an index seems a little sketchy
-        i = 0
-
-        while i < colors.length
-          current.c = i  if colors[i].join("") is colorString
-          i++
-        voxels.push
-          x: current.x
-          y: current.y + 1
-          z: current.z
-          c: current.c + 1
-
-        code = 0
-        code += 1000  unless current.x is last.x
-        code += 100  unless current.y is last.y
-        code += 10  unless current.z is last.z
-        code += 1  unless current.c is last.c
-        code += 10000
-        data.push parseInt(code, 2)
-        unless current.x is last.x
-          data.push current.x - last.x + 32
-          last.x = current.x
-        unless current.y is last.y
-          data.push current.y - last.y + 32
-          last.y = current.y
-        unless current.z is last.z
-          data.push current.z - last.z + 32
-          last.z = current.z
-        unless current.c is last.c
-          data.push current.c - last.c + 32
-          last.c = current.c
-    data = encode(data)
-    animationFrames[currentFrame] = data
-    cData = ""
-
-    # ignore color data
-    # for (var i = 0; i < colors.length; i++){
-    #   cData += ColorUtils.rgb2hex(colors[i]);
-    # }
-    outHash = "#" + ((if cData then ("C/" + cData) else ""))
-    i = 0
-
-    while i < animationFrames.length
-      if i is 0
-        outHash = outHash + ":A/" + animationFrames[i]
-      else
-        outHash = outHash + ":A" + i + "/" + animationFrames[i]
-      i++
-
-    # hack to ignore programmatic hash changes
-    window.updatingHash = true
-    window.location.replace outHash
-
-    # Update the Play Level link
-    $(".play-level").attr "href", "http://SceneManager.philschatz.com/game/" + outHash
-    setTimeout (->
-      window.updatingHash = false
-      return
-    ), 1
-    voxels
 
   # Update the Play Level link
   exportFunction = (voxels) ->
@@ -632,21 +492,8 @@ window.startEditor = ->
       (high[2] - low[2]) or 1
     ]
 
-  # https://gist.github.com/665235
-  decode = (string) ->
-    output = []
-    string.split("").forEach (v) ->
-      output.push "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".indexOf(v)
-      return
-    output
 
 
-  encode = (array) ->
-    output = ""
-    array.forEach (v) ->
-      output += "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".charAt(v)
-      return
-    output
 
 
   # Init code
@@ -694,51 +541,3 @@ window.startEditor = ->
     return
 
   return
-
-# // SceneManager.camera 2
-# windowWidth = container.clientWidth;
-# windowHeight = container.clientHeight;
-# view = {
-#   left: 2/3,
-#   bottom: 1/3,
-#   width: 1/3,
-#   height: 1/3,
-#   background: new THREE.Color().setRGB( 0.7, 0.5, 0.5 )
-# }
-# var left   = Math.floor( windowWidth  * view.left );
-# var bottom = Math.floor( windowHeight * view.bottom );
-# var width  = Math.floor( windowWidth  * view.width );
-# var height = Math.floor( windowHeight * view.height );
-# SceneManager.renderer.setViewport( left, bottom, width, height );
-# SceneManager.renderer.setScissor( left, bottom, width, height );
-# SceneManager.renderer.enableScissorTest ( true );
-# SceneManager.renderer.setClearColor( view.background );
-#
-# SceneManager.axisCamera.position.x = target.x;
-# SceneManager.axisCamera.position.y = 1000;
-# SceneManager.axisCamera.position.z = target.z;
-# SceneManager.axisCamera.lookAt(target);
-# SceneManager.renderer.render(SceneManager.scene, SceneManager.axisCamera)
-
-# view = {
-#   left: 2/3,
-#   bottom: 2/3,
-#   width: 1/3,
-#   height: 1/3,
-#   background: new THREE.Color().setRGB( 0.5, 0.7, 0.5 )
-# }
-# var left   = Math.floor( windowWidth  * view.left );
-# var bottom = Math.floor( windowHeight * view.bottom );
-# var width  = Math.floor( windowWidth  * view.width );
-# var height = Math.floor( windowHeight * view.height );
-# SceneManager.renderer.setViewport( left, bottom, width, height );
-# SceneManager.renderer.setScissor( left, bottom, width, height );
-# SceneManager.renderer.enableScissorTest ( true );
-# SceneManager.renderer.setClearColor( view.background );
-#
-# SceneManager.axisCamera.position.x = target.x;
-# SceneManager.axisCamera.position.y = target.y;
-# SceneManager.axisCamera.position.z = 1000;
-# SceneManager.axisCamera.lookAt(target);
-#
-# SceneManager.renderer.render(SceneManager.scene, SceneManager.axisCamera)
