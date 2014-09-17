@@ -4,15 +4,15 @@ ColorManager = require './color-manager'
 # https://gist.github.com/665235
 decode = (string) ->
   output = []
-  string.split("").forEach (v) ->
-    output.push "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".indexOf(v)
+  string.split('').forEach (v) ->
+    output.push 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'.indexOf(v)
     return
   output
 
 encode = (array) ->
-  output = ""
+  output = ''
   array.forEach (v) ->
-    output += "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".charAt(v)
+    output += 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'.charAt(v)
     return
   output
 
@@ -45,18 +45,18 @@ module.exports = (SceneManager) ->
           current.y = (object.position.y - 25) / 50
           current.z = (object.position.z - 25) / 50
           colorString = [
-            "r"
-            "g"
-            "b"
+            'r'
+            'g'
+            'b'
           ].map((col) ->
             object.material.color[col]
-          ).join("")
+          ).join('')
 
           # this string matching of floating point values to find an index seems a little sketchy
           i = 0
 
           while i < ColorManager.colors.length
-            current.c = i  if ColorManager.colors[i].join("") is colorString
+            current.c = i  if ColorManager.colors[i].join('') is colorString
             i++
           voxels.push
             x: current.x
@@ -85,20 +85,20 @@ module.exports = (SceneManager) ->
             last.c = current.c
       data = encode(data)
       animationFrames[currentFrame] = data
-      cData = ""
+      cData = ''
 
       # ignore color data
       # for (var i = 0; i < ColorManager.colors.length; i++){
       #   cData += ColorUtils.rgb2hex(ColorManager.colors[i]);
       # }
-      outHash = "#" + ((if cData then ("C/" + cData) else ""))
+      outHash = '#' + ((if cData then ('C/' + cData) else ''))
       i = 0
 
       while i < animationFrames.length
         if i is 0
-          outHash = outHash + ":A/" + animationFrames[i]
+          outHash = outHash + ':A/' + animationFrames[i]
         else
-          outHash = outHash + ":A" + i + "/" + animationFrames[i]
+          outHash = outHash + ':A' + i + '/' + animationFrames[i]
         i++
 
       # hack to ignore programmatic hash changes
@@ -106,7 +106,7 @@ module.exports = (SceneManager) ->
       window.location.replace outHash
 
       # Update the Play Level link
-      $(".play-level").attr "href", "http://philschatz.com/game/" + outHash
+      $('.play-level').attr 'href', 'http://philschatz.com/game/' + outHash
       setTimeout (->
         window.updatingHash = false
         return
@@ -117,21 +117,21 @@ module.exports = (SceneManager) ->
     buildFromHash: ->
       hashMask = null
       hash = window.location.hash.substr(1)
-      hashChunks = hash.split(":")
+      hashChunks = hash.split(':')
       chunks = {}
       animationFrames = []
       j = 0
       n = hashChunks.length
 
       while j < n
-        chunk = hashChunks[j].split("/")
+        chunk = hashChunks[j].split('/')
         chunks[chunk[0]] = chunk[1]
-        animationFrames.push chunk[1]  if chunk[0].charAt(0) is "A"
+        animationFrames.push chunk[1]  if chunk[0].charAt(0) is 'A'
         j++
-      if (not hashMask or hashMask is "C") and chunks["C"]
+      if (not hashMask or hashMask is 'C') and chunks['C']
 
         # decode ColorManager.colors
-        hexColors = chunks["C"]
+        hexColors = chunks['C']
         c = 0
         nC = hexColors.length / 6
 
@@ -140,7 +140,7 @@ module.exports = (SceneManager) ->
           ColorManager.colors[c] = ColorUtils.hex2rgb(hex)
           addColorToPalette c
           c++
-      frameMask = "A"
+      frameMask = 'A'
       if (not hashMask or hashMask is frameMask) and chunks[frameMask]
 
         # decode geo
@@ -155,18 +155,18 @@ module.exports = (SceneManager) ->
         l = data.length
         while i < l
           code = data[i++].toString(2)
-          current.x += data[i++] - 32  if code.charAt(1) is "1"
-          current.y += data[i++] - 32  if code.charAt(2) is "1"
-          current.z += data[i++] - 32  if code.charAt(3) is "1"
-          current.c += data[i++] - 32  if code.charAt(4) is "1"
+          current.x += data[i++] - 32  if code.charAt(1) is '1'
+          current.y += data[i++] - 32  if code.charAt(2) is '1'
+          current.z += data[i++] - 32  if code.charAt(3) is '1'
+          current.c += data[i++] - 32  if code.charAt(4) is '1'
 
-          if code.charAt(0) is "1"
+          if code.charAt(0) is '1'
             while !ColorManager.colors[current.c]
               ColorManager.colors.push [
                 0.0
                 0.0
                 0.0
               ]
-            SceneManager.addVoxel current.x * 50 + 25, current.y * 50 + 25, current.z * 50 + 25, ColorManager.colors[current.c] 
+            SceneManager.addVoxel current.x * 50 + 25, current.y * 50 + 25, current.z * 50 + 25, ColorManager.colors[current.c]
       @updateHash(ColorManager.colors)
       return

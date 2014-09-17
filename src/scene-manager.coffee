@@ -80,7 +80,7 @@ module.exports = (THREE, Input) ->
       @scene.add directionalLight
       hasWebGL = (->
         try
-          return !!window.WebGLRenderingContext and !!document.createElement("canvas").getContext("experimental-webgl")
+          return !!window.WebGLRenderingContext and !!document.createElement('canvas').getContext('experimental-webgl')
         catch e
           return false
         return
@@ -119,7 +119,7 @@ module.exports = (THREE, Input) ->
       voxel.wireMesh.visible = @_showWireframe
       voxel.matrixAutoUpdate = false
       voxel.updateMatrix()
-      voxel.name = x + "," + y + "," + z
+      voxel.name = x + ',' + y + ',' + z
       voxel.overdraw = true
       @scene.add(voxel)
       @scene.add(voxel.wireMesh)

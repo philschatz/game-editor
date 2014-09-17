@@ -4,7 +4,7 @@ module.exports = (Input, SceneManager) ->
   new class Interactions
 
       interact: ->
-        return  if typeof SceneManager.raycaster is "undefined"
+        return  if typeof SceneManager.raycaster is 'undefined'
         if @_objectHovered
           @_objectHovered.material.opacity = 1
           @_objectHovered = null
@@ -25,7 +25,7 @@ module.exports = (Input, SceneManager) ->
           ]
           if Input.isAltDown
             SceneManager.brush.currentCube = newCube  unless SceneManager.brush.currentCube
-            if SceneManager.brush.currentCube.join("") isnt newCube.join("")
+            if SceneManager.brush.currentCube.join('') isnt newCube.join('')
               if Input.isShiftDown
                 if intersect.object isnt SceneManager.plane
                   SceneManager.scene.remove intersect.object.wireMesh

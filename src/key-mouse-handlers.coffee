@@ -17,7 +17,7 @@ module.exports = (SceneManager, Interactions, Input, HashManager, target) ->
   return new class KeyMouseHandlers
     mousewheel: (event) ->
       # prevent zoom if a modal is open
-      return if $(".modal").hasClass("in")
+      return if $('.modal').hasClass('in')
       SceneManager.zoom(event.wheelDeltaY or event.detail)
 
     onWindowResize: ->
@@ -35,9 +35,9 @@ module.exports = (SceneManager, Interactions, Input, HashManager, target) ->
         # change the mouse cursor to a + letting the user know they can rotate
         intersecting = SceneManager.getIntersecting()
         unless intersecting
-          SceneManager.container.classList.add "rotatable"
+          SceneManager.container.classList.add 'rotatable'
         else
-          SceneManager.container.classList.remove "rotatable"
+          SceneManager.container.classList.remove 'rotatable'
       if Input.isMouseDown is 1 # left click
 
         # Rotate only if you clicked outside a block
@@ -146,11 +146,11 @@ module.exports = (SceneManager, Interactions, Input, HashManager, target) ->
 
 
     attachEvents: ->
-      SceneManager.renderer.domElement.addEventListener "mousemove", @onDocumentMouseMove, false
-      SceneManager.renderer.domElement.addEventListener "mousedown", @onDocumentMouseDown, false
-      SceneManager.renderer.domElement.addEventListener "mouseup", @onDocumentMouseUp, false
-      document.addEventListener "keydown", @onDocumentKeyDown, false
-      document.addEventListener "keyup", @onDocumentKeyUp, false
-      window.addEventListener "DOMMouseScroll", @mousewheel, false
-      window.addEventListener "mousewheel", @mousewheel, false
-      window.addEventListener "resize", @onWindowResize, false
+      SceneManager.renderer.domElement.addEventListener 'mousemove', @onDocumentMouseMove, false
+      SceneManager.renderer.domElement.addEventListener 'mousedown', @onDocumentMouseDown, false
+      SceneManager.renderer.domElement.addEventListener 'mouseup', @onDocumentMouseUp, false
+      document.addEventListener 'keydown', @onDocumentKeyDown, false
+      document.addEventListener 'keyup', @onDocumentKeyUp, false
+      window.addEventListener 'DOMMouseScroll', @mousewheel, false
+      window.addEventListener 'mousewheel', @mousewheel, false
+      window.addEventListener 'resize', @onWindowResize, false
