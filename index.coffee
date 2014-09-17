@@ -137,8 +137,8 @@ window.startEditor = ->
 
 
   changeColor = (e) ->
-    target = $(e.currentTarget)
-    idx = +target.find(".color").attr("data-color")
+    targetEl = $(e.currentTarget)
+    idx = +targetEl.find(".color").attr("data-color")
     updateColor idx
     false # eat the event
 

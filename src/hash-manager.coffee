@@ -159,6 +159,14 @@ module.exports = (SceneManager) ->
           current.y += data[i++] - 32  if code.charAt(2) is "1"
           current.z += data[i++] - 32  if code.charAt(3) is "1"
           current.c += data[i++] - 32  if code.charAt(4) is "1"
-          SceneManager.addVoxel current.x * 50 + 25, current.y * 50 + 25, current.z * 50 + 25, ColorManager.colors[current.c]  if code.charAt(0) is "1"
+
+          if code.charAt(0) is "1"
+            while !ColorManager.colors[current.c]
+              ColorManager.colors.push [
+                0.0
+                0.0
+                0.0
+              ]
+            SceneManager.addVoxel current.x * 50 + 25, current.y * 50 + 25, current.z * 50 + 25, ColorManager.colors[current.c] 
       @updateHash(ColorManager.colors)
       return
