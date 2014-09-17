@@ -15,7 +15,7 @@ window.startEditor = function() {
   var isShiftDown = false, isCtrlDown = false, isMouseDown = false, isAltDown = false
   var onMouseDownPosition = new THREE.Vector2(), onMouseDownPhi = 60, onMouseDownTheta = 45
   var radius = 1600, theta = 90, phi = 60
-  var target = new THREE.Vector3( -1200, 300, 900 ) // 0, 200, 0
+  var target = new THREE.Vector3( 0, 200, 0 ) // -1200, 300, 900
   var color = 0
   var CubeMaterial = THREE.MeshBasicMaterial
   var cube = new THREE.CubeGeometry( 50, 50, 50 )
