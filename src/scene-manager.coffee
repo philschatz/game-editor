@@ -1,4 +1,5 @@
-CameraManager = require './camera-manager'
+MainCamera = require './main-camera'
+AxisCamera = require './axis-camera'
 
 module.exports = (THREE, Input) ->
   new class SceneManager
@@ -28,9 +29,13 @@ module.exports = (THREE, Input) ->
     init: (@_container) ->
       window.scene = @scene = new THREE.Scene()
       @_camera = new THREE.OrthographicCamera(@_container.clientWidth / -1, @_container.clientWidth / 1, @_container.clientHeight / 1, @_container.clientHeight / -1, 1, 10000)
-      CameraManager.init(@scene, @_camera, @_container, @_target)
-      CameraManager.updateCamera({x:0, y:0, z:0})
+      MainCamera.init(@scene, @_camera, @_container, @_target)
+      MainCamera.updateCamera({x:0, y:0, z:0})
       @_axisCamera = new THREE.OrthographicCamera(@_container.clientWidth / -2, @_container.clientWidth / 2, @_container.clientHeight / 2, @_container.clientHeight / -2, 1, 10000)
+
+      @_axisCamera = new THREE.OrthographicCamera(@_container.clientWidth / -2, @_container.clientWidth / 2, @_container.clientHeight / 2, @_container.clientHeight / -2, 1, 10000)
+      AxisCamera.init(@scene, @_axisCamera, @_container, @_target)
+      AxisCamera.updateCamera({x:0, y:0, z:0})
 
       geometry = new THREE.Geometry()
       i = -@_size
@@ -127,7 +132,7 @@ module.exports = (THREE, Input) ->
     render: ->
       return console.warn 'Trying to render scene before initialized' unless @_camera
       @_camera.lookAt(@_target)
-      CameraManager.setRaycaster(@_projector.pickingRay(Input.mouse2D.clone(), @_camera))
+      MainCamera.setRaycaster(@_projector.pickingRay(Input.mouse2D.clone(), @_camera))
       @renderer.setViewport()
       @renderer.setScissor() # TODO: this might ned to become 0,0,@renderer.domElement.width,@renderer.domElement.height
       @renderer.enableScissorTest(false)
@@ -154,9 +159,6 @@ module.exports = (THREE, Input) ->
       @renderer.setScissor left, bottom, width, height
       @renderer.enableScissorTest true
       @renderer.setClearColor view.background
-      @_axisCamera.position.x = 1000
-      @_axisCamera.position.y = @_target.y
-      @_axisCamera.position.z = @_target.z
       @_axisCamera.lookAt(@_target)
       @renderer.render(@scene, @_axisCamera)
       return

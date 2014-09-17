@@ -1,4 +1,4 @@
-module.exports = new class CameraManager
+module.exports = class MainCamera
   radius: 1600
   _theta: 90
   _phi: 60

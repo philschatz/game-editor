@@ -1,26 +1,26 @@
 ColorManager = require './color-manager'
-CameraManager = require './camera-manager'
+MainCamera = require './main-camera'
 
 module.exports = (SceneManager, Interactions, Input, HashManager) ->
 
 
   setIsometricAngle = ->
     # Move up to the nearest 45 degree
-    theta = Math.floor((CameraManager.getRotation().theta + 180) / 180) * 180
+    theta = Math.floor((MainCamera.getRotation().theta + 180) / 180) * 180
     phi = 0 # The y angle
-    CameraManager.rotateCameraTo(theta, phi)
+    MainCamera.rotateCameraTo(theta, phi)
     return
 
   return new class KeyMouseHandlers
     mousewheel: (event) ->
       # prevent zoom if a modal is open
       return if $('.modal').hasClass('in')
-      CameraManager.zoom(event.wheelDeltaY or event.detail)
+      MainCamera.zoom(event.wheelDeltaY or event.detail)
 
     onWindowResize: ->
-      CameraManager.camera.aspect = CameraManager.container.clientWidth / CameraManager.container.clientHeight
-      CameraManager.camera.updateProjectionMatrix()
-      SceneManager.renderer.setSize CameraManager.container.clientWidth, CameraManager.container.clientHeight
+      MainCamera.camera.aspect = MainCamera.container.clientWidth / MainCamera.container.clientHeight
+      MainCamera.camera.updateProjectionMatrix()
+      SceneManager.renderer.setSize MainCamera.container.clientWidth, MainCamera.container.clientHeight
       Interactions.interact()
       return
 
@@ -30,11 +30,11 @@ module.exports = (SceneManager, Interactions, Input, HashManager) ->
       unless Input.isMouseRotating
 
         # change the mouse cursor to a + letting the user know they can rotate
-        intersecting = CameraManager.getIntersecting()
+        intersecting = MainCamera.getIntersecting()
         unless intersecting
-          CameraManager.container.classList.add 'rotatable'
+          MainCamera.container.classList.add 'rotatable'
         else
-          CameraManager.container.classList.remove 'rotatable'
+          MainCamera.container.classList.remove 'rotatable'
       if Input.isMouseDown is 1 # left click
 
         # Rotate only if you clicked outside a block
@@ -42,14 +42,14 @@ module.exports = (SceneManager, Interactions, Input, HashManager) ->
           theta = -((event.clientX - Input.onMouseDownPosition.x) * 0.5) + Input.onMouseDownTheta
           phi   =  ((event.clientY - Input.onMouseDownPosition.y) * 0.5) + Input.onMouseDownPhi
           phi = Math.min(180, Math.max(-90, phi))
-          CameraManager.rotateCameraTo(theta, phi)
+          MainCamera.rotateCameraTo(theta, phi)
 
       # else if Input.isMouseDown is 2 # middle click
       #   # Pan the camera
       #   # TODO: Move the target and then update the camera
 
-      Input.mouse2D.x = (event.clientX / CameraManager.container.clientWidth) * 2 - 1
-      Input.mouse2D.y = -(event.clientY / CameraManager.container.clientHeight) * 2 + 1
+      Input.mouse2D.x = (event.clientX / MainCamera.container.clientWidth) * 2 - 1
+      Input.mouse2D.y = -(event.clientY / MainCamera.container.clientHeight) * 2 + 1
       Interactions.interact()
       return
 
@@ -57,11 +57,11 @@ module.exports = (SceneManager, Interactions, Input, HashManager) ->
     onDocumentMouseDown: (event) ->
       event.preventDefault()
       Input.isMouseDown = event.which
-      Input.onMouseDownTheta = CameraManager.getRotation().theta
-      Input.onMouseDownPhi = CameraManager.getRotation().phi
+      Input.onMouseDownTheta = MainCamera.getRotation().theta
+      Input.onMouseDownPhi = MainCamera.getRotation().phi
       Input.onMouseDownPosition.x = event.clientX
       Input.onMouseDownPosition.y = event.clientY
-      Input.isMouseRotating = not CameraManager.getIntersecting()
+      Input.isMouseRotating = not MainCamera.getIntersecting()
       return
 
 
@@ -72,7 +72,7 @@ module.exports = (SceneManager, Interactions, Input, HashManager) ->
       Input.onMouseDownPosition.x = event.clientX - Input.onMouseDownPosition.x
       Input.onMouseDownPosition.y = event.clientY - Input.onMouseDownPosition.y
       return  if Input.onMouseDownPosition.length() > 5
-      intersect = CameraManager.getIntersecting()
+      intersect = MainCamera.getIntersecting()
       if intersect
         if Input.isShiftDown
           unless intersect.object is SceneManager.plane
@@ -90,9 +90,9 @@ module.exports = (SceneManager, Interactions, Input, HashManager) ->
     onDocumentKeyDown: (event) ->
       switch event.keyCode
         when 189
-          CameraManager.zoom(100)
+          MainCamera.zoom(100)
         when 187
-          CameraManager.zoom(-100)
+          MainCamera.zoom(-100)
         # when 49
         #   exports.setColor 0
         # when 50
