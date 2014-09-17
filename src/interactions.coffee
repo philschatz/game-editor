@@ -1,14 +1,15 @@
 ColorManager = require './color-manager'
+CameraManager = require './camera-manager'
 
 module.exports = (Input, SceneManager) ->
   new class Interactions
 
       interact: ->
-        return  if typeof SceneManager.raycaster is 'undefined'
+        return  unless CameraManager.raycaster
         if @_objectHovered
           @_objectHovered.material.opacity = 1
           @_objectHovered = null
-        intersect = SceneManager.getIntersecting()
+        intersect = CameraManager.getIntersecting()
         if intersect
           updateBrush = ->
             SceneManager.brush.position.x = Math.floor(position.x / 50) * 50 + 25

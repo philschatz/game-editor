@@ -12,9 +12,7 @@ SceneManager = require('./src/scene-manager')(THREE, Input)
 HashManager = require('./src/hash-manager')(SceneManager)
 Interactions = require('./src/interactions')(Input, SceneManager)
 
-target = new THREE.Vector3( 0, 200, 0 ) # -1200, 300, 900
-
-KeyMouse = require('./src/key-mouse-handlers')(SceneManager, Interactions, Input, HashManager, target)
+KeyMouse = require('./src/key-mouse-handlers')(SceneManager, Interactions, Input, HashManager)
 
 window.startEditor = ->
   container = null
@@ -275,7 +273,7 @@ window.startEditor = ->
     c++
   showWelcome()
   init()
-  raf(window).on "data", -> SceneManager.render(target)
+  raf(window).on "data", -> SceneManager.render()
   exports.viewInstructions = ->
     $("#welcome").modal()
     return

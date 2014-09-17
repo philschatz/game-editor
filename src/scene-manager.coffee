@@ -1,22 +1,21 @@
+CameraManager = require './camera-manager'
+
 module.exports = (THREE, Input) ->
   new class SceneManager
 
     # To limit the scope of requiring THREE
     THREE: -> THREE
 
-    container: null
-    radius: 1600
-    camera: null
-
     renderer: null
     brush: null
     scene: null
-    raycaster: null
 
     plane: null
 
-    theta: 90
-    phi: 60
+    _container: null
+    _camera: null
+    _target: new THREE.Vector3( 0, 200, 0 ) # -1200, 300, 900
+
 
     _CubeMaterial: THREE.MeshBasicMaterial
     _cube: new THREE.CubeGeometry( 50, 50, 50 )
@@ -26,14 +25,13 @@ module.exports = (THREE, Input) ->
     _step: 50
     _showWireframe: true
 
-    init: (@container) ->
-      @camera = new THREE.OrthographicCamera(container.clientWidth / -1, container.clientWidth / 1, container.clientHeight / 1, container.clientHeight / -1, 1, 10000)
-      @camera.position.x = @radius * Math.sin(@theta * Math.PI / 360) * Math.cos(@phi * Math.PI / 360)
-      @camera.position.y = @radius * Math.sin(@phi * Math.PI / 360)
-      @camera.position.z = @radius * Math.cos(@theta * Math.PI / 360) * Math.cos(@phi * Math.PI / 360)
-      @_axisCamera = new THREE.OrthographicCamera(container.clientWidth / -2, container.clientWidth / 2, container.clientHeight / 2, container.clientHeight / -2, 1, 10000)
-      @scene = new THREE.Scene()
-      window.scene = @scene
+    init: (@_container) ->
+      window.scene = @scene = new THREE.Scene()
+      @_camera = new THREE.OrthographicCamera(@_container.clientWidth / -1, @_container.clientWidth / 1, @_container.clientHeight / 1, @_container.clientHeight / -1, 1, 10000)
+      CameraManager.init(@scene, @_camera, @_container, @_target)
+      CameraManager.updateCamera({x:0, y:0, z:0})
+      @_axisCamera = new THREE.OrthographicCamera(@_container.clientWidth / -2, @_container.clientWidth / 2, @_container.clientHeight / 2, @_container.clientHeight / -2, 1, 10000)
+
       geometry = new THREE.Geometry()
       i = -@_size
 
@@ -72,9 +70,9 @@ module.exports = (THREE, Input) ->
       @brush.isBrush = true
       @brush.position.y = 2000
       @brush.overdraw = false
-      @scene.add @brush
+      @scene.add(@brush)
       ambientLight = new THREE.AmbientLight(0x606060)
-      @scene.add ambientLight
+      @scene.add(ambientLight)
       directionalLight = new THREE.DirectionalLight(0xffffff)
       directionalLight.position.set(1, 0.75, 0.5).normalize()
       @scene.add directionalLight
@@ -89,7 +87,7 @@ module.exports = (THREE, Input) ->
         @renderer = new THREE.WebGLRenderer(antialias: true)
       else
         @renderer = new THREE.CanvasRenderer()
-      @renderer.setSize container.clientWidth, container.clientHeight
+      @renderer.setSize(@_container.clientWidth, @_container.clientHeight)
 
 
     addVoxel: (x, y, z, col) ->
@@ -126,21 +124,21 @@ module.exports = (THREE, Input) ->
       return
 
 
-    render: (target) ->
-      return console.warn 'Trying to render scene before initialized' unless @camera
-      @camera.lookAt(target)
-      @raycaster = @_projector.pickingRay(Input.mouse2D.clone(), @camera)
+    render: ->
+      return console.warn 'Trying to render scene before initialized' unless @_camera
+      @_camera.lookAt(@_target)
+      CameraManager.setRaycaster(@_projector.pickingRay(Input.mouse2D.clone(), @_camera))
       @renderer.setViewport()
       @renderer.setScissor() # TODO: this might ned to become 0,0,@renderer.domElement.width,@renderer.domElement.height
       @renderer.enableScissorTest(false)
       @renderer.setClearColor(new THREE.Color().setRGB(1, 1, 1))
-      @renderer.render(@scene, @camera)
+      @renderer.render(@scene, @_camera)
 
       # return;
 
-      # @camera 2
-      windowWidth = @container.clientWidth
-      windowHeight = @container.clientHeight
+      # @_camera 2
+      windowWidth = @_container.clientWidth
+      windowHeight = @_container.clientHeight
       view =
         left: 3 / 4
         bottom: 0
@@ -157,51 +155,8 @@ module.exports = (THREE, Input) ->
       @renderer.enableScissorTest true
       @renderer.setClearColor view.background
       @_axisCamera.position.x = 1000
-      @_axisCamera.position.y = target.y
-      @_axisCamera.position.z = target.z
-      @_axisCamera.lookAt(target)
+      @_axisCamera.position.y = @_target.y
+      @_axisCamera.position.z = @_target.z
+      @_axisCamera.lookAt(@_target)
       @renderer.render(@scene, @_axisCamera)
       return
-
-
-    getIntersecting: ->
-      intersectable = []
-      @scene.children.map (c) ->
-        intersectable.push c  if c.isVoxel or c.isPlane
-        return
-
-      if @raycaster
-        intersections = @raycaster.intersectObjects(intersectable)
-        if intersections.length > 0
-          intersect = (if intersections[0].object.isBrush then intersections[1] else intersections[0])
-          intersect
-
-
-    zoom: (delta) ->
-      origin =
-        x: 0
-        y: 0
-        z: 0
-
-      distance = @camera.position.distanceTo(origin)
-      tooFar = distance > 6000
-      tooClose = Math.abs(@camera.top) < 500
-      return  if delta > 0 and tooFar
-      return  if delta < 0 and tooClose
-      @radius = distance # for mouse drag calculations to be correct
-      aspect = @container.clientWidth / @container.clientHeight
-      @camera.top += delta / 2
-      @camera.bottom -= delta / 2
-      @camera.left -= delta * aspect / 2
-      @camera.right += delta * aspect / 2
-
-      # @camera.updateMatrix();
-      @camera.updateProjectionMatrix()
-      @camera.translateZ delta
-      return
-
-    updateCamera: (target) ->
-      @camera.position.x = target.x + @radius * Math.sin(@theta * Math.PI / 360) * Math.cos(@phi * Math.PI / 360)
-      @camera.position.y = target.y + @radius * Math.sin(@phi * Math.PI / 360)
-      @camera.position.z = target.z + @radius * Math.cos(@theta * Math.PI / 360) * Math.cos(@phi * Math.PI / 360)
-      @camera.updateMatrix()
