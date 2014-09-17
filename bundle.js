@@ -10,13 +10,13 @@ var ndarrayFill = require('ndarray-fill')
 
 window.startEditor = function() {
   var container
-  var camera, renderer, brush
+  var camera, renderer, brush, axisCamera
   var projector, plane, scene, grid, shareDialog
   var mouse2D, mouse3D, raycaster, objectHovered
   var isShiftDown = false, isCtrlDown = false, isMouseDown = false, isAltDown = false
   var onMouseDownPosition = new THREE.Vector2(), onMouseDownPhi = 60, onMouseDownTheta = 45
   var radius = 1600, theta = 90, phi = 60
-  var target = new THREE.Vector3( 0, 200, 0 )
+  var target = new THREE.Vector3( -1200, 300, 900 ) // 0, 200, 0
   var color = 0
   var CubeMaterial = THREE.MeshBasicMaterial
   var cube = new THREE.CubeGeometry( 50, 50, 50 )
@@ -214,6 +214,7 @@ window.startEditor = function() {
     camera.position.y = radius * Math.sin( phi * Math.PI / 360 )
     camera.position.z = radius * Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
     camera.updateMatrix()
+
   }
 
   function addColor(e) {
@@ -383,6 +384,10 @@ window.startEditor = function() {
     camera.position.y = radius * Math.sin( phi * Math.PI / 360 )
     camera.position.z = radius * Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
 
+
+    axisCamera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / -2, 1, 10000 )
+
+
     scene = new THREE.Scene()
     window.scene = scene
 
@@ -467,6 +472,17 @@ window.startEditor = function() {
 
     container.appendChild(renderer.domElement)
 
+// renderer2 = new THREE.WebGLRenderer({antialias: true})
+// // else renderer2 = new THREE.CanvasRenderer()
+//
+// renderer2.setSize( window.innerWidth, window.innerHeight )
+
+// container2 = document.createElement('section')
+// document.body.appendChild(container2) //, document.body.firstChild
+// container2.appendChild(renderer2.domElement)
+
+
+
     renderer.domElement.addEventListener( 'mousemove', onDocumentMouseMove, false )
     renderer.domElement.addEventListener( 'mousedown', onDocumentMouseDown, false )
     renderer.domElement.addEventListener( 'mouseup', onDocumentMouseUp, false )
@@ -496,6 +512,7 @@ window.startEditor = function() {
     camera.updateProjectionMatrix()
 
     renderer.setSize( window.innerWidth, window.innerHeight )
+    // renderer2.setSize( window.innerWidth, window.innerHeight )
     interact()
   }
 
@@ -564,19 +581,31 @@ window.startEditor = function() {
   function onDocumentMouseMove( event ) {
     event.preventDefault()
 
-    if ( isMouseDown ) {
+    if ( isMouseDown == 1) { // left click
 
       theta = - ( ( event.clientX - onMouseDownPosition.x ) * 0.5 ) + onMouseDownTheta
       phi = ( ( event.clientY - onMouseDownPosition.y ) * 0.5 ) + onMouseDownPhi
 
       phi = Math.min( 180, Math.max( 0, phi ) )
 
-      camera.position.x = radius * Math.sin( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
-      camera.position.y = radius * Math.sin( phi * Math.PI / 360 )
-      camera.position.z = radius * Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
+      camera.position.x = target.x + radius * Math.sin( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
+      camera.position.y = target.y + radius * Math.sin( phi * Math.PI / 360 )
+      camera.position.z = target.z + radius * Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
       camera.updateMatrix()
 
+    } else if ( isMouseDown == 2) { // middle click
+
+      theta = - ( ( event.clientX - onMouseDownPosition.x ) * 0.5 ) + onMouseDownTheta
+      phi = ( ( event.clientY - onMouseDownPosition.y ) * 0.5 ) + onMouseDownPhi
+
+      phi = Math.min( 180, Math.max( 0, phi ) )
+
+target.x += Math.sin( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
+target.y += Math.sin( phi * Math.PI / 360 )
+target.z += Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
+
     }
+
 
     mouse2D.x = ( event.clientX / window.innerWidth ) * 2 - 1
     mouse2D.y = - ( event.clientY / window.innerHeight ) * 2 + 1
@@ -586,7 +615,7 @@ window.startEditor = function() {
 
   function onDocumentMouseDown( event ) {
     event.preventDefault()
-    isMouseDown = true
+    isMouseDown = event.which
     onMouseDownTheta = theta
     onMouseDownPhi = phi
     onMouseDownPosition.x = event.clientX
@@ -928,36 +957,6 @@ window.startEditor = function() {
     return idx + (idx/3) | 0
   }
 
-  function getExportCanvas(width, height) {
-    var canvas = document.createElement('canvas')
-    var ctx = canvas.getContext('2d')
-    var source = renderer.domElement
-    var width = canvas.width = width || source.width
-    var height = canvas.height = height || source.height
-
-    renderer.setSize(width, height)
-    camera.aspect = width/height
-    camera.updateProjectionMatrix()
-    renderer.render(scene, camera)
-
-    ctx.fillStyle = 'rgb(255,255,255)'
-    ctx.fillRect(0, 0, width, height)
-    ctx.drawImage(source, 0, 0, width, height)
-
-    updateHash()
-
-    var imageData = ctx.getImageData(0, 0, width, height)
-    var voxelData = window.location.hash
-    var text = 'voxel-painter:' + voxelData
-
-    lsb.encode(imageData.data, text, pickRGB)
-
-    ctx.putImageData(imageData, 0, 0)
-
-    onWindowResize()
-
-    return canvas
-  }
 
   function exportImage(width, height) {
     var canvas = getExportCanvas(width, height)
@@ -1047,9 +1046,113 @@ window.startEditor = function() {
   }
 
   function render() {
+
+    window.PHIL = target;
     camera.lookAt( target )
+    axisCamera.lookAt(target)
     raycaster = projector.pickingRay( mouse2D.clone(), camera )
+
+
+    renderer.setViewport();
+    renderer.setScissor() // TODO: this might ned to become 0,0,renderer.domElement.width,renderer.domElement.height
+    renderer.enableScissorTest(false);
+    renderer.setClearColor(new THREE.Color().setRGB( 1, 1, 1 ))
+
     renderer.render( scene, camera )
+
+// return;
+
+
+          // camera 2
+          windowWidth = window.innerWidth;
+          windowHeight = window.innerHeight;
+          view = {
+            left: 2/3,
+            bottom: 0,
+            width: 1/3,
+            height: 1/3,
+            background: new THREE.Color().setRGB( 0.5, 0.5, 0.7 )
+          }
+          var left   = Math.floor( windowWidth  * view.left );
+					var bottom = Math.floor( windowHeight * view.bottom );
+					var width  = Math.floor( windowWidth  * view.width );
+					var height = Math.floor( windowHeight * view.height );
+					renderer.setViewport( left, bottom, width, height );
+					renderer.setScissor( left, bottom, width, height );
+					renderer.enableScissorTest ( true );
+					renderer.setClearColor( view.background );
+
+					// axisCamera.aspect = width / height;
+					// axisCamera.updateProjectionMatrix();
+
+          axisCamera.position.x = 1000;
+          axisCamera.position.y = target.y;
+          axisCamera.position.z = target.z;
+          axisCamera.lookAt(target);
+
+          // camera.lookAt(new THREE.Vector3(0, camera.position.y, camera.position.z));
+          renderer.render(scene, axisCamera)
+
+
+          // camera 2
+          windowWidth = window.innerWidth;
+          windowHeight = window.innerHeight;
+          view = {
+            left: 2/3,
+            bottom: 1/3,
+            width: 1/3,
+            height: 1/3,
+            background: new THREE.Color().setRGB( 0.7, 0.5, 0.5 )
+          }
+          var left   = Math.floor( windowWidth  * view.left );
+          var bottom = Math.floor( windowHeight * view.bottom );
+          var width  = Math.floor( windowWidth  * view.width );
+          var height = Math.floor( windowHeight * view.height );
+          renderer.setViewport( left, bottom, width, height );
+          renderer.setScissor( left, bottom, width, height );
+          renderer.enableScissorTest ( true );
+          renderer.setClearColor( view.background );
+
+          // camera3.aspect = width / height;
+          // camera3.updateProjectionMatrix();
+
+          axisCamera.position.x = target.x;
+          axisCamera.position.y = 1000;
+          axisCamera.position.z = target.z;
+          axisCamera.lookAt(target);
+
+          // camera.lookAt(new THREE.Vector3(camera.position.x, camera.position.y, 0));
+          renderer.render(scene, axisCamera)
+
+view = {
+  left: 2/3,
+  bottom: 2/3,
+  width: 1/3,
+  height: 1/3,
+  background: new THREE.Color().setRGB( 0.5, 0.7, 0.5 )
+}
+var left   = Math.floor( windowWidth  * view.left );
+var bottom = Math.floor( windowHeight * view.bottom );
+var width  = Math.floor( windowWidth  * view.width );
+var height = Math.floor( windowHeight * view.height );
+renderer.setViewport( left, bottom, width, height );
+renderer.setScissor( left, bottom, width, height );
+renderer.enableScissorTest ( true );
+renderer.setClearColor( view.background );
+
+// camera3.aspect = width / height;
+// camera3.updateProjectionMatrix();
+
+axisCamera.position.x = target.x;
+axisCamera.position.y = target.y;
+axisCamera.position.z = 1000;
+axisCamera.lookAt(target);
+
+// camera.lookAt(new THREE.Vector3(camera.position.x, 0, camera.position.z));
+
+renderer.render(scene, axisCamera)
+
+
   }
 
 }
