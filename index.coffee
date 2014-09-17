@@ -7,40 +7,18 @@ raf = require("raf")
 # var ndarrayFill = require('ndarray-fill')
 ColorUtils = require './src/color-utils'
 Input = require('./src/input-manager')(THREE)
+SceneManager = require('./src/scene-manager')(THREE, Input)
 
 window.startEditor = ->
   container = null
-  camera = renderer = brush = axisCamera = null
-  projector = plane = scene = grid = shareDialog = null
-  mouse2D = mouse3D = raycaster = objectHovered = null
+  shareDialog = null
+  mouse3D = objectHovered = null
 
-  radius = 1600
-  theta = 90
-  phi = 60
   target = new THREE.Vector3( 0, 200, 0 ) # -1200, 300, 900
   color = 0
-  CubeMaterial = THREE.MeshBasicMaterial
-  cube = new THREE.CubeGeometry( 50, 50, 50 )
-  wireframeCube = new THREE.CubeGeometry(50.5, 50.5 , 50.5)
-  wireframe = true
-  fill = true
-  animation = false
-  animating = false
-  animationInterval = null
-  manualAnimating = false
-  wireframeOptions =
-    color: 0x000000
-    wireframe: true
-    wireframeLinewidth: 1
-    opacity: 0.8
-  wireframeMaterial = new THREE.MeshBasicMaterial(wireframeOptions)
-  animationFrames = []
-  currentFrame = 0
 
-  camera = undefined
-  renderer = undefined
-  brush = undefined
-  axisCamera = undefined
+  fill = true
+
 
   colors = [
     "000000"
@@ -90,30 +68,9 @@ window.startEditor = ->
   #   ndarrayFill(voxels, generateVoxels)
   #   return {voxels: voxels, colors: colors}
   # }
-  addVoxel = (x, y, z, c) ->
-    cubeMaterial = new CubeMaterial(
-      vertexColors: THREE.VertexColors
-      transparent: true
-    )
-    col = colors[c] or colors[0]
-    cubeMaterial.color.setRGB col[0], col[1], col[2]
-    wireframeMaterial = new THREE.MeshBasicMaterial(wireframeOptions)
-    wireframeMaterial.color.setRGB col[0] - 0.05, col[1] - 0.05, col[2] - 0.05
-    voxel = new THREE.Mesh(cube, cubeMaterial)
-    voxel.wireMesh = new THREE.Mesh(wireframeCube, wireframeMaterial)
-    voxel.isVoxel = true
-    voxel.position.x = x
-    voxel.position.y = y
-    voxel.position.z = z
-    voxel.wireMesh.position.copy voxel.position
-    voxel.wireMesh.visible = wireframe
-    voxel.matrixAutoUpdate = false
-    voxel.updateMatrix()
-    voxel.name = x + "," + y + "," + z
-    voxel.overdraw = true
-    scene.add voxel
-    scene.add voxel.wireMesh
-    return
+
+
+
   addColorToPalette = (idx) ->
 
     # add a button to the group
@@ -137,37 +94,42 @@ window.startEditor = ->
       clone.on "contextmenu", changeColor
     colorBox.parent().attr "data-color", "#" + ColorUtils.rgb2hex(colors[idx])
     colorBox.css "background", "#" + ColorUtils.rgb2hex(colors[idx])
-    brush.children[0].material.color.setRGB colors[idx][0], colors[idx][1], colors[idx][2]  if color is idx and brush
+    SceneManager.brush.children[0].material.color.setRGB colors[idx][0], colors[idx][1], colors[idx][2]  if color is idx and SceneManager.brush
     return
+
   zoom = (delta) ->
     origin =
       x: 0
       y: 0
       z: 0
 
-    distance = camera.position.distanceTo(origin)
+    distance = SceneManager.camera.position.distanceTo(origin)
     tooFar = distance > 6000
-    tooClose = Math.abs(camera.top) < 1000
+    tooClose = Math.abs(SceneManager.camera.top) < 1000
     return  if delta > 0 and tooFar
     return  if delta < 0 and tooClose
-    radius = distance # for mouse drag calculations to be correct
+    SceneManager.radius = distance # for mouse drag calculations to be correct
     aspect = container.clientWidth / container.clientHeight
-    camera.top += delta / 2
-    camera.bottom -= delta / 2
-    camera.left -= delta * aspect / 2
-    camera.right += delta * aspect / 2
+    SceneManager.camera.top += delta / 2
+    SceneManager.camera.bottom -= delta / 2
+    SceneManager.camera.left -= delta * aspect / 2
+    SceneManager.camera.right += delta * aspect / 2
 
-    # camera.updateMatrix();
-    camera.updateProjectionMatrix()
-    camera.translateZ delta
+    # SceneManager.camera.updateMatrix();
+    SceneManager.camera.updateProjectionMatrix()
+    SceneManager.camera.translateZ delta
     return
+
+
   setIsometricAngle = ->
-    theta += 90
-    camera.position.x = radius * Math.sin(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360)
-    camera.position.y = radius * Math.sin(phi * Math.PI / 360)
-    camera.position.z = radius * Math.cos(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360)
-    camera.updateMatrix()
+    SceneManager.theta += 90
+    SceneManager.camera.position.x = SceneManager.radius * Math.sin(SceneManager.theta * Math.PI / 360) * Math.cos(SceneManager.phi * Math.PI / 360)
+    SceneManager.camera.position.y = SceneManager.radius * Math.sin(SceneManager.phi * Math.PI / 360)
+    SceneManager.camera.position.z = SceneManager.radius * Math.cos(SceneManager.theta * Math.PI / 360) * Math.cos(SceneManager.phi * Math.PI / 360)
+    SceneManager.camera.updateMatrix()
     return
+
+
   addColor = (e) ->
 
     #add new color
@@ -182,6 +144,8 @@ window.startEditor = ->
     updateHash()
     updateColor idx
     return
+
+
   updateColor = (idx) ->
     color = idx
     picker = $("i[data-color=\"" + idx + "\"]").parent().colorpicker("show")
@@ -190,15 +154,14 @@ window.startEditor = ->
       addColorToPalette idx
 
       # todo:  better way to update color of existing blocks
-      scene.children.filter((el) ->
+      SceneManager.scene.children.filter((el) ->
         el.isVoxel
       ).map (mesh) ->
-        scene.remove mesh.wireMesh
-        scene.remove mesh
+        SceneManager.scene.remove mesh.wireMesh
+        SceneManager.scene.remove mesh
         return
 
       frameMask = "A"
-      frameMask = "A" + currentFrame  unless currentFrame is 0
       buildFromHash frameMask
       return
 
@@ -209,17 +172,23 @@ window.startEditor = ->
       return
 
     return
+
+
   changeColor = (e) ->
     target = $(e.currentTarget)
     idx = +target.find(".color").attr("data-color")
     updateColor idx
     false # eat the event
+
+
   pickColor = (e) ->
-    target = $(e.currentTarget)
-    idx = +target.find(".color").attr("data-color")
+    targetEl = $(e.currentTarget)
+    idx = +targetEl.find(".color").attr("data-color")
     color = idx
-    brush.children[0].material.color.setRGB colors[idx][0], colors[idx][1], colors[idx][2]
+    SceneManager.brush.children[0].material.color.setRGB colors[idx][0], colors[idx][1], colors[idx][2]
     return
+
+
   bindEventsAndPlugins = ->
     $(window).on "hashchange", ->
       return localStorage.setItem("seenWelcome", true)  if updatingHash
@@ -271,94 +240,23 @@ window.startEditor = ->
       return
 
     return
+
+
+
   init = ->
-
-    #camera = new THREE.PerspectiveCamera( 40, container.clientWidth / container.clientHeight, 1, 10000 )
-
-    # Grid
-
-    # Plane
-
-    # Brush
 
     # Lights
     mousewheel = (event) ->
-
       # prevent zoom if a modal is open
       zoom event.wheelDeltaY or event.detail  if $(".modal").hasClass("in")
+
     bindEventsAndPlugins()
     container = document.getElementById("editor-area")
-    camera = new THREE.OrthographicCamera(container.clientWidth / -1, container.clientWidth / 1, container.clientHeight / 1, container.clientHeight / -1, 1, 10000)
-    camera.position.x = radius * Math.sin(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360)
-    camera.position.y = radius * Math.sin(phi * Math.PI / 360)
-    camera.position.z = radius * Math.cos(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360)
-    axisCamera = new THREE.OrthographicCamera(container.clientWidth / -2, container.clientWidth / 2, container.clientHeight / 2, container.clientHeight / -2, 1, 10000)
-    scene = new THREE.Scene()
-    window.scene = scene
-    size = 500
-    step = 50
-    geometry = new THREE.Geometry()
-    i = -size
-
-    while i <= size
-      geometry.vertices.push new THREE.Vector3(-size, 0, i)
-      geometry.vertices.push new THREE.Vector3(size, 0, i)
-      geometry.vertices.push new THREE.Vector3(i, 0, -size)
-      geometry.vertices.push new THREE.Vector3(i, 0, size)
-      i += step
-    material = new THREE.LineBasicMaterial(
-      color: 0x000000
-      opacity: 0.2
-    )
-    line = new THREE.Line(geometry, material)
-    line.type = THREE.LinePieces
-    grid = line
-    scene.add line
-    projector = new THREE.Projector()
-    plane = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), new THREE.MeshBasicMaterial())
-    plane.rotation.x = -Math.PI / 2
-    plane.visible = false
-    plane.isPlane = true
-    scene.add plane
-    mouse2D = new THREE.Vector3(0, 10000, 0.5)
-    brushMaterials = [
-      new CubeMaterial(
-        vertexColors: THREE.VertexColors
-        opacity: 0.5
-        transparent: true
-      )
-      new THREE.MeshBasicMaterial(
-        color: 0x000000
-        wireframe: true
-      )
-    ]
-    brushMaterials[0].color.setRGB colors[0][0], colors[0][1], colors[0][2]
-    brush = THREE.SceneUtils.createMultiMaterialObject(cube, brushMaterials)
-    brush.isBrush = true
-    brush.position.y = 2000
-    brush.overdraw = false
-    scene.add brush
-    ambientLight = new THREE.AmbientLight(0x606060)
-    scene.add ambientLight
-    directionalLight = new THREE.DirectionalLight(0xffffff)
-    directionalLight.position.set(1, 0.75, 0.5).normalize()
-    scene.add directionalLight
-    hasWebGL = (->
-      try
-        return !!window.WebGLRenderingContext and !!document.createElement("canvas").getContext("experimental-webgl")
-      catch e
-        return false
-      return
-    )()
-    if hasWebGL
-      renderer = new THREE.WebGLRenderer(antialias: true)
-    else
-      renderer = new THREE.CanvasRenderer()
-    renderer.setSize container.clientWidth, container.clientHeight
-    container.appendChild renderer.domElement
-    renderer.domElement.addEventListener "mousemove", onDocumentMouseMove, false
-    renderer.domElement.addEventListener "mousedown", onDocumentMouseDown, false
-    renderer.domElement.addEventListener "mouseup", onDocumentMouseUp, false
+    SceneManager.init(container)
+    container.appendChild(SceneManager.renderer.domElement)
+    SceneManager.renderer.domElement.addEventListener "mousemove", onDocumentMouseMove, false
+    SceneManager.renderer.domElement.addEventListener "mousedown", onDocumentMouseDown, false
+    SceneManager.renderer.domElement.addEventListener "mouseup", onDocumentMouseUp, false
     document.addEventListener "keydown", onDocumentKeyDown, false
     document.addEventListener "keyup", onDocumentKeyUp, false
     window.addEventListener "DOMMouseScroll", mousewheel, false
@@ -367,34 +265,40 @@ window.startEditor = ->
     buildFromHash()  if window.location.hash
     updateHash()
     return
+
+
   onWindowResize = ->
-    camera.aspect = container.clientWidth / container.clientHeight
-    camera.updateProjectionMatrix()
-    renderer.setSize container.clientWidth, container.clientHeight
+    SceneManager.camera.aspect = container.clientWidth / container.clientHeight
+    SceneManager.camera.updateProjectionMatrix()
+    SceneManager.renderer.setSize container.clientWidth, container.clientHeight
     interact()
     return
+
+
   getIntersecting = ->
     intersectable = []
-    scene.children.map (c) ->
+    SceneManager.scene.children.map (c) ->
       intersectable.push c  if c.isVoxel or c.isPlane
       return
 
-    if raycaster
-      intersections = raycaster.intersectObjects(intersectable)
+    if SceneManager.raycaster
+      intersections = SceneManager.raycaster.intersectObjects(intersectable)
       if intersections.length > 0
         intersect = (if intersections[0].object.isBrush then intersections[1] else intersections[0])
         intersect
+
+
   interact = ->
-    return  if typeof raycaster is "undefined"
+    return  if typeof SceneManager.raycaster is "undefined"
     if objectHovered
       objectHovered.material.opacity = 1
       objectHovered = null
     intersect = getIntersecting()
     if intersect
       updateBrush = ->
-        brush.position.x = Math.floor(position.x / 50) * 50 + 25
-        brush.position.y = Math.floor(position.y / 50) * 50 + 25
-        brush.position.z = Math.floor(position.z / 50) * 50 + 25
+        SceneManager.brush.position.x = Math.floor(position.x / 50) * 50 + 25
+        SceneManager.brush.position.y = Math.floor(position.y / 50) * 50 + 25
+        SceneManager.brush.position.z = Math.floor(position.z / 50) * 50 + 25
         return
       normal = intersect.face.normal.clone()
       normal.applyMatrix4 intersect.object.matrixRotationWorld
@@ -405,28 +309,30 @@ window.startEditor = ->
         Math.floor(position.z / 50)
       ]
       if Input.isAltDown
-        brush.currentCube = newCube  unless brush.currentCube
-        if brush.currentCube.join("") isnt newCube.join("")
+        SceneManager.brush.currentCube = newCube  unless SceneManager.brush.currentCube
+        if SceneManager.brush.currentCube.join("") isnt newCube.join("")
           if Input.isShiftDown
-            if intersect.object isnt plane
-              scene.remove intersect.object.wireMesh
-              scene.remove intersect.object
+            if intersect.object isnt SceneManager.plane
+              SceneManager.scene.remove intersect.object.wireMesh
+              SceneManager.scene.remove intersect.object
           else
-            addVoxel brush.position.x, brush.position.y, brush.position.z, color  unless brush.position.y is 2000
+            SceneManager.addVoxel SceneManager.brush.position.x, SceneManager.brush.position.y, SceneManager.brush.position.z, colors[color]  unless SceneManager.brush.position.y is 2000
         updateBrush()
         updateHash()
-        return brush.currentCube = newCube
+        return SceneManager.brush.currentCube = newCube
       else if Input.isShiftDown
-        if intersect.object isnt plane
+        if intersect.object isnt SceneManager.plane
           objectHovered = intersect.object
           objectHovered.material.opacity = 0.5
-          brush.position.y = 2000
+          SceneManager.brush.position.y = 2000
           return
       else
         updateBrush()
         return
-    brush.position.y = 2000
+    SceneManager.brush.position.y = 2000
     return
+
+
   onDocumentMouseMove = (event) ->
     event.preventDefault()
     unless Input.isMouseRotating
@@ -441,33 +347,37 @@ window.startEditor = ->
 
       # Rotate only if you clicked outside a block
       unless intersecting
-        theta = -((event.clientX - Input.onMouseDownPosition.x) * 0.5) + Input.onMouseDownTheta
-        phi = ((event.clientY - Input.onMouseDownPosition.y) * 0.5) + Input.onMouseDownPhi
-        phi = Math.min(180, Math.max(0, phi))
-        camera.position.x = target.x + radius * Math.sin(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360)
-        camera.position.y = target.y + radius * Math.sin(phi * Math.PI / 360)
-        camera.position.z = target.z + radius * Math.cos(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360)
-        camera.updateMatrix()
+        SceneManager.theta = -((event.clientX - Input.onMouseDownPosition.x) * 0.5) + Input.onMouseDownTheta
+        SceneManager.phi = ((event.clientY - Input.onMouseDownPosition.y) * 0.5) + Input.onMouseDownPhi
+        SceneManager.phi = Math.min(180, Math.max(0, SceneManager.phi))
+        SceneManager.camera.position.x = target.x + SceneManager.radius * Math.sin(SceneManager.theta * Math.PI / 360) * Math.cos(SceneManager.phi * Math.PI / 360)
+        SceneManager.camera.position.y = target.y + SceneManager.radius * Math.sin(SceneManager.phi * Math.PI / 360)
+        SceneManager.camera.position.z = target.z + SceneManager.radius * Math.cos(SceneManager.theta * Math.PI / 360) * Math.cos(SceneManager.phi * Math.PI / 360)
+        SceneManager.camera.updateMatrix()
     else if Input.isMouseDown is 2 # middle click
-      theta = -((event.clientX - Input.onMouseDownPosition.x) * 0.5) + Input.onMouseDownTheta
-      phi = ((event.clientY - Input.onMouseDownPosition.y) * 0.5) + Input.onMouseDownPhi
-      phi = Math.min(180, Math.max(0, phi))
-      target.x += Math.sin(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360)
-      target.y += Math.sin(phi * Math.PI / 360)
-      target.z += Math.cos(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360)
-    mouse2D.x = (event.clientX / container.clientWidth) * 2 - 1
-    mouse2D.y = -(event.clientY / container.clientHeight) * 2 + 1
+      SceneManager.theta = -((event.clientX - Input.onMouseDownPosition.x) * 0.5) + Input.onMouseDownTheta
+      SceneManager.phi = ((event.clientY - Input.onMouseDownPosition.y) * 0.5) + Input.onMouseDownPhi
+      SceneManager.phi = Math.min(180, Math.max(0, SceneManager.phi))
+      target.x += Math.sin(SceneManager.theta * Math.PI / 360) * Math.cos(SceneManager.phi * Math.PI / 360)
+      target.y += Math.sin(SceneManager.phi * Math.PI / 360)
+      target.z += Math.cos(SceneManager.theta * Math.PI / 360) * Math.cos(SceneManager.phi * Math.PI / 360)
+    Input.mouse2D.x = (event.clientX / container.clientWidth) * 2 - 1
+    Input.mouse2D.y = -(event.clientY / container.clientHeight) * 2 + 1
     interact()
     return
+
+
   onDocumentMouseDown = (event) ->
     event.preventDefault()
     Input.isMouseDown = event.which
-    Input.onMouseDownTheta = theta
-    Input.onMouseDownPhi = phi
+    Input.onMouseDownTheta = SceneManager.theta
+    Input.onMouseDownPhi = SceneManager.phi
     Input.onMouseDownPosition.x = event.clientX
     Input.onMouseDownPosition.y = event.clientY
     Input.isMouseRotating = not getIntersecting()
     return
+
+
   onDocumentMouseUp = (event) ->
     event.preventDefault()
     Input.isMouseDown = false
@@ -478,15 +388,17 @@ window.startEditor = ->
     intersect = getIntersecting()
     if intersect
       if Input.isShiftDown
-        unless intersect.object is plane
-          scene.remove intersect.object.wireMesh
-          scene.remove intersect.object
+        unless intersect.object is SceneManager.plane
+          SceneManager.scene.remove intersect.object.wireMesh
+          SceneManager.scene.remove intersect.object
       else
-        addVoxel brush.position.x, brush.position.y, brush.position.z, color  unless brush.position.y is 2000
+        SceneManager.addVoxel SceneManager.brush.position.x, SceneManager.brush.position.y, SceneManager.brush.position.z, colors[color]  unless SceneManager.brush.position.y is 2000
     updateHash()
-    render()
+    SceneManager.render(target)
     interact()
     return
+
+
   onDocumentKeyDown = (event) ->
     console.log event.keyCode
     switch event.keyCode
@@ -522,6 +434,8 @@ window.startEditor = ->
         Input.isAltDown = true
       when 65
         setIsometricAngle()
+
+
   onDocumentKeyUp = (event) ->
     switch event.keyCode
       when 16
@@ -560,7 +474,6 @@ window.startEditor = ->
         addColorToPalette c
         c++
     frameMask = "A"
-    frameMask = "A" + currentFrame  unless currentFrame is 0
     if (not hashMask or hashMask is frameMask) and chunks[frameMask]
 
       # decode geo
@@ -579,10 +492,14 @@ window.startEditor = ->
         current.y += data[i++] - 32  if code.charAt(2) is "1"
         current.z += data[i++] - 32  if code.charAt(3) is "1"
         current.c += data[i++] - 32  if code.charAt(4) is "1"
-        addVoxel current.x * 50 + 25, current.y * 50 + 25, current.z * 50 + 25, current.c  if code.charAt(0) is "1"
+        SceneManager.addVoxel current.x * 50 + 25, current.y * 50 + 25, current.z * 50 + 25, colors[current.c]  if code.charAt(0) is "1"
     updateHash()
     return
+
+
   updateHash = ->
+    currentFrame = 0
+    animationFrames = []
     data = []
     voxels = []
     code = undefined
@@ -598,9 +515,9 @@ window.startEditor = ->
       z: 0
       c: 0
 
-    for i of scene.children
-      object = scene.children[i]
-      if object.isVoxel and object isnt plane and object isnt brush
+    for i of SceneManager.scene.children
+      object = SceneManager.scene.children[i]
+      if object.isVoxel and object isnt SceneManager.plane and object isnt SceneManager.brush
         current.x = (object.position.x - 25) / 50
         current.y = (object.position.y - 25) / 50
         current.z = (object.position.z - 25) / 50
@@ -666,7 +583,7 @@ window.startEditor = ->
     window.location.replace outHash
 
     # Update the Play Level link
-    $(".play-level").attr "href", "http://philschatz.com/game/" + outHash
+    $(".play-level").attr "href", "http://SceneManager.philschatz.com/game/" + outHash
     setTimeout (->
       window.updatingHash = false
       return
@@ -689,16 +606,6 @@ window.startEditor = ->
     funcString += "voxels.map(function(voxel) {" + "if (colorMapper(voxel[3])) { addBlock([position.x + voxel[0], position.y + voxel[1], position.z + voxel[2]], colorMapper(voxel[3])) }" + "});"
     funcString
 
-  # skips every fourth byte when encoding images,
-  # i.e. leave the alpha channel
-  # alone and only change RGB
-  pickRGB = (idx) ->
-    idx + (idx / 3) | 0
-  exportImage = (width, height) ->
-    canvas = getExportCanvas(width, height)
-    image = new Image
-    image.src = canvas.toDataURL()
-    image
   getDimensions = (voxels) ->
     low = [
       0
@@ -731,71 +638,35 @@ window.startEditor = ->
     string.split("").forEach (v) ->
       output.push "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".indexOf(v)
       return
-
     output
+
+
   encode = (array) ->
     output = ""
     array.forEach (v) ->
       output += "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".charAt(v)
       return
-
     output
-  save = ->
-    window.open renderer.domElement.toDataURL("image/png"), "mywindow"
-    return
-  render = ->
-    camera.lookAt target
-    raycaster = projector.pickingRay(mouse2D.clone(), camera)
-    renderer.setViewport()
-    renderer.setScissor() # TODO: this might ned to become 0,0,renderer.domElement.width,renderer.domElement.height
-    renderer.enableScissorTest false
-    renderer.setClearColor new THREE.Color().setRGB(1, 1, 1)
-    renderer.render scene, camera
 
-    # return;
 
-    # camera 2
-    windowWidth = container.clientWidth
-    windowHeight = container.clientHeight
-    view =
-      left: 3 / 4
-      bottom: 0
-      width: 1 / 4
-      height: 1 / 4
-      background: new THREE.Color().setRGB(0.5, 0.5, 0.7)
-
-    left = Math.floor(windowWidth * view.left)
-    bottom = Math.floor(windowHeight * view.bottom)
-    width = Math.floor(windowWidth * view.width)
-    height = Math.floor(windowHeight * view.height)
-    renderer.setViewport left, bottom, width, height
-    renderer.setScissor left, bottom, width, height
-    renderer.enableScissorTest true
-    renderer.setClearColor view.background
-    axisCamera.position.x = 1000
-    axisCamera.position.y = target.y
-    axisCamera.position.z = target.z
-    axisCamera.lookAt target
-    renderer.render scene, axisCamera
-    return
-
+  # Init code
   c = 0
   while c < 12
     addColorToPalette c
     c++
   showWelcome()
   init()
-  raf(window).on "data", render
+  raf(window).on "data", -> SceneManager.render(target)
   exports.viewInstructions = ->
     $("#welcome").modal()
     return
 
   exports.reset = ->
     window.location.replace "#/"
-    scene.children.filter((el) ->
+    SceneManager.scene.children.filter((el) ->
       el.isVoxel
     ).map (mesh) ->
-      scene.remove mesh
+      SceneManager.scene.remove mesh
       return
 
     return
@@ -805,12 +676,12 @@ window.startEditor = ->
     return
 
   exports.showGrid = (bool) ->
-    grid.material.visible = bool
+    SceneManager.grid.material.visible = bool
     return
 
-  $(".play-level").attr "href", "http://philschatz.com/game/" + window.location.hash
+  $(".play-level").attr "href", "http://SceneManager.philschatz.com/game/" + window.location.hash
   window.exportMap = ->
-    voxels = scene.children.filter((el) ->
+    voxels = SceneManager.scene.children.filter((el) ->
       el.isVoxel
     )
     voxelsReal = voxels.map((v) ->
@@ -824,7 +695,7 @@ window.startEditor = ->
 
   return
 
-# // camera 2
+# // SceneManager.camera 2
 # windowWidth = container.clientWidth;
 # windowHeight = container.clientHeight;
 # view = {
@@ -838,16 +709,16 @@ window.startEditor = ->
 # var bottom = Math.floor( windowHeight * view.bottom );
 # var width  = Math.floor( windowWidth  * view.width );
 # var height = Math.floor( windowHeight * view.height );
-# renderer.setViewport( left, bottom, width, height );
-# renderer.setScissor( left, bottom, width, height );
-# renderer.enableScissorTest ( true );
-# renderer.setClearColor( view.background );
+# SceneManager.renderer.setViewport( left, bottom, width, height );
+# SceneManager.renderer.setScissor( left, bottom, width, height );
+# SceneManager.renderer.enableScissorTest ( true );
+# SceneManager.renderer.setClearColor( view.background );
 #
-# axisCamera.position.x = target.x;
-# axisCamera.position.y = 1000;
-# axisCamera.position.z = target.z;
-# axisCamera.lookAt(target);
-# renderer.render(scene, axisCamera)
+# SceneManager.axisCamera.position.x = target.x;
+# SceneManager.axisCamera.position.y = 1000;
+# SceneManager.axisCamera.position.z = target.z;
+# SceneManager.axisCamera.lookAt(target);
+# SceneManager.renderer.render(SceneManager.scene, SceneManager.axisCamera)
 
 # view = {
 #   left: 2/3,
@@ -860,14 +731,14 @@ window.startEditor = ->
 # var bottom = Math.floor( windowHeight * view.bottom );
 # var width  = Math.floor( windowWidth  * view.width );
 # var height = Math.floor( windowHeight * view.height );
-# renderer.setViewport( left, bottom, width, height );
-# renderer.setScissor( left, bottom, width, height );
-# renderer.enableScissorTest ( true );
-# renderer.setClearColor( view.background );
+# SceneManager.renderer.setViewport( left, bottom, width, height );
+# SceneManager.renderer.setScissor( left, bottom, width, height );
+# SceneManager.renderer.enableScissorTest ( true );
+# SceneManager.renderer.setClearColor( view.background );
 #
-# axisCamera.position.x = target.x;
-# axisCamera.position.y = target.y;
-# axisCamera.position.z = 1000;
-# axisCamera.lookAt(target);
+# SceneManager.axisCamera.position.x = target.x;
+# SceneManager.axisCamera.position.y = target.y;
+# SceneManager.axisCamera.position.z = 1000;
+# SceneManager.axisCamera.lookAt(target);
 #
-# renderer.render(scene, axisCamera)
+# SceneManager.renderer.render(SceneManager.scene, SceneManager.axisCamera)
