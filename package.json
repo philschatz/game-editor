@@ -8,10 +8,11 @@
   },
   "devDependencies": {
     "beefy": "0.0.11",
-    "browserify": "^5.9.1"
+    "browserify": "^5.9.1",
+    "coffeeify": "^0.7.0"
   },
   "scripts": {
-    "test": "browserify index.js -o bundle.js",
-    "start": "beefy index.js:bundle.js 8084"
+    "test": "./node_modules/.bin/browserify index.coffee -o bundle.js --extension='.coffee' --transform coffeeify",
+    "start": "./node_modules/.bin/beefy index.coffee:bundle.js  8084 --live -- --extension='.coffee' --transform coffeeify"
   }
 }
