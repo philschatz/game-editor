@@ -5,21 +5,15 @@ raf = require("raf")
 # var Convert = require('voxel-critter/lib/convert.js')
 # var ndarray = require('ndarray')
 # var ndarrayFill = require('ndarray-fill')
-ColorUtils = require("./src/color-utils")
+ColorUtils = require './src/color-utils'
+Input = require('./src/input-manager')(THREE)
+
 window.startEditor = ->
   container = null
   camera = renderer = brush = axisCamera = null
   projector = plane = scene = grid = shareDialog = null
   mouse2D = mouse3D = raycaster = objectHovered = null
 
-  isShiftDown = false
-  isCtrlDown = false
-  isMouseRotating = false
-  isMouseDown = false
-  isAltDown = false
-  onMouseDownPosition = new THREE.Vector2()
-  onMouseDownPhi = 60
-  onMouseDownTheta = 45
   radius = 1600
   theta = 90
   phi = 60
@@ -34,15 +28,38 @@ window.startEditor = ->
   animating = false
   animationInterval = null
   manualAnimating = false
-  wireframeOptions = { color: 0x000000, wireframe: true, wireframeLinewidth: 1, opacity: 0.8 }
+  wireframeOptions =
+    color: 0x000000
+    wireframe: true
+    wireframeLinewidth: 1
+    opacity: 0.8
   wireframeMaterial = new THREE.MeshBasicMaterial(wireframeOptions)
   animationFrames = []
   currentFrame = 0
 
+  camera = undefined
+  renderer = undefined
+  brush = undefined
+  axisCamera = undefined
 
-  # -1200, 300, 900
+  colors = [
+    "000000"
+    "2ECC71"
+    "3498DB"
+    "34495E"
+    "E67E22"
+    "ECF0F1"
+    "FFF500"
+    "FF0000"
+    "00FF38"
+    "BD00FF"
+    "08c9ff"
+    "D32020"
+  ].map((c) ->
+    ColorUtils.hex2rgb c
+  )
 
-  #var colors = ['000000', 'FFF500', ].map(function(c) { return ColorUtils.hex2rgb(c) })
+
   showWelcome = ->
     seenWelcome = localStorage.getItem("seenWelcome")
     return $("#welcome").modal()  if seenWelcome
@@ -387,10 +404,10 @@ window.startEditor = ->
         Math.floor(position.y / 50)
         Math.floor(position.z / 50)
       ]
-      if isAltDown
+      if Input.isAltDown
         brush.currentCube = newCube  unless brush.currentCube
         if brush.currentCube.join("") isnt newCube.join("")
-          if isShiftDown
+          if Input.isShiftDown
             if intersect.object isnt plane
               scene.remove intersect.object.wireMesh
               scene.remove intersect.object
@@ -399,7 +416,7 @@ window.startEditor = ->
         updateBrush()
         updateHash()
         return brush.currentCube = newCube
-      else if isShiftDown
+      else if Input.isShiftDown
         if intersect.object isnt plane
           objectHovered = intersect.object
           objectHovered.material.opacity = 0.5
@@ -412,7 +429,7 @@ window.startEditor = ->
     return
   onDocumentMouseMove = (event) ->
     event.preventDefault()
-    unless isMouseRotating
+    unless Input.isMouseRotating
 
       # change the mouse cursor to a + letting the user know they can rotate
       intersecting = getIntersecting()
@@ -420,20 +437,20 @@ window.startEditor = ->
         container.classList.add "rotatable"
       else
         container.classList.remove "rotatable"
-    if isMouseDown is 1 # left click
+    if Input.isMouseDown is 1 # left click
 
       # Rotate only if you clicked outside a block
       unless intersecting
-        theta = -((event.clientX - onMouseDownPosition.x) * 0.5) + onMouseDownTheta
-        phi = ((event.clientY - onMouseDownPosition.y) * 0.5) + onMouseDownPhi
+        theta = -((event.clientX - Input.onMouseDownPosition.x) * 0.5) + Input.onMouseDownTheta
+        phi = ((event.clientY - Input.onMouseDownPosition.y) * 0.5) + Input.onMouseDownPhi
         phi = Math.min(180, Math.max(0, phi))
         camera.position.x = target.x + radius * Math.sin(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360)
         camera.position.y = target.y + radius * Math.sin(phi * Math.PI / 360)
         camera.position.z = target.z + radius * Math.cos(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360)
         camera.updateMatrix()
-    else if isMouseDown is 2 # middle click
-      theta = -((event.clientX - onMouseDownPosition.x) * 0.5) + onMouseDownTheta
-      phi = ((event.clientY - onMouseDownPosition.y) * 0.5) + onMouseDownPhi
+    else if Input.isMouseDown is 2 # middle click
+      theta = -((event.clientX - Input.onMouseDownPosition.x) * 0.5) + Input.onMouseDownTheta
+      phi = ((event.clientY - Input.onMouseDownPosition.y) * 0.5) + Input.onMouseDownPhi
       phi = Math.min(180, Math.max(0, phi))
       target.x += Math.sin(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360)
       target.y += Math.sin(phi * Math.PI / 360)
@@ -444,23 +461,23 @@ window.startEditor = ->
     return
   onDocumentMouseDown = (event) ->
     event.preventDefault()
-    isMouseDown = event.which
-    onMouseDownTheta = theta
-    onMouseDownPhi = phi
-    onMouseDownPosition.x = event.clientX
-    onMouseDownPosition.y = event.clientY
-    isMouseRotating = not getIntersecting()
+    Input.isMouseDown = event.which
+    Input.onMouseDownTheta = theta
+    Input.onMouseDownPhi = phi
+    Input.onMouseDownPosition.x = event.clientX
+    Input.onMouseDownPosition.y = event.clientY
+    Input.isMouseRotating = not getIntersecting()
     return
   onDocumentMouseUp = (event) ->
     event.preventDefault()
-    isMouseDown = false
-    isMouseRotating = false
-    onMouseDownPosition.x = event.clientX - onMouseDownPosition.x
-    onMouseDownPosition.y = event.clientY - onMouseDownPosition.y
-    return  if onMouseDownPosition.length() > 5
+    Input.isMouseDown = false
+    Input.isMouseRotating = false
+    Input.onMouseDownPosition.x = event.clientX - Input.onMouseDownPosition.x
+    Input.onMouseDownPosition.y = event.clientY - Input.onMouseDownPosition.y
+    return  if Input.onMouseDownPosition.length() > 5
     intersect = getIntersecting()
     if intersect
-      if isShiftDown
+      if Input.isShiftDown
         unless intersect.object is plane
           scene.remove intersect.object.wireMesh
           scene.remove intersect.object
@@ -498,21 +515,21 @@ window.startEditor = ->
       when 48
         exports.setColor 9
       when 16
-        isShiftDown = true
+        Input.isShiftDown = true
       when 17
-        isCtrlDown = true
+        Input.isCtrlDown = true
       when 18
-        isAltDown = true
+        Input.isAltDown = true
       when 65
         setIsometricAngle()
   onDocumentKeyUp = (event) ->
     switch event.keyCode
       when 16
-        isShiftDown = false
+        Input.isShiftDown = false
       when 17
-        isCtrlDown = false
+        Input.isCtrlDown = false
       when 18
-        isAltDown = false
+        Input.isAltDown = false
 
   # Array.prototype.diff = function(a) {
   #   return this.filter(function(i) {return !(a.indexOf(i) > -1);});
@@ -761,71 +778,8 @@ window.startEditor = ->
     axisCamera.lookAt target
     renderer.render scene, axisCamera
     return
-  container = undefined
-  camera = undefined
-  renderer = undefined
-  brush = undefined
-  axisCamera = undefined
-  projector = undefined
-  plane = undefined
-  scene = undefined
-  grid = undefined
-  shareDialog = undefined
-  mouse2D = undefined
-  mouse3D = undefined
-  raycaster = undefined
-  objectHovered = undefined
-  isShiftDown = false
-  isCtrlDown = false
-  isMouseRotating = false
-  isMouseDown = false
-  isAltDown = false
-  onMouseDownPosition = new THREE.Vector2()
-  onMouseDownPhi = 60
-  onMouseDownTheta = 45
-  radius = 1600
-  theta = 90
-  phi = 60
-  target = new THREE.Vector3(0, 200, 0)
-  color = 0
-  CubeMaterial = THREE.MeshBasicMaterial
-  cube = new THREE.CubeGeometry(50, 50, 50)
-  wireframeCube = new THREE.CubeGeometry(50.5, 50.5, 50.5)
-  wireframe = true
-  fill = true
-  animation = false
-  animating = false
-  animationInterval = undefined
-  manualAnimating = false
-  sliderEl = undefined
-  playPauseEl = undefined
-  wireframeOptions =
-    color: 0x000000
-    wireframe: true
-    wireframeLinewidth: 1
-    opacity: 0.8
 
-  wireframeMaterial = new THREE.MeshBasicMaterial(wireframeOptions)
-  animationFrames = []
-  currentFrame = 0
-  colors = [
-    "000000"
-    "2ECC71"
-    "3498DB"
-    "34495E"
-    "E67E22"
-    "ECF0F1"
-    "FFF500"
-    "FF0000"
-    "00FF38"
-    "BD00FF"
-    "08c9ff"
-    "D32020"
-  ].map((c) ->
-    ColorUtils.hex2rgb c
-  )
   c = 0
-
   while c < 12
     addColorToPalette c
     c++
