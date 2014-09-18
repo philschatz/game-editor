@@ -1,7 +1,7 @@
 module.exports = class MainCamera
   radius: 1600
-  _theta: 90
-  _phi: 60
+  _theta: 0
+  _phi: 0
 
   _target: null
 

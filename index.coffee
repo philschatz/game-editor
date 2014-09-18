@@ -7,12 +7,14 @@ raf = require("raf")
 # var ndarrayFill = require('ndarray-fill')
 ColorUtils = require './src/color-utils'
 ColorManager = require './src/color-manager'
+AxisCamera = require './src/axis-camera'
 Input = require('./src/input-manager')(THREE)
 SceneManager = require('./src/scene-manager')(THREE, Input)
 HashManager = require('./src/hash-manager')(SceneManager)
 Interactions = require('./src/interactions')(Input, SceneManager)
 
 KeyMouse = require('./src/key-mouse-handlers')(SceneManager, Interactions, Input, HashManager)
+
 
 window.startEditor = ->
   container = null
@@ -24,7 +26,23 @@ window.startEditor = ->
 
   fill = true
 
+  $('#axis-camera-controls .rotate-left').on 'click', ->
+    {theta, phi} = AxisCamera.getRotation()
+    theta -= 180
+    theta += 720 if theta < 0
+    AxisCamera.rotateCameraTo(theta, phi)
 
+  $('#axis-camera-controls .rotate-right').on 'click', ->
+    {theta, phi} = AxisCamera.getRotation()
+    theta += 180
+    theta -= 720 if theta >= 720
+    AxisCamera.rotateCameraTo(theta, phi)
+
+  $('#axis-camera-controls .zoom-in').on 'click', ->
+    AxisCamera.zoom(-100)
+
+  $('#axis-camera-controls .zoom-out').on 'click', ->
+    AxisCamera.zoom(100)
 
 
   showWelcome = ->

@@ -10,6 +10,12 @@
   cursor: move;
 }
 
+#axis-camera-controls {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
 @font-face {
   font-family: 'Lato';
   font-style: normal;

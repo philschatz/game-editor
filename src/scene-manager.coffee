@@ -148,7 +148,7 @@ module.exports = (THREE, Input) ->
         left: 3 / 4
         bottom: 0
         width: 1 / 4
-        height: 1 / 4
+        height: 1 / 3
         background: new THREE.Color().setRGB(0.5, 0.5, 0.7)
 
       left = Math.floor(windowWidth * view.left)
