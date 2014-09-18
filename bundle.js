@@ -1,49 +1,57 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var ColorUtils, THREE, raf;
+var AxisCamera, ColorManager, ColorUtils, HashManager, Input, Interactions, KeyMouse, SceneManager, THREE, raf;
 
 THREE = require("three");
 
 raf = require("raf");
 
-ColorUtils = require("./src/color-utils");
+ColorUtils = require('./src/color-utils');
+
+ColorManager = require('./src/color-manager');
+
+AxisCamera = require('./src/axis-camera');
+
+Input = require('./src/input-manager')(THREE);
+
+SceneManager = require('./src/scene-manager')(THREE, Input);
+
+HashManager = require('./src/hash-manager')(SceneManager);
+
+Interactions = require('./src/interactions')(Input, SceneManager);
+
+KeyMouse = require('./src/key-mouse-handlers')(SceneManager, Interactions, Input, HashManager);
 
 window.startEditor = function() {
-  var CubeMaterial, addColor, addColorToPalette, addVoxel, animating, animation, animationFrames, animationInterval, axisCamera, bindEventsAndPlugins, brush, buildFromHash, c, camera, changeColor, color, colors, container, cube, currentFrame, decode, encode, exportFunction, exportImage, fill, getDimensions, getIntersecting, grid, init, interact, isAltDown, isCtrlDown, isMouseDown, isMouseRotating, isShiftDown, manualAnimating, mouse2D, mouse3D, objectHovered, onDocumentKeyDown, onDocumentKeyUp, onDocumentMouseDown, onDocumentMouseMove, onDocumentMouseUp, onMouseDownPhi, onMouseDownPosition, onMouseDownTheta, onWindowResize, phi, pickColor, pickRGB, plane, playPauseEl, projector, radius, raycaster, render, renderer, save, scene, setIsometricAngle, shareDialog, showWelcome, sliderEl, target, theta, updateColor, updateHash, wireframe, wireframeCube, wireframeMaterial, wireframeOptions, zoom;
+  var addColor, addColorToPalette, bindEventsAndPlugins, c, changeColor, color, container, exportFunction, fill, getDimensions, init, mouse3D, pickColor, shareDialog, showWelcome, updateColor;
   container = null;
-  camera = renderer = brush = axisCamera = null;
-  projector = plane = scene = grid = shareDialog = null;
-  mouse2D = mouse3D = raycaster = objectHovered = null;
-  isShiftDown = false;
-  isCtrlDown = false;
-  isMouseRotating = false;
-  isMouseDown = false;
-  isAltDown = false;
-  onMouseDownPosition = new THREE.Vector2();
-  onMouseDownPhi = 60;
-  onMouseDownTheta = 45;
-  radius = 1600;
-  theta = 90;
-  phi = 60;
-  target = new THREE.Vector3(0, 200, 0);
+  shareDialog = null;
+  mouse3D = null;
   color = 0;
-  CubeMaterial = THREE.MeshBasicMaterial;
-  cube = new THREE.CubeGeometry(50, 50, 50);
-  wireframeCube = new THREE.CubeGeometry(50.5, 50.5, 50.5);
-  wireframe = true;
   fill = true;
-  animation = false;
-  animating = false;
-  animationInterval = null;
-  manualAnimating = false;
-  wireframeOptions = {
-    color: 0x000000,
-    wireframe: true,
-    wireframeLinewidth: 1,
-    opacity: 0.8
-  };
-  wireframeMaterial = new THREE.MeshBasicMaterial(wireframeOptions);
-  animationFrames = [];
-  currentFrame = 0;
+  $('#axis-camera-controls .rotate-left').on('click', function() {
+    var phi, theta, _ref;
+    _ref = AxisCamera.getRotation(), theta = _ref.theta, phi = _ref.phi;
+    theta -= 180;
+    if (theta < 0) {
+      theta += 720;
+    }
+    return AxisCamera.rotateCameraTo(theta, phi);
+  });
+  $('#axis-camera-controls .rotate-right').on('click', function() {
+    var phi, theta, _ref;
+    _ref = AxisCamera.getRotation(), theta = _ref.theta, phi = _ref.phi;
+    theta += 180;
+    if (theta >= 720) {
+      theta -= 720;
+    }
+    return AxisCamera.rotateCameraTo(theta, phi);
+  });
+  $('#axis-camera-controls .zoom-in').on('click', function() {
+    return AxisCamera.zoom(-100);
+  });
+  $('#axis-camera-controls .zoom-out').on('click', function() {
+    return AxisCamera.zoom(100);
+  });
   showWelcome = function() {
     var seenWelcome;
     seenWelcome = localStorage.getItem("seenWelcome");
@@ -51,31 +59,6 @@ window.startEditor = function() {
       return $("#welcome").modal();
     }
     localStorage.setItem("seenWelcome", true);
-  };
-  addVoxel = function(x, y, z, c) {
-    var col, cubeMaterial, voxel;
-    cubeMaterial = new CubeMaterial({
-      vertexColors: THREE.VertexColors,
-      transparent: true
-    });
-    col = colors[c] || colors[0];
-    cubeMaterial.color.setRGB(col[0], col[1], col[2]);
-    wireframeMaterial = new THREE.MeshBasicMaterial(wireframeOptions);
-    wireframeMaterial.color.setRGB(col[0] - 0.05, col[1] - 0.05, col[2] - 0.05);
-    voxel = new THREE.Mesh(cube, cubeMaterial);
-    voxel.wireMesh = new THREE.Mesh(wireframeCube, wireframeMaterial);
-    voxel.isVoxel = true;
-    voxel.position.x = x;
-    voxel.position.y = y;
-    voxel.position.z = z;
-    voxel.wireMesh.position.copy(voxel.position);
-    voxel.wireMesh.visible = wireframe;
-    voxel.matrixAutoUpdate = false;
-    voxel.updateMatrix();
-    voxel.name = x + "," + y + "," + z;
-    voxel.overdraw = true;
-    scene.add(voxel);
-    scene.add(voxel.wireMesh);
   };
   addColorToPalette = function(idx) {
     var base, clone, colorBox;
@@ -97,90 +80,53 @@ window.startEditor = function() {
       });
       clone.on("contextmenu", changeColor);
     }
-    colorBox.parent().attr("data-color", "#" + ColorUtils.rgb2hex(colors[idx]));
-    colorBox.css("background", "#" + ColorUtils.rgb2hex(colors[idx]));
-    if (color === idx && brush) {
-      brush.children[0].material.color.setRGB(colors[idx][0], colors[idx][1], colors[idx][2]);
+    colorBox.parent().attr("data-color", "#" + ColorUtils.rgb2hex(ColorManager.colors[idx]));
+    colorBox.css("background", "#" + ColorUtils.rgb2hex(ColorManager.colors[idx]));
+    if (ColorManager.currentColor === idx && SceneManager.brush) {
+      SceneManager.brush.children[0].material.color.setRGB(ColorManager.colors[idx][0], ColorManager.colors[idx][1], ColorManager.colors[idx][2]);
     }
-  };
-  zoom = function(delta) {
-    var aspect, distance, origin, tooClose, tooFar;
-    origin = {
-      x: 0,
-      y: 0,
-      z: 0
-    };
-    distance = camera.position.distanceTo(origin);
-    tooFar = distance > 6000;
-    tooClose = Math.abs(camera.top) < 1000;
-    if (delta > 0 && tooFar) {
-      return;
-    }
-    if (delta < 0 && tooClose) {
-      return;
-    }
-    radius = distance;
-    aspect = container.clientWidth / container.clientHeight;
-    camera.top += delta / 2;
-    camera.bottom -= delta / 2;
-    camera.left -= delta * aspect / 2;
-    camera.right += delta * aspect / 2;
-    camera.updateProjectionMatrix();
-    camera.translateZ(delta);
-  };
-  setIsometricAngle = function() {
-    theta += 90;
-    camera.position.x = radius * Math.sin(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360);
-    camera.position.y = radius * Math.sin(phi * Math.PI / 360);
-    camera.position.z = radius * Math.cos(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360);
-    camera.updateMatrix();
   };
   addColor = function(e) {
     var idx;
-    colors.push([0.0, 0.0, 0.0]);
-    idx = colors.length - 1;
-    color = idx;
+    ColorManager.colors.push([0.0, 0.0, 0.0]);
+    idx = ColorManager.colors.length - 1;
+    ColorManager.currentColor = idx;
     addColorToPalette(idx);
-    updateHash();
+    HashManager.updateHash();
     updateColor(idx);
   };
   updateColor = function(idx) {
     var picker;
-    color = idx;
+    ColorManager.currentColor = idx;
     picker = $("i[data-color=\"" + idx + "\"]").parent().colorpicker("show");
     picker.on("changeColor", function(e) {
-      var frameMask;
-      colors[idx] = ColorUtils.hex2rgb(e.color.toHex());
+      ColorManager.colors[idx] = ColorUtils.hex2rgb(e.color.toHex());
       addColorToPalette(idx);
-      scene.children.filter(function(el) {
+      SceneManager.scene.children.filter(function(el) {
         return el.isVoxel;
       }).map(function(mesh) {
-        scene.remove(mesh.wireMesh);
-        scene.remove(mesh);
+        SceneManager.scene.remove(mesh.wireMesh);
+        SceneManager.scene.remove(mesh);
       });
-      frameMask = "A";
-      if (currentFrame !== 0) {
-        frameMask = "A" + currentFrame;
-      }
-      buildFromHash(frameMask);
+      HashManager.buildFromHash();
     });
     picker.on("hide", function(e) {
       picker.unbind("click.colorpicker");
     });
   };
   changeColor = function(e) {
-    var idx;
-    target = $(e.currentTarget);
-    idx = +target.find(".color").attr("data-color");
+    var idx, targetEl;
+    targetEl = $(e.currentTarget);
+    idx = +targetEl.find(".color").attr("data-color");
     updateColor(idx);
     return false;
   };
   pickColor = function(e) {
-    var idx;
-    target = $(e.currentTarget);
-    idx = +target.find(".color").attr("data-color");
-    color = idx;
-    brush.children[0].material.color.setRGB(colors[idx][0], colors[idx][1], colors[idx][2]);
+    var idx, targetEl;
+    targetEl = $(e.currentTarget);
+    idx = +targetEl.find(".color").attr("data-color");
+    ColorManager.currentColor = idx;
+    SceneManager.brush.children[0].material.color.setRGB(ColorManager.colors[idx][0], ColorManager.colors[idx][1], ColorManager.colors[idx][2]);
   };
   bindEventsAndPlugins = function() {
     var actionsMenu;
@@ -227,444 +173,15 @@ window.startEditor = function() {
     });
   };
   init = function() {
-    var ambientLight, brushMaterials, directionalLight, geometry, hasWebGL, i, line, material, mousewheel, size, step;
-    mousewheel = function(event) {
-      if ($(".modal").hasClass("in")) {
-        return zoom(event.wheelDeltaY || event.detail);
-      }
-    };
     bindEventsAndPlugins();
     container = document.getElementById("editor-area");
-    camera = new THREE.OrthographicCamera(container.clientWidth / -1, container.clientWidth / 1, container.clientHeight / 1, container.clientHeight / -1, 1, 10000);
-    camera.position.x = radius * Math.sin(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360);
-    camera.position.y = radius * Math.sin(phi * Math.PI / 360);
-    camera.position.z = radius * Math.cos(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360);
-    axisCamera = new THREE.OrthographicCamera(container.clientWidth / -2, container.clientWidth / 2, container.clientHeight / 2, container.clientHeight / -2, 1, 10000);
-    scene = new THREE.Scene();
-    window.scene = scene;
-    size = 500;
-    step = 50;
-    geometry = new THREE.Geometry();
-    i = -size;
-    while (i <= size) {
-      geometry.vertices.push(new THREE.Vector3(-size, 0, i));
-      geometry.vertices.push(new THREE.Vector3(size, 0, i));
-      geometry.vertices.push(new THREE.Vector3(i, 0, -size));
-      geometry.vertices.push(new THREE.Vector3(i, 0, size));
-      i += step;
-    }
-    material = new THREE.LineBasicMaterial({
-      color: 0x000000,
-      opacity: 0.2
-    });
-    line = new THREE.Line(geometry, material);
-    line.type = THREE.LinePieces;
-    grid = line;
-    scene.add(line);
-    projector = new THREE.Projector();
-    plane = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), new THREE.MeshBasicMaterial());
-    plane.rotation.x = -Math.PI / 2;
-    plane.visible = false;
-    plane.isPlane = true;
-    scene.add(plane);
-    mouse2D = new THREE.Vector3(0, 10000, 0.5);
-    brushMaterials = [
-      new CubeMaterial({
-        vertexColors: THREE.VertexColors,
-        opacity: 0.5,
-        transparent: true
-      }), new THREE.MeshBasicMaterial({
-        color: 0x000000,
-        wireframe: true
-      })
-    ];
-    brushMaterials[0].color.setRGB(colors[0][0], colors[0][1], colors[0][2]);
-    brush = THREE.SceneUtils.createMultiMaterialObject(cube, brushMaterials);
-    brush.isBrush = true;
-    brush.position.y = 2000;
-    brush.overdraw = false;
-    scene.add(brush);
-    ambientLight = new THREE.AmbientLight(0x606060);
-    scene.add(ambientLight);
-    directionalLight = new THREE.DirectionalLight(0xffffff);
-    directionalLight.position.set(1, 0.75, 0.5).normalize();
-    scene.add(directionalLight);
-    hasWebGL = (function() {
-      var e;
-      try {
-        return !!window.WebGLRenderingContext && !!document.createElement("canvas").getContext("experimental-webgl");
-      } catch (_error) {
-        e = _error;
-        return false;
-      }
-    })();
-    if (hasWebGL) {
-      renderer = new THREE.WebGLRenderer({
-        antialias: true
-      });
-    } else {
-      renderer = new THREE.CanvasRenderer();
-    }
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    container.appendChild(renderer.domElement);
-    renderer.domElement.addEventListener("mousemove", onDocumentMouseMove, false);
-    renderer.domElement.addEventListener("mousedown", onDocumentMouseDown, false);
-    renderer.domElement.addEventListener("mouseup", onDocumentMouseUp, false);
-    document.addEventListener("keydown", onDocumentKeyDown, false);
-    document.addEventListener("keyup", onDocumentKeyUp, false);
-    window.addEventListener("DOMMouseScroll", mousewheel, false);
-    window.addEventListener("mousewheel", mousewheel, false);
-    window.addEventListener("resize", onWindowResize, false);
+    SceneManager.init(container);
+    container.appendChild(SceneManager.renderer.domElement);
+    KeyMouse.attachEvents();
     if (window.location.hash) {
-      buildFromHash();
+      HashManager.buildFromHash();
     }
-    updateHash();
-  };
-  onWindowResize = function() {
-    camera.aspect = container.clientWidth / container.clientHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    interact();
-  };
-  getIntersecting = function() {
-    var intersect, intersectable, intersections;
-    intersectable = [];
-    scene.children.map(function(c) {
-      if (c.isVoxel || c.isPlane) {
-        intersectable.push(c);
-      }
-    });
-    if (raycaster) {
-      intersections = raycaster.intersectObjects(intersectable);
-      if (intersections.length > 0) {
-        intersect = (intersections[0].object.isBrush ? intersections[1] : intersections[0]);
-        return intersect;
-      }
-    }
-  };
-  interact = function() {
-    var intersect, newCube, normal, position, updateBrush;
-    if (typeof raycaster === "undefined") {
-      return;
-    }
-    if (objectHovered) {
-      objectHovered.material.opacity = 1;
-      objectHovered = null;
-    }
-    intersect = getIntersecting();
-    if (intersect) {
-      updateBrush = function() {
-        brush.position.x = Math.floor(position.x / 50) * 50 + 25;
-        brush.position.y = Math.floor(position.y / 50) * 50 + 25;
-        brush.position.z = Math.floor(position.z / 50) * 50 + 25;
-      };
-      normal = intersect.face.normal.clone();
-      normal.applyMatrix4(intersect.object.matrixRotationWorld);
-      position = new THREE.Vector3().addVectors(intersect.point, normal);
-      newCube = [Math.floor(position.x / 50), Math.floor(position.y / 50), Math.floor(position.z / 50)];
-      if (isAltDown) {
-        if (!brush.currentCube) {
-          brush.currentCube = newCube;
-        }
-        if (brush.currentCube.join("") !== newCube.join("")) {
-          if (isShiftDown) {
-            if (intersect.object !== plane) {
-              scene.remove(intersect.object.wireMesh);
-              scene.remove(intersect.object);
-            }
-          } else {
-            if (brush.position.y !== 2000) {
-              addVoxel(brush.position.x, brush.position.y, brush.position.z, color);
-            }
-          }
-        }
-        updateBrush();
-        updateHash();
-        return brush.currentCube = newCube;
-      } else if (isShiftDown) {
-        if (intersect.object !== plane) {
-          objectHovered = intersect.object;
-          objectHovered.material.opacity = 0.5;
-          brush.position.y = 2000;
-          return;
-        }
-      } else {
-        updateBrush();
-        return;
-      }
-    }
-    brush.position.y = 2000;
-  };
-  onDocumentMouseMove = function(event) {
-    var intersecting;
-    event.preventDefault();
-    if (!isMouseRotating) {
-      intersecting = getIntersecting();
-      if (!intersecting) {
-        container.classList.add("rotatable");
-      } else {
-        container.classList.remove("rotatable");
-      }
-    }
-    if (isMouseDown === 1) {
-      if (!intersecting) {
-        theta = -((event.clientX - onMouseDownPosition.x) * 0.5) + onMouseDownTheta;
-        phi = ((event.clientY - onMouseDownPosition.y) * 0.5) + onMouseDownPhi;
-        phi = Math.min(180, Math.max(0, phi));
-        camera.position.x = target.x + radius * Math.sin(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360);
-        camera.position.y = target.y + radius * Math.sin(phi * Math.PI / 360);
-        camera.position.z = target.z + radius * Math.cos(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360);
-        camera.updateMatrix();
-      }
-    } else if (isMouseDown === 2) {
-      theta = -((event.clientX - onMouseDownPosition.x) * 0.5) + onMouseDownTheta;
-      phi = ((event.clientY - onMouseDownPosition.y) * 0.5) + onMouseDownPhi;
-      phi = Math.min(180, Math.max(0, phi));
-      target.x += Math.sin(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360);
-      target.y += Math.sin(phi * Math.PI / 360);
-      target.z += Math.cos(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360);
-    }
-    mouse2D.x = (event.clientX / container.clientWidth) * 2 - 1;
-    mouse2D.y = -(event.clientY / container.clientHeight) * 2 + 1;
-    interact();
-  };
-  onDocumentMouseDown = function(event) {
-    event.preventDefault();
-    isMouseDown = event.which;
-    onMouseDownTheta = theta;
-    onMouseDownPhi = phi;
-    onMouseDownPosition.x = event.clientX;
-    onMouseDownPosition.y = event.clientY;
-    isMouseRotating = !getIntersecting();
-  };
-  onDocumentMouseUp = function(event) {
-    var intersect;
-    event.preventDefault();
-    isMouseDown = false;
-    isMouseRotating = false;
-    onMouseDownPosition.x = event.clientX - onMouseDownPosition.x;
-    onMouseDownPosition.y = event.clientY - onMouseDownPosition.y;
-    if (onMouseDownPosition.length() > 5) {
-      return;
-    }
-    intersect = getIntersecting();
-    if (intersect) {
-      if (isShiftDown) {
-        if (intersect.object !== plane) {
-          scene.remove(intersect.object.wireMesh);
-          scene.remove(intersect.object);
-        }
-      } else {
-        if (brush.position.y !== 2000) {
-          addVoxel(brush.position.x, brush.position.y, brush.position.z, color);
-        }
-      }
-    }
-    updateHash();
-    render();
-    interact();
-  };
-  onDocumentKeyDown = function(event) {
-    console.log(event.keyCode);
-    switch (event.keyCode) {
-      case 189:
-        return zoom(100);
-      case 187:
-        return zoom(-100);
-      case 49:
-        return exports.setColor(0);
-      case 50:
-        return exports.setColor(1);
-      case 51:
-        return exports.setColor(2);
-      case 52:
-        return exports.setColor(3);
-      case 53:
-        return exports.setColor(4);
-      case 54:
-        return exports.setColor(5);
-      case 55:
-        return exports.setColor(6);
-      case 56:
-        return exports.setColor(7);
-      case 57:
-        return exports.setColor(8);
-      case 48:
-        return exports.setColor(9);
-      case 16:
-        return isShiftDown = true;
-      case 17:
-        return isCtrlDown = true;
-      case 18:
-        return isAltDown = true;
-      case 65:
-        return setIsometricAngle();
-    }
-  };
-  onDocumentKeyUp = function(event) {
-    switch (event.keyCode) {
-      case 16:
-        return isShiftDown = false;
-      case 17:
-        return isCtrlDown = false;
-      case 18:
-        return isAltDown = false;
-    }
-  };
-  buildFromHash = function(hashMask) {
-    var c, chunk, chunks, code, current, data, frameMask, hash, hashChunks, hex, hexColors, i, j, l, n, nC;
-    hash = window.location.hash.substr(1);
-    hashChunks = hash.split(":");
-    chunks = {};
-    animationFrames = [];
-    j = 0;
-    n = hashChunks.length;
-    while (j < n) {
-      chunk = hashChunks[j].split("/");
-      chunks[chunk[0]] = chunk[1];
-      if (chunk[0].charAt(0) === "A") {
-        animationFrames.push(chunk[1]);
-      }
-      j++;
-    }
-    if ((!hashMask || hashMask === "C") && chunks["C"]) {
-      hexColors = chunks["C"];
-      c = 0;
-      nC = hexColors.length / 6;
-      while (c < nC) {
-        hex = hexColors.substr(c * 6, 6);
-        colors[c] = ColorUtils.hex2rgb(hex);
-        addColorToPalette(c);
-        c++;
-      }
-    }
-    frameMask = "A";
-    if (currentFrame !== 0) {
-      frameMask = "A" + currentFrame;
-    }
-    if ((!hashMask || hashMask === frameMask) && chunks[frameMask]) {
-      current = {
-        x: 0,
-        y: 0,
-        z: 0,
-        c: 0
-      };
-      data = decode(chunks[frameMask]);
-      i = 0;
-      l = data.length;
-      while (i < l) {
-        code = data[i++].toString(2);
-        if (code.charAt(1) === "1") {
-          current.x += data[i++] - 32;
-        }
-        if (code.charAt(2) === "1") {
-          current.y += data[i++] - 32;
-        }
-        if (code.charAt(3) === "1") {
-          current.z += data[i++] - 32;
-        }
-        if (code.charAt(4) === "1") {
-          current.c += data[i++] - 32;
-        }
-        if (code.charAt(0) === "1") {
-          addVoxel(current.x * 50 + 25, current.y * 50 + 25, current.z * 50 + 25, current.c);
-        }
-      }
-    }
-    updateHash();
-  };
-  updateHash = function() {
-    var cData, code, colorString, current, data, i, last, object, outHash, voxels;
-    data = [];
-    voxels = [];
-    code = void 0;
-    current = {
-      x: 0,
-      y: 0,
-      z: 0,
-      c: 0
-    };
-    last = {
-      x: 0,
-      y: 0,
-      z: 0,
-      c: 0
-    };
-    for (i in scene.children) {
-      object = scene.children[i];
-      if (object.isVoxel && object !== plane && object !== brush) {
-        current.x = (object.position.x - 25) / 50;
-        current.y = (object.position.y - 25) / 50;
-        current.z = (object.position.z - 25) / 50;
-        colorString = ["r", "g", "b"].map(function(col) {
-          return object.material.color[col];
-        }).join("");
-        i = 0;
-        while (i < colors.length) {
-          if (colors[i].join("") === colorString) {
-            current.c = i;
-          }
-          i++;
-        }
-        voxels.push({
-          x: current.x,
-          y: current.y + 1,
-          z: current.z,
-          c: current.c + 1
-        });
-        code = 0;
-        if (current.x !== last.x) {
-          code += 1000;
-        }
-        if (current.y !== last.y) {
-          code += 100;
-        }
-        if (current.z !== last.z) {
-          code += 10;
-        }
-        if (current.c !== last.c) {
-          code += 1;
-        }
-        code += 10000;
-        data.push(parseInt(code, 2));
-        if (current.x !== last.x) {
-          data.push(current.x - last.x + 32);
-          last.x = current.x;
-        }
-        if (current.y !== last.y) {
-          data.push(current.y - last.y + 32);
-          last.y = current.y;
-        }
-        if (current.z !== last.z) {
-          data.push(current.z - last.z + 32);
-          last.z = current.z;
-        }
-        if (current.c !== last.c) {
-          data.push(current.c - last.c + 32);
-          last.c = current.c;
-        }
-      }
-    }
-    data = encode(data);
-    animationFrames[currentFrame] = data;
-    cData = "";
-    outHash = "#" + (cData ? "C/" + cData : "");
-    i = 0;
-    while (i < animationFrames.length) {
-      if (i === 0) {
-        outHash = outHash + ":A/" + animationFrames[i];
-      } else {
-        outHash = outHash + ":A" + i + "/" + animationFrames[i];
-      }
-      i++;
-    }
-    window.updatingHash = true;
-    window.location.replace(outHash);
-    $(".play-level").attr("href", "http://philschatz.com/game/" + outHash);
-    setTimeout((function() {
-      window.updatingHash = false;
-    }), 1);
-    return voxels;
+    HashManager.updateHash();
   };
   exportFunction = function(voxels) {
     var dimensions, funcString;
@@ -676,16 +193,6 @@ window.startEditor = function() {
     funcString += "var dimensions = " + JSON.stringify(dimensions) + ";";
     funcString += "voxels.map(function(voxel) {" + "if (colorMapper(voxel[3])) { addBlock([position.x + voxel[0], position.y + voxel[1], position.z + voxel[2]], colorMapper(voxel[3])) }" + "});";
     return funcString;
-  };
-  pickRGB = function(idx) {
-    return idx + (idx / 3) | 0;
-  };
-  exportImage = function(width, height) {
-    var canvas, image;
-    canvas = getExportCanvas(width, height);
-    image = new Image;
-    image.src = canvas.toDataURL();
-    return image;
   };
   getDimensions = function(voxels) {
     var high, low;
@@ -713,107 +220,6 @@ window.startEditor = function() {
     });
     return [(high[0] - low[0]) || 1, (high[1] - low[1]) || 1, (high[2] - low[2]) || 1];
   };
-  decode = function(string) {
-    var output;
-    output = [];
-    string.split("").forEach(function(v) {
-      output.push("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".indexOf(v));
-    });
-    return output;
-  };
-  encode = function(array) {
-    var output;
-    output = "";
-    array.forEach(function(v) {
-      output += "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".charAt(v);
-    });
-    return output;
-  };
-  save = function() {
-    window.open(renderer.domElement.toDataURL("image/png"), "mywindow");
-  };
-  render = function() {
-    var bottom, height, left, view, width, windowHeight, windowWidth;
-    camera.lookAt(target);
-    raycaster = projector.pickingRay(mouse2D.clone(), camera);
-    renderer.setViewport();
-    renderer.setScissor();
-    renderer.enableScissorTest(false);
-    renderer.setClearColor(new THREE.Color().setRGB(1, 1, 1));
-    renderer.render(scene, camera);
-    windowWidth = container.clientWidth;
-    windowHeight = container.clientHeight;
-    view = {
-      left: 3 / 4,
-      bottom: 0,
-      width: 1 / 4,
-      height: 1 / 4,
-      background: new THREE.Color().setRGB(0.5, 0.5, 0.7)
-    };
-    left = Math.floor(windowWidth * view.left);
-    bottom = Math.floor(windowHeight * view.bottom);
-    width = Math.floor(windowWidth * view.width);
-    height = Math.floor(windowHeight * view.height);
-    renderer.setViewport(left, bottom, width, height);
-    renderer.setScissor(left, bottom, width, height);
-    renderer.enableScissorTest(true);
-    renderer.setClearColor(view.background);
-    axisCamera.position.x = 1000;
-    axisCamera.position.y = target.y;
-    axisCamera.position.z = target.z;
-    axisCamera.lookAt(target);
-    renderer.render(scene, axisCamera);
-  };
-  container = void 0;
-  camera = void 0;
-  renderer = void 0;
-  brush = void 0;
-  axisCamera = void 0;
-  projector = void 0;
-  plane = void 0;
-  scene = void 0;
-  grid = void 0;
-  shareDialog = void 0;
-  mouse2D = void 0;
-  mouse3D = void 0;
-  raycaster = void 0;
-  objectHovered = void 0;
-  isShiftDown = false;
-  isCtrlDown = false;
-  isMouseRotating = false;
-  isMouseDown = false;
-  isAltDown = false;
-  onMouseDownPosition = new THREE.Vector2();
-  onMouseDownPhi = 60;
-  onMouseDownTheta = 45;
-  radius = 1600;
-  theta = 90;
-  phi = 60;
-  target = new THREE.Vector3(0, 200, 0);
-  color = 0;
-  CubeMaterial = THREE.MeshBasicMaterial;
-  cube = new THREE.CubeGeometry(50, 50, 50);
-  wireframeCube = new THREE.CubeGeometry(50.5, 50.5, 50.5);
-  wireframe = true;
-  fill = true;
-  animation = false;
-  animating = false;
-  animationInterval = void 0;
-  manualAnimating = false;
-  sliderEl = void 0;
-  playPauseEl = void 0;
-  wireframeOptions = {
-    color: 0x000000,
-    wireframe: true,
-    wireframeLinewidth: 1,
-    opacity: 0.8
-  };
-  wireframeMaterial = new THREE.MeshBasicMaterial(wireframeOptions);
-  animationFrames = [];
-  currentFrame = 0;
-  colors = ["000000", "2ECC71", "3498DB", "34495E", "E67E22", "ECF0F1", "FFF500", "FF0000", "00FF38", "BD00FF", "08c9ff", "D32020"].map(function(c) {
-    return ColorUtils.hex2rgb(c);
-  });
   c = 0;
   while (c < 12) {
     addColorToPalette(c);
@@ -821,28 +227,30 @@ window.startEditor = function() {
   }
   showWelcome();
   init();
-  raf(window).on("data", render);
+  raf(window).on("data", function() {
+    return SceneManager.render();
+  });
   exports.viewInstructions = function() {
     $("#welcome").modal();
   };
   exports.reset = function() {
     window.location.replace("#/");
-    scene.children.filter(function(el) {
+    SceneManager.scene.children.filter(function(el) {
       return el.isVoxel;
     }).map(function(mesh) {
-      scene.remove(mesh);
+      SceneManager.scene.remove(mesh);
     });
   };
   exports.setColor = function(idx) {
     $("i[data-color=\"" + idx + "\"]").click();
   };
   exports.showGrid = function(bool) {
-    grid.material.visible = bool;
+    SceneManager.grid.material.visible = bool;
   };
   $(".play-level").attr("href", "http://philschatz.com/game/" + window.location.hash);
   window.exportMap = function() {
     var voxels, voxelsReal;
-    voxels = scene.children.filter(function(el) {
+    voxels = SceneManager.scene.children.filter(function(el) {
       return el.isVoxel;
     });
     voxelsReal = voxels.map(function(v) {
@@ -859,7 +267,7 @@ window.startEditor = function() {
 
 
 
-},{"./src/color-utils":5,"raf":3,"three":4}],2:[function(require,module,exports){
+},{"./src/axis-camera":5,"./src/color-manager":7,"./src/color-utils":8,"./src/hash-manager":9,"./src/input-manager":10,"./src/interactions":11,"./src/key-mouse-handlers":12,"./src/scene-manager":14,"raf":3,"three":4}],2:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -37016,6 +36424,131 @@ if (typeof exports !== 'undefined') {
 }
 
 },{}],5:[function(require,module,exports){
+var CameraManager;
+
+CameraManager = require('./camera-manager');
+
+window.axisCamera = module.exports = new CameraManager();
+
+
+
+},{"./camera-manager":6}],6:[function(require,module,exports){
+var MainCamera;
+
+module.exports = MainCamera = (function() {
+  function MainCamera() {}
+
+  MainCamera.prototype.radius = 1600;
+
+  MainCamera.prototype._theta = 0;
+
+  MainCamera.prototype._phi = 0;
+
+  MainCamera.prototype._target = null;
+
+  MainCamera.prototype.init = function(_scene, camera, container, _target) {
+    this._scene = _scene;
+    this.camera = camera;
+    this.container = container;
+    this._target = _target;
+  };
+
+  MainCamera.prototype.getRotation = function() {
+    return {
+      theta: this._theta,
+      phi: this._phi
+    };
+  };
+
+  MainCamera.prototype.zoom = function(delta) {
+    var aspect, distance, origin, tooClose, tooFar;
+    origin = {
+      x: 0,
+      y: 0,
+      z: 0
+    };
+    distance = this.camera.position.distanceTo(origin);
+    tooFar = distance > 6000;
+    tooClose = Math.abs(this.camera.top) < 500;
+    if (delta > 0 && tooFar) {
+      return;
+    }
+    if (delta < 0 && tooClose) {
+      return;
+    }
+    this.radius = distance;
+    aspect = this.container.clientWidth / this.container.clientHeight;
+    this.camera.top += delta / 2;
+    this.camera.bottom -= delta / 2;
+    this.camera.left -= delta * aspect / 2;
+    this.camera.right += delta * aspect / 2;
+    this.camera.updateProjectionMatrix();
+    this.camera.translateZ(delta);
+  };
+
+  MainCamera.prototype.rotateCameraTo = function(theta, phi) {
+    if (theta == null) {
+      theta = this._theta;
+    }
+    if (phi == null) {
+      phi = this._phi;
+    }
+    this._theta = theta;
+    this._phi = phi;
+    return this.updateCamera();
+  };
+
+  MainCamera.prototype.updateCamera = function() {
+    this.camera.position.x = this._target.x + this.radius * Math.sin(this._theta * Math.PI / 360) * Math.cos(this._phi * Math.PI / 360);
+    this.camera.position.y = this._target.y + this.radius * Math.sin(this._phi * Math.PI / 360);
+    this.camera.position.z = this._target.z + this.radius * Math.cos(this._theta * Math.PI / 360) * Math.cos(this._phi * Math.PI / 360);
+    return this.camera.updateMatrix();
+  };
+
+  MainCamera.prototype.setRaycaster = function(raycaster) {
+    this.raycaster = raycaster;
+  };
+
+  MainCamera.prototype.getIntersecting = function() {
+    var intersect, intersectable, intersections;
+    intersectable = [];
+    this._scene.children.map(function(c) {
+      if (c.isVoxel || c.isPlane) {
+        intersectable.push(c);
+      }
+    });
+    if (this.raycaster) {
+      intersections = this.raycaster.intersectObjects(intersectable);
+      if (intersections.length > 0) {
+        intersect = (intersections[0].object.isBrush ? intersections[1] : intersections[0]);
+        return intersect;
+      }
+    }
+  };
+
+  return MainCamera;
+
+})();
+
+
+
+},{}],7:[function(require,module,exports){
+var ColorUtils, colors;
+
+ColorUtils = require('./color-utils');
+
+colors = ['000000', '2ECC71', '3498DB', '34495E', 'E67E22', 'ECF0F1', 'FFF500', 'FF0000', '00FF38', 'BD00FF', '08c9ff', 'D32020'].map(function(c) {
+  return ColorUtils.hex2rgb(c);
+});
+
+module.exports = {
+  colors: colors,
+  currentColor: 0
+};
+
+
+
+},{"./color-utils":8}],8:[function(require,module,exports){
 function v2h(value) {
   value = parseInt(value).toString(16)
   return value.length < 2 ? '0' + value : value
@@ -37033,4 +36566,651 @@ module.exports = {
   }
 }
 
-},{}]},{},[1]);
+},{}],9:[function(require,module,exports){
+var ColorManager, decode, encode;
+
+ColorManager = require('./color-manager');
+
+decode = function(string) {
+  var output;
+  output = [];
+  string.split('').forEach(function(v) {
+    output.push('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'.indexOf(v));
+  });
+  return output;
+};
+
+encode = function(array) {
+  var output;
+  output = '';
+  array.forEach(function(v) {
+    output += 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'.charAt(v);
+  });
+  return output;
+};
+
+module.exports = function(SceneManager) {
+  var HashManager;
+  return new (HashManager = (function() {
+    function HashManager() {}
+
+    HashManager.prototype.updateHash = function() {
+      var animationFrames, cData, code, colorString, current, currentFrame, data, i, last, object, outHash, voxels;
+      currentFrame = 0;
+      animationFrames = [];
+      data = [];
+      voxels = [];
+      code = void 0;
+      current = {
+        x: 0,
+        y: 0,
+        z: 0,
+        c: 0
+      };
+      last = {
+        x: 0,
+        y: 0,
+        z: 0,
+        c: 0
+      };
+      for (i in SceneManager.scene.children) {
+        object = SceneManager.scene.children[i];
+        if (object.isVoxel && object !== SceneManager.plane && object !== SceneManager.brush) {
+          current.x = (object.position.x - 25) / 50;
+          current.y = (object.position.y - 25) / 50;
+          current.z = (object.position.z - 25) / 50;
+          colorString = ['r', 'g', 'b'].map(function(col) {
+            return object.material.color[col];
+          }).join('');
+          i = 0;
+          while (i < ColorManager.colors.length) {
+            if (ColorManager.colors[i].join('') === colorString) {
+              current.c = i;
+            }
+            i++;
+          }
+          voxels.push({
+            x: current.x,
+            y: current.y + 1,
+            z: current.z,
+            c: current.c + 1
+          });
+          code = 0;
+          if (current.x !== last.x) {
+            code += 1000;
+          }
+          if (current.y !== last.y) {
+            code += 100;
+          }
+          if (current.z !== last.z) {
+            code += 10;
+          }
+          if (current.c !== last.c) {
+            code += 1;
+          }
+          code += 10000;
+          data.push(parseInt(code, 2));
+          if (current.x !== last.x) {
+            data.push(current.x - last.x + 32);
+            last.x = current.x;
+          }
+          if (current.y !== last.y) {
+            data.push(current.y - last.y + 32);
+            last.y = current.y;
+          }
+          if (current.z !== last.z) {
+            data.push(current.z - last.z + 32);
+            last.z = current.z;
+          }
+          if (current.c !== last.c) {
+            data.push(current.c - last.c + 32);
+            last.c = current.c;
+          }
+        }
+      }
+      data = encode(data);
+      animationFrames[currentFrame] = data;
+      cData = '';
+      outHash = '#' + (cData ? 'C/' + cData : '');
+      i = 0;
+      while (i < animationFrames.length) {
+        if (i === 0) {
+          outHash = outHash + ':A/' + animationFrames[i];
+        } else {
+          outHash = outHash + ':A' + i + '/' + animationFrames[i];
+        }
+        i++;
+      }
+      window.updatingHash = true;
+      window.location.replace(outHash);
+      $('.play-level').attr('href', 'http://philschatz.com/game/' + outHash);
+      setTimeout((function() {
+        window.updatingHash = false;
+      }), 1);
+      return voxels;
+    };
+
+    HashManager.prototype.buildFromHash = function() {
+      var animationFrames, c, chunk, chunks, code, current, data, frameMask, hash, hashChunks, hashMask, hex, hexColors, i, j, l, n, nC;
+      hashMask = null;
+      hash = window.location.hash.substr(1);
+      hashChunks = hash.split(':');
+      chunks = {};
+      animationFrames = [];
+      j = 0;
+      n = hashChunks.length;
+      while (j < n) {
+        chunk = hashChunks[j].split('/');
+        chunks[chunk[0]] = chunk[1];
+        if (chunk[0].charAt(0) === 'A') {
+          animationFrames.push(chunk[1]);
+        }
+        j++;
+      }
+      if ((!hashMask || hashMask === 'C') && chunks['C']) {
+        hexColors = chunks['C'];
+        c = 0;
+        nC = hexColors.length / 6;
+        while (c < nC) {
+          hex = hexColors.substr(c * 6, 6);
+          ColorManager.colors[c] = ColorUtils.hex2rgb(hex);
+          addColorToPalette(c);
+          c++;
+        }
+      }
+      frameMask = 'A';
+      if ((!hashMask || hashMask === frameMask) && chunks[frameMask]) {
+        current = {
+          x: 0,
+          y: 0,
+          z: 0,
+          c: 0
+        };
+        data = decode(chunks[frameMask]);
+        i = 0;
+        l = data.length;
+        while (i < l) {
+          code = data[i++].toString(2);
+          if (code.charAt(1) === '1') {
+            current.x += data[i++] - 32;
+          }
+          if (code.charAt(2) === '1') {
+            current.y += data[i++] - 32;
+          }
+          if (code.charAt(3) === '1') {
+            current.z += data[i++] - 32;
+          }
+          if (code.charAt(4) === '1') {
+            current.c += data[i++] - 32;
+          }
+          if (code.charAt(0) === '1') {
+            while (!ColorManager.colors[current.c]) {
+              ColorManager.colors.push([0.0, 0.0, 0.0]);
+            }
+            SceneManager.addVoxel(current.x * 50 + 25, current.y * 50 + 25, current.z * 50 + 25, ColorManager.colors[current.c]);
+          }
+        }
+      }
+      this.updateHash(ColorManager.colors);
+    };
+
+    return HashManager;
+
+  })());
+};
+
+
+
+},{"./color-manager":7}],10:[function(require,module,exports){
+module.exports = function(THREE) {
+  return {
+    isShiftDown: false,
+    isCtrlDown: false,
+    isMouseRotating: false,
+    isMouseDown: false,
+    isAltDown: false,
+    onMouseDownPosition: new THREE.Vector2(),
+    onMouseDownPhi: 60,
+    onMouseDownTheta: 45,
+    mouse2D: new THREE.Vector3(0, 10000, 0.5)
+  };
+};
+
+
+
+},{}],11:[function(require,module,exports){
+var ColorManager, MainCamera;
+
+ColorManager = require('./color-manager');
+
+MainCamera = require('./main-camera');
+
+module.exports = function(Input, SceneManager) {
+  var Interactions;
+  return new (Interactions = (function() {
+    function Interactions() {}
+
+    Interactions.prototype.interact = function() {
+      var intersect, newCube, normal, position, updateBrush;
+      if (!MainCamera.raycaster) {
+        return;
+      }
+      if (this._objectHovered) {
+        this._objectHovered.material.opacity = 1;
+        this._objectHovered = null;
+      }
+      intersect = MainCamera.getIntersecting();
+      if (intersect) {
+        updateBrush = function() {
+          SceneManager.brush.position.x = Math.floor(position.x / 50) * 50 + 25;
+          SceneManager.brush.position.y = Math.floor(position.y / 50) * 50 + 25;
+          SceneManager.brush.position.z = Math.floor(position.z / 50) * 50 + 25;
+        };
+        normal = intersect.face.normal.clone();
+        normal.applyMatrix4(intersect.object.matrixRotationWorld);
+        position = new (SceneManager.THREE().Vector3)().addVectors(intersect.point, normal);
+        newCube = [Math.floor(position.x / 50), Math.floor(position.y / 50), Math.floor(position.z / 50)];
+        if (Input.isAltDown) {
+          if (!SceneManager.brush.currentCube) {
+            SceneManager.brush.currentCube = newCube;
+          }
+          if (SceneManager.brush.currentCube.join('') !== newCube.join('')) {
+            if (Input.isShiftDown) {
+              if (intersect.object !== SceneManager.plane) {
+                SceneManager.scene.remove(intersect.object.wireMesh);
+                SceneManager.scene.remove(intersect.object);
+              }
+            } else {
+              if (SceneManager.brush.position.y !== 2000) {
+                SceneManager.addVoxel(SceneManager.brush.position.x, SceneManager.brush.position.y, SceneManager.brush.position.z, ColorManager.colors[ColorManager.currentColor]);
+              }
+            }
+          }
+          updateBrush();
+          HashManager.updateHash();
+          return SceneManager.brush.currentCube = newCube;
+        } else if (Input.isShiftDown) {
+          if (intersect.object !== SceneManager.plane) {
+            this._objectHovered = intersect.object;
+            this._objectHovered.material.opacity = 0.5;
+            SceneManager.brush.position.y = 2000;
+            return;
+          }
+        } else {
+          updateBrush();
+          return;
+        }
+      }
+      SceneManager.brush.position.y = 2000;
+    };
+
+    return Interactions;
+
+  })());
+};
+
+
+
+},{"./color-manager":7,"./main-camera":13}],12:[function(require,module,exports){
+var ColorManager, MainCamera;
+
+ColorManager = require('./color-manager');
+
+MainCamera = require('./main-camera');
+
+module.exports = function(SceneManager, Interactions, Input, HashManager) {
+  var KeyMouseHandlers, setIsometricAngle;
+  setIsometricAngle = function() {
+    var phi, theta;
+    theta = Math.floor((MainCamera.getRotation().theta + 180) / 180) * 180;
+    phi = 0;
+    MainCamera.rotateCameraTo(theta, phi);
+  };
+  return new (KeyMouseHandlers = (function() {
+    function KeyMouseHandlers() {}
+
+    KeyMouseHandlers.prototype.mousewheel = function(event) {
+      if ($('.modal').hasClass('in')) {
+        return;
+      }
+      return MainCamera.zoom(event.wheelDeltaY || event.detail);
+    };
+
+    KeyMouseHandlers.prototype.onWindowResize = function() {
+      MainCamera.camera.aspect = MainCamera.container.clientWidth / MainCamera.container.clientHeight;
+      MainCamera.camera.updateProjectionMatrix();
+      SceneManager.renderer.setSize(MainCamera.container.clientWidth, MainCamera.container.clientHeight);
+      Interactions.interact();
+    };
+
+    KeyMouseHandlers.prototype.onDocumentMouseMove = function(event) {
+      var intersecting, phi, theta;
+      event.preventDefault();
+      if (!Input.isMouseRotating) {
+        intersecting = MainCamera.getIntersecting();
+        if (!intersecting) {
+          MainCamera.container.classList.add('rotatable');
+        } else {
+          MainCamera.container.classList.remove('rotatable');
+        }
+      }
+      if (Input.isMouseDown === 1) {
+        if (!intersecting) {
+          theta = -((event.clientX - Input.onMouseDownPosition.x) * 0.5) + Input.onMouseDownTheta;
+          phi = ((event.clientY - Input.onMouseDownPosition.y) * 0.5) + Input.onMouseDownPhi;
+          phi = Math.min(180, Math.max(-90, phi));
+          MainCamera.rotateCameraTo(theta, phi);
+        }
+      }
+      Input.mouse2D.x = (event.clientX / MainCamera.container.clientWidth) * 2 - 1;
+      Input.mouse2D.y = -(event.clientY / MainCamera.container.clientHeight) * 2 + 1;
+      Interactions.interact();
+    };
+
+    KeyMouseHandlers.prototype.onDocumentMouseDown = function(event) {
+      event.preventDefault();
+      Input.isMouseDown = event.which;
+      Input.onMouseDownTheta = MainCamera.getRotation().theta;
+      Input.onMouseDownPhi = MainCamera.getRotation().phi;
+      Input.onMouseDownPosition.x = event.clientX;
+      Input.onMouseDownPosition.y = event.clientY;
+      Input.isMouseRotating = !MainCamera.getIntersecting();
+    };
+
+    KeyMouseHandlers.prototype.onDocumentMouseUp = function(event) {
+      var intersect;
+      event.preventDefault();
+      Input.isMouseDown = false;
+      Input.isMouseRotating = false;
+      Input.onMouseDownPosition.x = event.clientX - Input.onMouseDownPosition.x;
+      Input.onMouseDownPosition.y = event.clientY - Input.onMouseDownPosition.y;
+      if (Input.onMouseDownPosition.length() > 5) {
+        return;
+      }
+      intersect = MainCamera.getIntersecting();
+      if (intersect) {
+        if (Input.isShiftDown) {
+          if (intersect.object !== SceneManager.plane) {
+            SceneManager.scene.remove(intersect.object.wireMesh);
+            SceneManager.scene.remove(intersect.object);
+          }
+        } else {
+          if (SceneManager.brush.position.y !== 2000) {
+            SceneManager.addVoxel(SceneManager.brush.position.x, SceneManager.brush.position.y, SceneManager.brush.position.z, ColorManager.colors[ColorManager.currentColor]);
+          }
+        }
+      }
+      HashManager.updateHash();
+      SceneManager.render();
+      Interactions.interact();
+    };
+
+    KeyMouseHandlers.prototype.onDocumentKeyDown = function(event) {
+      switch (event.keyCode) {
+        case 189:
+          return MainCamera.zoom(100);
+        case 187:
+          return MainCamera.zoom(-100);
+        case 16:
+          return Input.isShiftDown = true;
+        case 17:
+          return Input.isCtrlDown = true;
+        case 18:
+          return Input.isAltDown = true;
+        case 65:
+          return setIsometricAngle();
+      }
+    };
+
+    KeyMouseHandlers.prototype.onDocumentKeyUp = function(event) {
+      switch (event.keyCode) {
+        case 16:
+          return Input.isShiftDown = false;
+        case 17:
+          return Input.isCtrlDown = false;
+        case 18:
+          return Input.isAltDown = false;
+      }
+    };
+
+    KeyMouseHandlers.prototype.attachEvents = function() {
+      SceneManager.renderer.domElement.addEventListener('mousemove', this.onDocumentMouseMove, false);
+      SceneManager.renderer.domElement.addEventListener('mousedown', this.onDocumentMouseDown, false);
+      SceneManager.renderer.domElement.addEventListener('mouseup', this.onDocumentMouseUp, false);
+      document.addEventListener('keydown', this.onDocumentKeyDown, false);
+      document.addEventListener('keyup', this.onDocumentKeyUp, false);
+      window.addEventListener('DOMMouseScroll', this.mousewheel, false);
+      window.addEventListener('mousewheel', this.mousewheel, false);
+      return window.addEventListener('resize', this.onWindowResize, false);
+    };
+
+    return KeyMouseHandlers;
+
+  })());
+};
+
+
+
+},{"./color-manager":7,"./main-camera":13}],13:[function(require,module,exports){
+var CameraManager, MainCamera,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+CameraManager = require('./camera-manager');
+
+window.mainCamera = module.exports = new (MainCamera = (function(_super) {
+  __extends(MainCamera, _super);
+
+  function MainCamera() {
+    return MainCamera.__super__.constructor.apply(this, arguments);
+  }
+
+  MainCamera.prototype._theta = 90;
+
+  MainCamera.prototype._phi = 60;
+
+  return MainCamera;
+
+})(CameraManager));
+
+
+
+},{"./camera-manager":6}],14:[function(require,module,exports){
+var AxisCamera, MainCamera;
+
+MainCamera = require('./main-camera');
+
+AxisCamera = require('./axis-camera');
+
+module.exports = function(THREE, Input) {
+  var SceneManager;
+  return new (SceneManager = (function() {
+    function SceneManager() {}
+
+    SceneManager.prototype.THREE = function() {
+      return THREE;
+    };
+
+    SceneManager.prototype.renderer = null;
+
+    SceneManager.prototype.brush = null;
+
+    SceneManager.prototype.scene = null;
+
+    SceneManager.prototype.plane = null;
+
+    SceneManager.prototype._container = null;
+
+    SceneManager.prototype._camera = null;
+
+    SceneManager.prototype._target = new THREE.Vector3(0, 200, 0);
+
+    SceneManager.prototype._CubeMaterial = THREE.MeshBasicMaterial;
+
+    SceneManager.prototype._cube = new THREE.CubeGeometry(50, 50, 50);
+
+    SceneManager.prototype._axisCamera = null;
+
+    SceneManager.prototype._projector = null;
+
+    SceneManager.prototype._size = 500;
+
+    SceneManager.prototype._step = 50;
+
+    SceneManager.prototype._showWireframe = true;
+
+    SceneManager.prototype.init = function(_container) {
+      var ambientLight, brushMaterials, directionalLight, geometry, hasWebGL, i, material;
+      this._container = _container;
+      window.scene = this.scene = new THREE.Scene();
+      this._camera = new THREE.OrthographicCamera(this._container.clientWidth / -1, this._container.clientWidth / 1, this._container.clientHeight / 1, this._container.clientHeight / -1, 1, 10000);
+      MainCamera.init(this.scene, this._camera, this._container, this._target);
+      MainCamera.updateCamera({
+        x: 0,
+        y: 0,
+        z: 0
+      });
+      this._axisCamera = new THREE.OrthographicCamera(this._container.clientWidth / -2, this._container.clientWidth / 2, this._container.clientHeight / 2, this._container.clientHeight / -2, 1, 10000);
+      this._axisCamera = new THREE.OrthographicCamera(this._container.clientWidth / -2, this._container.clientWidth / 2, this._container.clientHeight / 2, this._container.clientHeight / -2, 1, 10000);
+      AxisCamera.init(this.scene, this._axisCamera, this._container, this._target);
+      AxisCamera.updateCamera({
+        x: 0,
+        y: 0,
+        z: 0
+      });
+      geometry = new THREE.Geometry();
+      i = -this._size;
+      while (i <= this._size) {
+        geometry.vertices.push(new THREE.Vector3(-this._size, 0, i));
+        geometry.vertices.push(new THREE.Vector3(this._size, 0, i));
+        geometry.vertices.push(new THREE.Vector3(i, 0, -this._size));
+        geometry.vertices.push(new THREE.Vector3(i, 0, this._size));
+        i += this._step;
+      }
+      material = new THREE.LineBasicMaterial({
+        color: 0x000000,
+        opacity: 0.2
+      });
+      this.grid = new THREE.Line(geometry, material);
+      this.grid.type = THREE.LinePieces;
+      this.scene.add(this.grid);
+      this._projector = new THREE.Projector();
+      this.plane = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), new THREE.MeshBasicMaterial());
+      this.plane.rotation.x = -Math.PI / 2;
+      this.plane.visible = false;
+      this.plane.isPlane = true;
+      this.scene.add(this.plane);
+      brushMaterials = [
+        new this._CubeMaterial({
+          vertexColors: THREE.VertexColors,
+          opacity: 0.5,
+          transparent: true
+        }), new THREE.MeshBasicMaterial({
+          color: 0x000000,
+          wireframe: true
+        })
+      ];
+      brushMaterials[0].color.setRGB(0, 0, 0);
+      this.brush = THREE.SceneUtils.createMultiMaterialObject(this._cube, brushMaterials);
+      this.brush.isBrush = true;
+      this.brush.position.y = 2000;
+      this.brush.overdraw = false;
+      this.scene.add(this.brush);
+      ambientLight = new THREE.AmbientLight(0x606060);
+      this.scene.add(ambientLight);
+      directionalLight = new THREE.DirectionalLight(0xffffff);
+      directionalLight.position.set(1, 0.75, 0.5).normalize();
+      this.scene.add(directionalLight);
+      hasWebGL = (function() {
+        var e;
+        try {
+          return !!window.WebGLRenderingContext && !!document.createElement('canvas').getContext('experimental-webgl');
+        } catch (_error) {
+          e = _error;
+          return false;
+        }
+      })();
+      if (hasWebGL) {
+        this.renderer = new THREE.WebGLRenderer({
+          antialias: true
+        });
+      } else {
+        this.renderer = new THREE.CanvasRenderer();
+      }
+      return this.renderer.setSize(this._container.clientWidth, this._container.clientHeight);
+    };
+
+    SceneManager.prototype.addVoxel = function(x, y, z, col) {
+      var cubeMaterial, voxel, wireframeCube, wireframeMaterial, wireframeOptions;
+      cubeMaterial = new this._CubeMaterial({
+        vertexColors: THREE.VertexColors,
+        transparent: true
+      });
+      wireframeCube = new THREE.CubeGeometry(50.5, 50.5, 50.5);
+      wireframeOptions = {
+        color: 0x000000,
+        wireframe: true,
+        wireframeLinewidth: 1,
+        opacity: 0.8
+      };
+      wireframeMaterial = new THREE.MeshBasicMaterial(wireframeOptions);
+      cubeMaterial.color.setRGB(col[0], col[1], col[2]);
+      wireframeMaterial = new THREE.MeshBasicMaterial(wireframeOptions);
+      wireframeMaterial.color.setRGB(col[0] - 0.05, col[1] - 0.05, col[2] - 0.05);
+      voxel = new THREE.Mesh(this._cube, cubeMaterial);
+      voxel.wireMesh = new THREE.Mesh(wireframeCube, wireframeMaterial);
+      voxel.isVoxel = true;
+      voxel.position.x = x;
+      voxel.position.y = y;
+      voxel.position.z = z;
+      voxel.wireMesh.position.copy(voxel.position);
+      voxel.wireMesh.visible = this._showWireframe;
+      voxel.matrixAutoUpdate = false;
+      voxel.updateMatrix();
+      voxel.name = x + ',' + y + ',' + z;
+      voxel.overdraw = true;
+      this.scene.add(voxel);
+      this.scene.add(voxel.wireMesh);
+    };
+
+    SceneManager.prototype.render = function() {
+      var bottom, height, left, view, width, windowHeight, windowWidth;
+      if (!this._camera) {
+        return console.warn('Trying to render scene before initialized');
+      }
+      this._camera.lookAt(this._target);
+      MainCamera.setRaycaster(this._projector.pickingRay(Input.mouse2D.clone(), this._camera));
+      this.renderer.setViewport();
+      this.renderer.setScissor();
+      this.renderer.enableScissorTest(false);
+      this.renderer.setClearColor(new THREE.Color().setRGB(1, 1, 1));
+      this.renderer.render(this.scene, this._camera);
+      windowWidth = this._container.clientWidth;
+      windowHeight = this._container.clientHeight;
+      view = {
+        left: 3 / 4,
+        bottom: 0,
+        width: 1 / 4,
+        height: 1 / 3,
+        background: new THREE.Color().setRGB(0.5, 0.5, 0.7)
+      };
+      left = Math.floor(windowWidth * view.left);
+      bottom = Math.floor(windowHeight * view.bottom);
+      width = Math.floor(windowWidth * view.width);
+      height = Math.floor(windowHeight * view.height);
+      this.renderer.setViewport(left, bottom, width, height);
+      this.renderer.setScissor(left, bottom, width, height);
+      this.renderer.enableScissorTest(true);
+      this.renderer.setClearColor(view.background);
+      this._axisCamera.lookAt(this._target);
+      this.renderer.render(this.scene, this._axisCamera);
+    };
+
+    return SceneManager;
+
+  })());
+};
+
+
+
+},{"./axis-camera":5,"./main-camera":13}]},{},[1]);
