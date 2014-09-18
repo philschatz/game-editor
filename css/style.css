@@ -10,6 +10,12 @@
   cursor: move;
 }
 
+#main-camera-controls {
+  position: absolute;
+  bottom: 33%;
+  right: 0;
+}
+
 #axis-camera-controls {
   position: absolute;
   bottom: 0;

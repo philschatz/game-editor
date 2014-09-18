@@ -1,5 +1,5 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var AxisCamera, ColorManager, ColorUtils, HashManager, Input, Interactions, KeyMouse, SceneManager, THREE, raf;
+var AxisCamera, ColorManager, ColorUtils, HashManager, Input, Interactions, KeyMouse, MainCamera, SceneManager, THREE, raf;
 
 THREE = require("three");
 
@@ -10,6 +10,8 @@ ColorUtils = require('./src/color-utils');
 ColorManager = require('./src/color-manager');
 
 AxisCamera = require('./src/axis-camera');
+
+MainCamera = require('./src/main-camera');
 
 Input = require('./src/input-manager')(THREE);
 
@@ -22,36 +24,40 @@ Interactions = require('./src/interactions')(Input, SceneManager);
 KeyMouse = require('./src/key-mouse-handlers')(SceneManager, Interactions, Input, HashManager);
 
 window.startEditor = function() {
-  var addColor, addColorToPalette, bindEventsAndPlugins, c, changeColor, color, container, exportFunction, fill, getDimensions, init, mouse3D, pickColor, shareDialog, showWelcome, updateColor;
+  var addColor, addColorToPalette, bindEventsAndPlugins, c, cameraHandlers, changeColor, color, container, exportFunction, fill, getDimensions, init, mouse3D, pickColor, shareDialog, showWelcome, updateColor;
   container = null;
   shareDialog = null;
   mouse3D = null;
   color = 0;
   fill = true;
-  $('#axis-camera-controls .rotate-left').on('click', function() {
-    var phi, theta, _ref;
-    _ref = AxisCamera.getRotation(), theta = _ref.theta, phi = _ref.phi;
-    theta -= 180;
-    if (theta < 0) {
-      theta += 720;
-    }
-    return AxisCamera.rotateCameraTo(theta, phi);
-  });
-  $('#axis-camera-controls .rotate-right').on('click', function() {
-    var phi, theta, _ref;
-    _ref = AxisCamera.getRotation(), theta = _ref.theta, phi = _ref.phi;
-    theta += 180;
-    if (theta >= 720) {
-      theta -= 720;
-    }
-    return AxisCamera.rotateCameraTo(theta, phi);
-  });
-  $('#axis-camera-controls .zoom-in').on('click', function() {
-    return AxisCamera.zoom(-100);
-  });
-  $('#axis-camera-controls .zoom-out').on('click', function() {
-    return AxisCamera.zoom(100);
-  });
+  cameraHandlers = function(id, cameraManager) {
+    $("#" + id + " .rotate-left").on('click', function() {
+      var phi, theta, _ref;
+      _ref = cameraManager.getRotation(), theta = _ref.theta, phi = _ref.phi;
+      theta -= 180;
+      if (theta < 0) {
+        theta += 720;
+      }
+      return cameraManager.rotateCameraTo(theta, phi);
+    });
+    $("#" + id + " .rotate-right").on('click', function() {
+      var phi, theta, _ref;
+      _ref = cameraManager.getRotation(), theta = _ref.theta, phi = _ref.phi;
+      theta += 180;
+      if (theta >= 720) {
+        theta -= 720;
+      }
+      return cameraManager.rotateCameraTo(theta, phi);
+    });
+    $("#" + id + " .zoom-in").on('click', function() {
+      return cameraManager.zoom(-100);
+    });
+    return $("#" + id + " .zoom-out").on('click', function() {
+      return cameraManager.zoom(100);
+    });
+  };
+  cameraHandlers('axis-camera-controls', AxisCamera);
+  cameraHandlers('main-camera-controls', MainCamera);
   showWelcome = function() {
     var seenWelcome;
     seenWelcome = localStorage.getItem("seenWelcome");
@@ -267,7 +273,7 @@ window.startEditor = function() {
 
 
 
-},{"./src/axis-camera":5,"./src/color-manager":7,"./src/color-utils":8,"./src/hash-manager":9,"./src/input-manager":10,"./src/interactions":11,"./src/key-mouse-handlers":12,"./src/scene-manager":14,"raf":3,"three":4}],2:[function(require,module,exports){
+},{"./src/axis-camera":5,"./src/color-manager":7,"./src/color-utils":8,"./src/hash-manager":9,"./src/input-manager":10,"./src/interactions":11,"./src/key-mouse-handlers":12,"./src/main-camera":13,"./src/scene-manager":14,"raf":3,"three":4}],2:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a

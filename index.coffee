@@ -8,6 +8,7 @@ raf = require("raf")
 ColorUtils = require './src/color-utils'
 ColorManager = require './src/color-manager'
 AxisCamera = require './src/axis-camera'
+MainCamera = require './src/main-camera'
 Input = require('./src/input-manager')(THREE)
 SceneManager = require('./src/scene-manager')(THREE, Input)
 HashManager = require('./src/hash-manager')(SceneManager)
@@ -26,24 +27,29 @@ window.startEditor = ->
 
   fill = true
 
-  $('#axis-camera-controls .rotate-left').on 'click', ->
-    {theta, phi} = AxisCamera.getRotation()
-    theta -= 180
-    theta += 720 if theta < 0
-    AxisCamera.rotateCameraTo(theta, phi)
 
-  $('#axis-camera-controls .rotate-right').on 'click', ->
-    {theta, phi} = AxisCamera.getRotation()
-    theta += 180
-    theta -= 720 if theta >= 720
-    AxisCamera.rotateCameraTo(theta, phi)
+  cameraHandlers = (id, cameraManager) ->
 
-  $('#axis-camera-controls .zoom-in').on 'click', ->
-    AxisCamera.zoom(-100)
+    $("##{id} .rotate-left").on 'click', ->
+      {theta, phi} = cameraManager.getRotation()
+      theta -= 180
+      theta += 720 if theta < 0
+      cameraManager.rotateCameraTo(theta, phi)
 
-  $('#axis-camera-controls .zoom-out').on 'click', ->
-    AxisCamera.zoom(100)
+    $("##{id} .rotate-right").on 'click', ->
+      {theta, phi} = cameraManager.getRotation()
+      theta += 180
+      theta -= 720 if theta >= 720
+      cameraManager.rotateCameraTo(theta, phi)
 
+    $("##{id} .zoom-in").on 'click', ->
+      cameraManager.zoom(-100)
+
+    $("##{id} .zoom-out").on 'click', ->
+      cameraManager.zoom(100)
+
+  cameraHandlers('axis-camera-controls', AxisCamera)
+  cameraHandlers('main-camera-controls', MainCamera)
 
   showWelcome = ->
     seenWelcome = localStorage.getItem("seenWelcome")
