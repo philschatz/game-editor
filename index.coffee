@@ -30,17 +30,39 @@ window.startEditor = ->
 
   cameraHandlers = (id, cameraManager) ->
 
+    updateLabel = ->
+      {theta, phi} = cameraManager.getRotation()
+      theta = (theta / 180) % 4
+      label = switch theta
+        when 0 then 'X'
+        when 1 then 'Z'
+        when 2 then '-X'
+        when 3 then '-Z'
+        else '??'
+      $("##{id} .axis-label").text(label)
+
+    updateLabel()
+
+    $("##{id} .axis-label").on 'click', ->
+      {theta, phi} = cameraManager.getRotation()
+      theta += 360
+      theta -= 720 if theta >= 720
+      cameraManager.rotateCameraTo(theta, phi)
+      updateLabel()
+
     $("##{id} .rotate-left").on 'click', ->
       {theta, phi} = cameraManager.getRotation()
       theta -= 180
       theta += 720 if theta < 0
       cameraManager.rotateCameraTo(theta, phi)
+      updateLabel()
 
     $("##{id} .rotate-right").on 'click', ->
       {theta, phi} = cameraManager.getRotation()
       theta += 180
       theta -= 720 if theta >= 720
       cameraManager.rotateCameraTo(theta, phi)
+      updateLabel()
 
     $("##{id} .zoom-in").on 'click', ->
       cameraManager.zoom(-100)
