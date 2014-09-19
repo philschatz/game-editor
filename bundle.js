@@ -23,6 +23,10 @@ Interactions = require('./src/interactions')(Input, SceneManager);
 
 KeyMouse = require('./src/key-mouse-handlers')(SceneManager, Interactions, Input, HashManager);
 
+Number.prototype.mod = function(n) {
+  return ((this % n) + n) % n;
+};
+
 window.startEditor = function() {
   var addColor, addColorToPalette, bindEventsAndPlugins, c, cameraHandlers, changeColor, color, container, exportFunction, fill, getDimensions, init, mouse3D, pickColor, shareDialog, showWelcome, updateColor;
   container = null;
@@ -31,6 +35,39 @@ window.startEditor = function() {
   color = 0;
   fill = true;
   cameraHandlers = function(id, cameraManager) {
+    var updateLabel;
+    updateLabel = function() {
+      var label, phi, theta, _ref;
+      _ref = cameraManager.getRotation(), theta = _ref.theta, phi = _ref.phi;
+      theta = Math.round(theta / 180).mod(4);
+      label = (function() {
+        switch (theta) {
+          case 0:
+            return 'X';
+          case 1:
+            return 'Z';
+          case 2:
+            return '-X';
+          case 3:
+            return '-Z';
+          default:
+            return '??';
+        }
+      })();
+      return $("#" + id + " .axis-label").text(label);
+    };
+    updateLabel();
+    setInterval(updateLabel, 1000);
+    $("#" + id + " .axis-label").on('click', function() {
+      var phi, theta, _ref;
+      _ref = cameraManager.getRotation(), theta = _ref.theta, phi = _ref.phi;
+      theta += 360;
+      if (theta >= 720) {
+        theta -= 720;
+      }
+      cameraManager.rotateCameraTo(theta, phi);
+      return updateLabel();
+    });
     $("#" + id + " .rotate-left").on('click', function() {
       var phi, theta, _ref;
       _ref = cameraManager.getRotation(), theta = _ref.theta, phi = _ref.phi;
@@ -38,7 +75,8 @@ window.startEditor = function() {
       if (theta < 0) {
         theta += 720;
       }
-      return cameraManager.rotateCameraTo(theta, phi);
+      cameraManager.rotateCameraTo(theta, phi);
+      return updateLabel();
     });
     $("#" + id + " .rotate-right").on('click', function() {
       var phi, theta, _ref;
@@ -47,7 +85,8 @@ window.startEditor = function() {
       if (theta >= 720) {
         theta -= 720;
       }
-      return cameraManager.rotateCameraTo(theta, phi);
+      cameraManager.rotateCameraTo(theta, phi);
+      return updateLabel();
     });
     $("#" + id + " .zoom-in").on('click', function() {
       return cameraManager.zoom(-100);
@@ -58,6 +97,11 @@ window.startEditor = function() {
   };
   cameraHandlers('axis-camera-controls', AxisCamera);
   cameraHandlers('main-camera-controls', MainCamera);
+  $('#axis-camera-controls .rotate-main').on('click', function() {
+    var phi, theta, _ref;
+    _ref = AxisCamera.getRotation(), theta = _ref.theta, phi = _ref.phi;
+    return MainCamera.rotateCameraTo(theta, phi);
+  });
   showWelcome = function() {
     var seenWelcome;
     seenWelcome = localStorage.getItem("seenWelcome");
@@ -128,11 +172,34 @@ window.startEditor = function() {
     return false;
   };
   pickColor = function(e) {
-    var idx, targetEl;
+    var idx, sort, targetEl, x, x1, x2, y, y1, y2, z, z1, z2, _i, _j, _k, _ref, _ref1, _ref2, _ref3, _ref4;
     targetEl = $(e.currentTarget);
     idx = +targetEl.find(".color").attr("data-color");
     ColorManager.currentColor = idx;
     SceneManager.brush.children[0].material.color.setRGB(ColorManager.colors[idx][0], ColorManager.colors[idx][1], ColorManager.colors[idx][2]);
+    if (Input.startPosition && Input.endPosition) {
+      sort = function(a, b) {
+        if (a < b) {
+          return [a, b];
+        }
+        return [b, a];
+      };
+      _ref = Input.startPosition, x1 = _ref.x, y1 = _ref.y, z1 = _ref.z;
+      _ref1 = Input.endPosition, x2 = _ref1.x, y2 = _ref1.y, z2 = _ref1.z;
+      Input.startPosition = null;
+      Input.endPosition = null;
+      Interactions.removeRectangle();
+      _ref2 = sort(x1, x2), x1 = _ref2[0], x2 = _ref2[1];
+      _ref3 = sort(y1, y2), y1 = _ref3[0], y2 = _ref3[1];
+      _ref4 = sort(z1, z2), z1 = _ref4[0], z2 = _ref4[1];
+      for (x = _i = x1; _i <= x2; x = _i += 50) {
+        for (y = _j = y1; _j <= y2; y = _j += 50) {
+          for (z = _k = z1; _k <= z2; z = _k += 50) {
+            SceneManager.addVoxel(x, y, z, ColorManager.colors[idx]);
+          }
+        }
+      }
+    }
   };
   bindEventsAndPlugins = function() {
     var actionsMenu;
@@ -36778,7 +36845,9 @@ module.exports = function(THREE) {
     onMouseDownPosition: new THREE.Vector2(),
     onMouseDownPhi: 60,
     onMouseDownTheta: 45,
-    mouse2D: new THREE.Vector3(0, 10000, 0.5)
+    mouse2D: new THREE.Vector3(0, 10000, 0.5),
+    startPosition: null,
+    endPosition: null
   };
 };
 
@@ -36796,8 +36865,14 @@ module.exports = function(Input, SceneManager) {
   return new (Interactions = (function() {
     function Interactions() {}
 
+    Interactions.prototype.removeRectangle = function() {
+      if (this.rectangle) {
+        return SceneManager.scene.remove(this.rectangle);
+      }
+    };
+
     Interactions.prototype.interact = function() {
-      var intersect, newCube, normal, position, updateBrush;
+      var THREE, bbox, brushMaterials, cube, depth, height, intersect, newCube, normal, position, updateBrush, width, x1, x2, y1, y2, z1, z2, _ref, _ref1, _ref2;
       if (!MainCamera.raycaster) {
         return;
       }
@@ -36807,16 +36882,16 @@ module.exports = function(Input, SceneManager) {
       }
       intersect = MainCamera.getIntersecting();
       if (intersect) {
+        normal = intersect.face.normal.clone();
+        normal.applyMatrix4(intersect.object.matrixRotationWorld);
+        position = new (SceneManager.THREE().Vector3)().addVectors(intersect.point, normal);
         updateBrush = function() {
           SceneManager.brush.position.x = Math.floor(position.x / 50) * 50 + 25;
           SceneManager.brush.position.y = Math.floor(position.y / 50) * 50 + 25;
           SceneManager.brush.position.z = Math.floor(position.z / 50) * 50 + 25;
         };
-        normal = intersect.face.normal.clone();
-        normal.applyMatrix4(intersect.object.matrixRotationWorld);
-        position = new (SceneManager.THREE().Vector3)().addVectors(intersect.point, normal);
-        newCube = [Math.floor(position.x / 50), Math.floor(position.y / 50), Math.floor(position.z / 50)];
         if (Input.isAltDown) {
+          newCube = [Math.floor(position.x / 50), Math.floor(position.y / 50), Math.floor(position.z / 50)];
           if (!SceneManager.brush.currentCube) {
             SceneManager.brush.currentCube = newCube;
           }
@@ -36834,7 +36909,8 @@ module.exports = function(Input, SceneManager) {
           }
           updateBrush();
           HashManager.updateHash();
-          return SceneManager.brush.currentCube = newCube;
+          SceneManager.brush.currentCube = newCube;
+          return;
         } else if (Input.isShiftDown) {
           if (intersect.object !== SceneManager.plane) {
             this._objectHovered = intersect.object;
@@ -36842,6 +36918,52 @@ module.exports = function(Input, SceneManager) {
             SceneManager.brush.position.y = 2000;
             return;
           }
+        } else if (Input.startPosition && Input.isMouseDown) {
+          this.removeRectangle();
+          THREE = SceneManager.THREE();
+          x1 = Math.floor(Input.startPosition.x / 50) * 50 + 25;
+          y1 = Math.floor(Input.startPosition.y / 50) * 50 + 25;
+          z1 = Math.floor(Input.startPosition.z / 50) * 50 + 25;
+          x2 = Math.floor(position.x / 50) * 50 + 25;
+          y2 = Math.floor(position.y / 50) * 50 + 25;
+          z2 = Math.floor(position.z / 50) * 50 + 25;
+          Input.endPosition = {
+            x: x2,
+            y: y2,
+            z: z2
+          };
+          bbox = function(x1, x2) {
+            if (x1 <= x2) {
+              return [x1 - 25, x2 + 25];
+            } else {
+              return [x1 + 25, x2 - 25];
+            }
+          };
+          _ref = bbox(x1, x2), x1 = _ref[0], x2 = _ref[1];
+          _ref1 = bbox(y1, y2), y1 = _ref1[0], y2 = _ref1[1];
+          _ref2 = bbox(z1, z2), z1 = _ref2[0], z2 = _ref2[1];
+          width = Math.abs(x2 - x1);
+          height = Math.abs(y2 - y1);
+          depth = Math.abs(z2 - z1);
+          cube = new THREE.CubeGeometry(width, height, depth);
+          brushMaterials = [
+            new THREE.MeshBasicMaterial({
+              vertexColors: THREE.VertexColors,
+              opacity: 0.5,
+              transparent: true
+            }), new THREE.MeshBasicMaterial({
+              color: 0x000000,
+              wireframe: true
+            })
+          ];
+          brushMaterials[0].color.setRGB(0, 0, 0);
+          this.rectangle = THREE.SceneUtils.createMultiMaterialObject(cube, brushMaterials);
+          this.rectangle.position = {
+            x: (x2 - x1) / 2 + x1,
+            y: (y2 - y1) / 2 + y1,
+            z: (z2 - z1) / 2 + z1
+          };
+          SceneManager.scene.add(this.rectangle);
         } else {
           updateBrush();
           return;
@@ -36900,7 +37022,7 @@ module.exports = function(SceneManager, Interactions, Input, HashManager) {
           MainCamera.container.classList.remove('rotatable');
         }
       }
-      if (Input.isMouseDown === 1) {
+      if (Input.isMouseRotating) {
         if (!intersecting) {
           theta = -((event.clientX - Input.onMouseDownPosition.x) * 0.5) + Input.onMouseDownTheta;
           phi = ((event.clientY - Input.onMouseDownPosition.y) * 0.5) + Input.onMouseDownPhi;
@@ -36914,17 +37036,35 @@ module.exports = function(SceneManager, Interactions, Input, HashManager) {
     };
 
     KeyMouseHandlers.prototype.onDocumentMouseDown = function(event) {
+      var intersect, normal, phi, position, theta, _ref;
       event.preventDefault();
       Input.isMouseDown = event.which;
-      Input.onMouseDownTheta = MainCamera.getRotation().theta;
-      Input.onMouseDownPhi = MainCamera.getRotation().phi;
+      _ref = MainCamera.getRotation(), theta = _ref.theta, phi = _ref.phi;
+      Input.onMouseDownTheta = theta;
+      Input.onMouseDownPhi = phi;
       Input.onMouseDownPosition.x = event.clientX;
       Input.onMouseDownPosition.y = event.clientY;
-      Input.isMouseRotating = !MainCamera.getIntersecting();
+      Input.startPosition = null;
+      Input.endPosition = null;
+      Interactions.removeRectangle();
+      intersect = MainCamera.getIntersecting();
+      if (intersect) {
+        normal = intersect.face.normal.clone();
+        normal.applyMatrix4(intersect.object.matrixRotationWorld);
+        position = new (SceneManager.THREE().Vector3)().addVectors(intersect.point, normal);
+        position.x = Math.floor(position.x / 50) * 50 + 25;
+        position.y = Math.floor(position.y / 50) * 50 + 25;
+        position.z = Math.floor(position.z / 50) * 50 + 25;
+        Input.startPosition = position;
+        Input.isMouseRotating = false;
+      } else {
+        Input.startPosition = null;
+        Input.isMouseRotating = Input.isMouseDown === 1;
+      }
     };
 
     KeyMouseHandlers.prototype.onDocumentMouseUp = function(event) {
-      var intersect;
+      var color, intersect, x, y, z, _ref;
       event.preventDefault();
       Input.isMouseDown = false;
       Input.isMouseRotating = false;
@@ -36941,8 +37081,10 @@ module.exports = function(SceneManager, Interactions, Input, HashManager) {
             SceneManager.scene.remove(intersect.object);
           }
         } else {
-          if (SceneManager.brush.position.y !== 2000) {
-            SceneManager.addVoxel(SceneManager.brush.position.x, SceneManager.brush.position.y, SceneManager.brush.position.z, ColorManager.colors[ColorManager.currentColor]);
+          _ref = SceneManager.brush.position, x = _ref.x, y = _ref.y, z = _ref.z;
+          color = ColorManager.colors[ColorManager.currentColor];
+          if (y !== 2000) {
+            SceneManager.addVoxel(x, y, z, color);
           }
         }
       }
