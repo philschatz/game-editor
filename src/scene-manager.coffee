@@ -109,16 +109,16 @@ module.exports = (THREE, Input) ->
       wireframeMaterial = new THREE.MeshBasicMaterial(wireframeOptions)
 
       # col = colors[c] or colors[0]
-      cubeMaterial.color.setRGB col[0], col[1], col[2]
+      cubeMaterial.color.setRGB(col[0], col[1], col[2])
       wireframeMaterial = new THREE.MeshBasicMaterial(wireframeOptions)
-      wireframeMaterial.color.setRGB col[0] - 0.05, col[1] - 0.05, col[2] - 0.05
+      wireframeMaterial.color.setRGB(col[0] - 0.05, col[1] - 0.05, col[2] - 0.05)
       voxel = new THREE.Mesh(@_cube, cubeMaterial)
       voxel.wireMesh = new THREE.Mesh(wireframeCube, wireframeMaterial)
       voxel.isVoxel = true
       voxel.position.x = x
       voxel.position.y = y
       voxel.position.z = z
-      voxel.wireMesh.position.copy voxel.position
+      voxel.wireMesh.position.copy(voxel.position)
       voxel.wireMesh.visible = @_showWireframe
       voxel.matrixAutoUpdate = false
       voxel.updateMatrix()

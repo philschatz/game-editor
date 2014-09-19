@@ -35,7 +35,8 @@ module.exports = (SceneManager, Interactions, Input, HashManager) ->
           MainCamera.container.classList.add 'rotatable'
         else
           MainCamera.container.classList.remove 'rotatable'
-      if Input.isMouseDown is 1 # left click
+
+      if Input.isMouseRotating # Input.isMouseDown is 1 # left click
 
         # Rotate only if you clicked outside a block
         unless intersecting
@@ -57,11 +58,27 @@ module.exports = (SceneManager, Interactions, Input, HashManager) ->
     onDocumentMouseDown: (event) ->
       event.preventDefault()
       Input.isMouseDown = event.which
-      Input.onMouseDownTheta = MainCamera.getRotation().theta
-      Input.onMouseDownPhi = MainCamera.getRotation().phi
+      {theta, phi} = MainCamera.getRotation()
+      Input.onMouseDownTheta = theta
+      Input.onMouseDownPhi = phi
       Input.onMouseDownPosition.x = event.clientX
       Input.onMouseDownPosition.y = event.clientY
-      Input.isMouseRotating = not MainCamera.getIntersecting()
+      Input.startPosition = null
+      Input.endPosition = null
+      Interactions.removeRectangle()
+      intersect = MainCamera.getIntersecting()
+      if intersect
+        normal = intersect.face.normal.clone()
+        normal.applyMatrix4(intersect.object.matrixRotationWorld)
+        position = new (SceneManager.THREE().Vector3)().addVectors(intersect.point, normal)
+        position.x = Math.floor(position.x / 50) * 50 + 25
+        position.y = Math.floor(position.y / 50) * 50 + 25
+        position.z = Math.floor(position.z / 50) * 50 + 25
+        Input.startPosition = position
+        Input.isMouseRotating = false
+      else
+        Input.startPosition = null
+        Input.isMouseRotating = Input.isMouseDown is 1
       return
 
 
@@ -71,6 +88,7 @@ module.exports = (SceneManager, Interactions, Input, HashManager) ->
       Input.isMouseRotating = false
       Input.onMouseDownPosition.x = event.clientX - Input.onMouseDownPosition.x
       Input.onMouseDownPosition.y = event.clientY - Input.onMouseDownPosition.y
+      # Input.startPosition = null
       return  if Input.onMouseDownPosition.length() > 5
       intersect = MainCamera.getIntersecting()
       if intersect
@@ -79,7 +97,9 @@ module.exports = (SceneManager, Interactions, Input, HashManager) ->
             SceneManager.scene.remove intersect.object.wireMesh
             SceneManager.scene.remove intersect.object
         else
-          SceneManager.addVoxel SceneManager.brush.position.x, SceneManager.brush.position.y, SceneManager.brush.position.z, ColorManager.colors[ColorManager.currentColor]  unless SceneManager.brush.position.y is 2000
+          {x, y, z} = SceneManager.brush.position
+          color = ColorManager.colors[ColorManager.currentColor]
+          SceneManager.addVoxel(x, y, z, color)  unless y is 2000
       HashManager.updateHash()
       SceneManager.render()
       Interactions.interact()

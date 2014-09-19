@@ -17,6 +17,11 @@ Interactions = require('./src/interactions')(Input, SceneManager)
 KeyMouse = require('./src/key-mouse-handlers')(SceneManager, Interactions, Input, HashManager)
 
 
+# Stupid negative modulo in JS
+Number::mod = (n) ->
+  ((this % n) + n) % n
+
+
 window.startEditor = ->
   container = null
   shareDialog = null
@@ -32,7 +37,7 @@ window.startEditor = ->
 
     updateLabel = ->
       {theta, phi} = cameraManager.getRotation()
-      theta = (theta / 180) % 4
+      theta = Math.round(theta / 180).mod(4)
       label = switch theta
         when 0 then 'X'
         when 1 then 'Z'
@@ -42,6 +47,7 @@ window.startEditor = ->
       $("##{id} .axis-label").text(label)
 
     updateLabel()
+    setInterval updateLabel, 1000
 
     $("##{id} .axis-label").on 'click', ->
       {theta, phi} = cameraManager.getRotation()
@@ -72,6 +78,11 @@ window.startEditor = ->
 
   cameraHandlers('axis-camera-controls', AxisCamera)
   cameraHandlers('main-camera-controls', MainCamera)
+
+  $('#axis-camera-controls .rotate-main').on 'click', ->
+    {theta, phi} = AxisCamera.getRotation()
+    MainCamera.rotateCameraTo(theta, phi)
+
 
   showWelcome = ->
     seenWelcome = localStorage.getItem("seenWelcome")
@@ -191,7 +202,25 @@ window.startEditor = ->
     targetEl = $(e.currentTarget)
     idx = +targetEl.find(".color").attr("data-color")
     ColorManager.currentColor = idx
-    SceneManager.brush.children[0].material.color.setRGB ColorManager.colors[idx][0], ColorManager.colors[idx][1], ColorManager.colors[idx][2]
+    SceneManager.brush.children[0].material.color.setRGB(ColorManager.colors[idx][0], ColorManager.colors[idx][1], ColorManager.colors[idx][2])
+    if Input.startPosition and Input.endPosition
+      # Fill in with voxels
+      sort = (a, b) ->
+        return [a, b] if a < b
+        return [b, a]
+      {x:x1, y:y1, z:z1} = Input.startPosition
+      {x:x2, y:y2, z:z2} = Input.endPosition
+      Input.startPosition = null
+      Input.endPosition = null
+      Interactions.removeRectangle()
+
+      [x1, x2] = sort(x1, x2)
+      [y1, y2] = sort(y1, y2)
+      [z1, z2] = sort(z1, z2)
+      for x in [x1..x2] by 50
+        for y in [y1..y2] by 50
+          for z in [z1..z2] by 50
+            SceneManager.addVoxel(x, y, z, ColorManager.colors[idx])
     return
 
 
