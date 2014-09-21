@@ -50,6 +50,22 @@ window.startEditor = ->
     for i in SceneManager.scene.children
       scene.remove(SceneManager.scene.children[0]) if SceneManager.scene.children[0]
 
+    removeDuplicateFaces = (geometry) ->
+      for i in [0..geometry.faces.length - 1]
+        centroid = geometry.faces[i].centroid
+        for j in [0..i - 1]
+          f2 = geometry.faces[j]
+          if f2
+            centroid2 = f2.centroid
+            if centroid.equals(centroid2)
+              delete geometry.faces[i]
+              delete geometry.faces[j]
+        geometry.faces = geometry.faces.filter( (a) -> return a)
+        return geometry
+
+    removeDuplicateFaces(geo)
+
+
 
     cubeMaterial = new SceneManager._CubeMaterial(
       vertexColors: THREE.VertexColors
