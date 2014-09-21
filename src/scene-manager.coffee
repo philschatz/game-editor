@@ -19,7 +19,7 @@ module.exports = (THREE, Input) ->
 
 
     _CubeMaterial: THREE.MeshBasicMaterial
-    _cube: new THREE.CubeGeometry( 50, 50, 50 )
+    _cube: new THREE.BoxGeometry( 50, 50, 50 )
     _axisCamera: null
     _projector: null
     _size: 500
@@ -100,7 +100,7 @@ module.exports = (THREE, Input) ->
         vertexColors: THREE.VertexColors
         transparent: true
       )
-      wireframeCube = new THREE.CubeGeometry(50.5, 50.5 , 50.5)
+      wireframeCube = new THREE.BoxGeometry(50.5, 50.5 , 50.5)
       wireframeOptions =
         color: 0x000000
         wireframe: true
@@ -131,10 +131,13 @@ module.exports = (THREE, Input) ->
 
     render: ->
       return console.warn 'Trying to render scene before initialized' unless @_camera
+      windowWidth = @_container.clientWidth
+      windowHeight = @_container.clientHeight
+
       @_camera.lookAt(@_target)
       MainCamera.setRaycaster(@_projector.pickingRay(Input.mouse2D.clone(), @_camera))
-      @renderer.setViewport()
-      @renderer.setScissor() # TODO: this might ned to become 0,0,@renderer.domElement.width,@renderer.domElement.height
+      @renderer.setViewport(0, 0, windowWidth, windowHeight)
+      @renderer.setScissor(0, 0, windowWidth, windowHeight)
       @renderer.enableScissorTest(false)
       @renderer.setClearColor(new THREE.Color().setRGB(1, 1, 1))
       @renderer.render(@scene, @_camera)
@@ -142,8 +145,6 @@ module.exports = (THREE, Input) ->
       # return;
 
       # @_camera 2
-      windowWidth = @_container.clientWidth
-      windowHeight = @_container.clientHeight
       view =
         left: 3 / 4
         bottom: 0

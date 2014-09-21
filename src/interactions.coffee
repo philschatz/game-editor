@@ -80,7 +80,7 @@ module.exports = (Input, SceneManager) ->
             width   = Math.abs(x2 - x1)
             height  = Math.abs(y2 - y1)
             depth   = Math.abs(z2 - z1)
-            cube = new THREE.CubeGeometry( width, height, depth )
+            cube = new THREE.BoxGeometry( width, height, depth )
 
 
             brushMaterials = [
