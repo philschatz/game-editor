@@ -1,10 +1,15 @@
-THREE = require("three")
+THREE = window.THREE
 raf = require("raf")
 
 # var lsb = require('lsb')
 # var Convert = require('voxel-critter/lib/convert.js')
 # var ndarray = require('ndarray')
 # var ndarrayFill = require('ndarray-fill')
+
+require './js/exporters/OBJExporter'
+require './js/loaders/OBJLoader'
+# require './js/loaders/OBJLoader2'
+
 ColorUtils = require './src/color-utils'
 ColorManager = require './src/color-manager'
 AxisCamera = require './src/axis-camera'
@@ -31,6 +36,33 @@ window.startEditor = ->
   color = 0
 
   fill = true
+
+
+  window.exportGeometry = ->
+    geo = new THREE.Geometry()
+    for i in SceneManager.scene.children
+      if i?.isVoxel
+        c = i.material.color
+        for f in i.geometry.faces
+          # f.vertexColors = [c, c, c]
+          f.color = c
+        THREE.GeometryUtils.merge(geo, i)
+    for i in SceneManager.scene.children
+      scene.remove(SceneManager.scene.children[0]) if SceneManager.scene.children[0]
+
+
+    cubeMaterial = new SceneManager._CubeMaterial(
+      vertexColors: THREE.VertexColors
+      transparent: true
+    )
+    # json = new THREE.GeometryExporter().parse(geo)
+    # geo2 = new THREE.GeometryLoader().parse(json)
+
+    txt = new THREE.OBJExporter().parse(geo)
+    geo2 = new THREE.OBJLoader().parse(txt)
+
+    mesh = new THREE.Mesh(geo, cubeMaterial)
+    scene.add(mesh)
 
 
   cameraHandlers = (id, cameraManager) ->
