@@ -4,7 +4,7 @@
   "dependencies": {
     "ndarray-stl": "^1.0.1",
     "raf": "0.0.1",
-    "three": "0.55.0"
+    "three": "0.58"
   },
   "devDependencies": {
     "beefy": "0.0.11",

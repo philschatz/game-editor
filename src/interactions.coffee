@@ -15,7 +15,11 @@ module.exports = (Input, SceneManager) ->
         intersect = MainCamera.getIntersecting()
         if intersect
           normal = intersect.face.normal.clone()
-          normal.applyMatrix4(intersect.object.matrixRotationWorld)
+          # normal.applyMatrix4(intersect.object.matrixRotationWorld)
+          matrixRotationWorld = new (SceneManager.THREE().Matrix4)()
+          matrixRotationWorld.extractRotation( intersect.object.matrixWorld )
+          normal.applyMatrix4(matrixRotationWorld)
+
           position = new (SceneManager.THREE().Vector3)().addVectors(intersect.point, normal)
           updateBrush = ->
             SceneManager.brush.position.x = Math.floor(position.x / 50) * 50 + 25
