@@ -161,6 +161,7 @@ module.exports = (SceneManager) ->
           current.c += data[i++] - 32  if code.charAt(4) is '1'
 
           if code.charAt(0) is '1'
+            throw new Error('BUG: no negative colors') if current.c < 0
             while !ColorManager.colors[current.c]
               ColorManager.colors.push [
                 0.0
