@@ -6,9 +6,14 @@ raf = require("raf")
 # var ndarray = require('ndarray')
 # var ndarrayFill = require('ndarray-fill')
 
-require './js/exporters/OBJExporter'
-require './js/loaders/OBJLoader'
-# require './js/loaders/OBJLoader2'
+# require './js/exporters/OBJExporter'
+# require './js/loaders/OBJLoader'
+# # require './js/loaders/OBJLoader2'
+require './js/exporters/BufferGeometryExporter'
+require './js/exporters/GeometryExporter'
+require './js/exporters/MaterialExporter'
+require './js/exporters/ObjectExporter'
+require './js/loaders/ObjectLoader'
 
 ColorUtils = require './src/color-utils'
 ColorManager = require './src/color-manager'
@@ -60,10 +65,11 @@ window.startEditor = ->
             if centroid.equals(centroid2)
               delete geometry.faces[i]
               delete geometry.faces[j]
-        geometry.faces = geometry.faces.filter( (a) -> return a)
+              console.log 'removed duplicate'
+        geometry.faces = geometry.faces.filter( (a) -> return a if a)
         return geometry
 
-    removeDuplicateFaces(geo)
+    # removeDuplicateFaces(geo)
 
 
 
@@ -74,11 +80,18 @@ window.startEditor = ->
     # json = new THREE.GeometryExporter().parse(geo)
     # geo2 = new THREE.GeometryLoader().parse(json)
 
-    txt = new THREE.OBJExporter().parse(geo)
-    geo2 = new THREE.OBJLoader().parse(txt)
+    # txt = new THREE.OBJExporter().parse(geo)
+    # geo2 = new THREE.OBJLoader().parse(txt)
 
     mesh = new THREE.Mesh(geo, cubeMaterial)
-    scene.add(mesh)
+    txt = new THREE.ObjectExporter().parse(mesh)
+    geo2 = new THREE.ObjectLoader().parse(txt)
+
+    console.log JSON.stringify(txt)
+
+    # mesh = new THREE.Mesh(geo2, cubeMaterial)
+    # scene.add(mesh)
+    scene.add(geo2)
 
 
   cameraHandlers = (id, cameraManager) ->
