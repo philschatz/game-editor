@@ -52,9 +52,7 @@ module.exports = class MainCamera
   getIntersecting: ->
     intersectable = []
     @_scene.children.map (c) ->
-      if c.isVoxel or c.isPlane
-        intersectable.push c
-      else if c.isWireMesh
+      if c.isVoxel or c.isPlane or c.isWireMesh
         intersectable.push c
       return
 

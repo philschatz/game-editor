@@ -4,7 +4,7 @@ AxisCamera = require './axis-camera'
 VoxelFactory = require './voxel-factory'
 
 module.exports = (THREE, Input) ->
-  VoxelFactory = VoxelFactory(THREE)
+  # VoxelFactory = VoxelFactory(THREE)
   new class SceneManager
 
     # To limit the scope of requiring THREE
@@ -36,7 +36,6 @@ module.exports = (THREE, Input) ->
       MainCamera.updateCamera({x:0, y:0, z:0})
       @_axisCamera = new THREE.OrthographicCamera(@_container.clientWidth / -2, @_container.clientWidth / 2, @_container.clientHeight / 2, @_container.clientHeight / -2, 1, 10000)
 
-      @_axisCamera = new THREE.OrthographicCamera(@_container.clientWidth / -2, @_container.clientWidth / 2, @_container.clientHeight / 2, @_container.clientHeight / -2, 1, 10000)
       AxisCamera.init(@scene, @_axisCamera, @_container, @_target)
       AxisCamera.updateCamera({x:0, y:0, z:0})
 
@@ -61,6 +60,7 @@ module.exports = (THREE, Input) ->
       @plane.rotation.x = -Math.PI / 2
       @plane.visible = false
       @plane.isPlane = true
+      @plane.name = 'plane'
       @scene.add(@plane)
       brushMaterials = [
         new @_CubeMaterial(
@@ -104,31 +104,29 @@ module.exports = (THREE, Input) ->
       wireframeOptions =
         color: 0xEEEEEE
         wireframe: true
-        wireframeLinewidth: 0
+        wireframeLinewidth: 1
         opacity: 0.05
 
       wireframeMaterial = new THREE.MeshBasicMaterial(wireframeOptions)
       # wireframeMaterial.color.setRGB(0, 0, 0) # or color - .05
 
-      voxel = VoxelFactory.freshVoxel(color)
+      voxel = VoxelFactory.freshVoxel(color, true) # true = addWireframe
 
-      voxel.wireMesh = new THREE.Mesh(wireframeCube, wireframeMaterial)
       voxel.isVoxel = true
-      voxel.wireMesh.myVoxel = voxel
-      voxel.wireMesh.isWireMesh = true
       voxel.position.x += x
       voxel.position.y += y
       voxel.position.z += z
-      voxel.wireMesh.position.x = x
-      voxel.wireMesh.position.y = y
-      voxel.wireMesh.position.z = z
-      voxel.wireMesh.visible = @_showWireframe
+      if voxel.wireMesh
+        voxel.wireMesh.position.x = x
+        voxel.wireMesh.position.y = y
+        voxel.wireMesh.position.z = z
+        voxel.wireMesh.visible = @_showWireframe
       voxel.matrixAutoUpdate = false
       voxel.updateMatrix()
-      voxel.name = x + ',' + y + ',' + z
+      voxel.name ?= x + ',' + y + ',' + z
       voxel.overdraw = true
       @scene.add(voxel)
-      @scene.add(voxel.wireMesh)
+      @scene.add(voxel.wireMesh) if voxel.wireMesh
       return
 
 

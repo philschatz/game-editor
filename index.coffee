@@ -15,6 +15,9 @@ require './js/exporters/MaterialExporter'
 require './js/exporters/ObjectExporter'
 require './js/loaders/ObjectLoader'
 
+
+
+
 ColorUtils = require './src/color-utils'
 ColorManager = require './src/color-manager'
 AxisCamera = require './src/axis-camera'
@@ -26,6 +29,8 @@ Interactions = require('./src/interactions')(Input, SceneManager)
 
 KeyMouse = require('./src/key-mouse-handlers')(SceneManager, Interactions, Input, HashManager)
 
+VoxelFactory = require './src/voxel-factory'
+IconMaker = require './src/icon-maker'
 
 # Stupid negative modulo in JS
 Number::mod = (n) ->
@@ -47,11 +52,24 @@ window.startEditor = ->
     geo = new THREE.Geometry()
     for i in SceneManager.scene.children
       if i?.isVoxel
-        c = i.material.color
-        for f in i.geometry.faces
-          # f.vertexColors = [c, c, c]
-          f.color = c
-        THREE.GeometryUtils.merge(geo, i)
+        if i.material
+          c = i.material.color
+          for f in i.geometry.faces
+            # f.vertexColors = [c, c, c]
+            f.color = c
+          THREE.GeometryUtils.merge(geo, i)
+
+        else if i instanceof THREE.Object3D
+          # throw new Error('whoops, looks like this is not a ladder...') unless i.children.length is 2
+          child = i.children[0] # TODO:
+          mesh = child.clone()
+          mesh.position.addVectors(mesh.position, i.position)
+          THREE.GeometryUtils.merge(geo, mesh)
+
+        else
+          throw new Error('whoops!')
+
+
     for i in SceneManager.scene.children
       scene.remove(SceneManager.scene.children[0]) if SceneManager.scene.children[0]
 
@@ -92,6 +110,21 @@ window.startEditor = ->
     # mesh = new THREE.Mesh(geo2, cubeMaterial)
     # scene.add(mesh)
     scene.add(geo2)
+
+
+  window.exportImage = ->
+    for color in [0..12]
+      image = new Image()
+      image.src = IconMaker.renderVoxel(VoxelFactory.freshVoxel(color, true))
+      document.body.appendChild(image)
+
+
+
+
+
+  exportImage()
+  # return
+
 
 
   cameraHandlers = (id, cameraManager) ->
