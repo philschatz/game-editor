@@ -30,7 +30,6 @@ module.exports = (THREE) -> new class VoxelFactory
       voxel.scale.y = 1/16
       voxel.scale.z = 1/16
       voxel.position.y = -25
-      voxel.position.z = -6
 
       wireframeCube = new THREE.BoxGeometry(50.5, 50.5 , 50.5)
       wireframeOptions =

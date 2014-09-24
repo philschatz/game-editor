@@ -115,6 +115,14 @@ module.exports = (SceneManager, Interactions, Input, HashManager) ->
       return
 
 
+    translateVoxels = (vector) ->
+      for child in SceneManager.scene.children
+        if child.isVoxel
+          child.position.addVectors(child.position, vector)
+          child.wireMesh.position.addVectors(child.wireMesh.position, vector)
+
+      HashManager.updateHash()
+
 
     onDocumentKeyDown: (event) ->
       switch event.keyCode
@@ -122,6 +130,19 @@ module.exports = (SceneManager, Interactions, Input, HashManager) ->
           MainCamera.zoom(100)
         when 187
           MainCamera.zoom(-100)
+        # Move the entire level
+        when 'A'.charCodeAt(0)
+          translateVoxels(new THREE.Vector3(-50, 0, 0))
+        when 'D'.charCodeAt(0)
+          translateVoxels(new THREE.Vector3(50, 0, 0))
+        when 'W'.charCodeAt(0)
+          translateVoxels(new THREE.Vector3(0, 50, 0))
+        when 'S'.charCodeAt(0)
+          translateVoxels(new THREE.Vector3(0, -50, 0))
+        when 'Q'.charCodeAt(0)
+          translateVoxels(new THREE.Vector3(0, 0, -50))
+        when 'E'.charCodeAt(0)
+          translateVoxels(new THREE.Vector3(0, 0, 50))
         # when 49
         #   exports.setColor 0
         # when 50
