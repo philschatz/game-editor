@@ -40,7 +40,7 @@ module.exports = (Input, SceneManager) ->
                   SceneManager.scene.remove intersect.object.wireMesh
                   SceneManager.scene.remove intersect.object
               else
-                SceneManager.addVoxel SceneManager.brush.position.x, SceneManager.brush.position.y, SceneManager.brush.position.z, ColorManager.colors[ColorManager.currentColor]  unless SceneManager.brush.position.y is 2000
+                SceneManager.addVoxel SceneManager.brush.position.x, SceneManager.brush.position.y, SceneManager.brush.position.z, ColorManager.currentColor  unless SceneManager.brush.position.y is 2000
             updateBrush()
             HashManager.updateHash()
             SceneManager.brush.currentCube = newCube

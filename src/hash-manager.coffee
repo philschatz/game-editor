@@ -44,20 +44,22 @@ module.exports = (SceneManager) ->
           current.x = (object.position.x - 25) / 50
           current.y = (object.position.y - 25) / 50
           current.z = (object.position.z - 25) / 50
-          colorString = [
-            'r'
-            'g'
-            'b'
-          ].map((col) ->
-            object.material.color[col]
-          ).join('')
+
+          current.c = object.colorCode
+          # colorString = [
+          #   'r'
+          #   'g'
+          #   'b'
+          # ].map((col) ->
+          #   object.material.color[col]
+          # ).join('')
 
           # this string matching of floating point values to find an index seems a little sketchy
           i = 0
 
-          while i < ColorManager.colors.length
-            current.c = i  if ColorManager.colors[i].join('') is colorString
-            i++
+          # while i < ColorManager.colors.length
+          #   current.c = i  if ColorManager.colors[i].join('') is colorString
+          #   i++
           voxels.push
             x: current.x
             y: current.y + 1
@@ -147,7 +149,7 @@ module.exports = (SceneManager) ->
         current =
           x: 0
           y: 0
-          z: 0
+          z: 0 # 64 + 7
           c: 0
 
         data = decode(chunks[frameMask])
@@ -168,6 +170,6 @@ module.exports = (SceneManager) ->
                 0.0
                 0.0
               ]
-            SceneManager.addVoxel current.x * 50 + 25, current.y * 50 + 25, current.z * 50 + 25, ColorManager.colors[current.c]
+            SceneManager.addVoxel current.x * 50 + 25, current.y * 50 + 25, current.z * 50 + 25, current.c
       @updateHash(ColorManager.colors)
       return

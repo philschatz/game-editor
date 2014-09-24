@@ -19,7 +19,7 @@ module.exports = class MainCamera
 
     distance = @camera.position.distanceTo(origin)
     tooFar = distance > 6000
-    tooClose = Math.abs(@camera.top) < 500
+    tooClose = Math.abs(@camera.top) < 200
     return  if delta > 0 and tooFar
     return  if delta < 0 and tooClose
     @radius = distance # for mouse drag calculations to be correct
@@ -52,7 +52,10 @@ module.exports = class MainCamera
   getIntersecting: ->
     intersectable = []
     @_scene.children.map (c) ->
-      intersectable.push c  if c.isVoxel or c.isPlane
+      if c.isVoxel or c.isPlane
+        intersectable.push c
+      else if c.isWireMesh
+        intersectable.push c
       return
 
     if @raycaster

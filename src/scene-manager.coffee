@@ -1,7 +1,10 @@
 MainCamera = require './main-camera'
 AxisCamera = require './axis-camera'
 
+VoxelFactory = require './voxel-factory'
+
 module.exports = (THREE, Input) ->
+  VoxelFactory = VoxelFactory(THREE)
   new class SceneManager
 
     # To limit the scope of requiring THREE
@@ -95,30 +98,30 @@ module.exports = (THREE, Input) ->
       @renderer.setSize(@_container.clientWidth, @_container.clientHeight)
 
 
-    addVoxel: (x, y, z, col) ->
-      cubeMaterial = new @_CubeMaterial(
-        vertexColors: THREE.VertexColors
-        transparent: true
-      )
+    addVoxel: (x, y, z, color) ->
+
       wireframeCube = new THREE.BoxGeometry(50.5, 50.5 , 50.5)
       wireframeOptions =
-        color: 0x000000
+        color: 0xEEEEEE
         wireframe: true
-        wireframeLinewidth: 1
-        opacity: 0.8
-      wireframeMaterial = new THREE.MeshBasicMaterial(wireframeOptions)
+        wireframeLinewidth: 0
+        opacity: 0.05
 
-      # col = colors[c] or colors[0]
-      cubeMaterial.color.setRGB(col[0], col[1], col[2])
       wireframeMaterial = new THREE.MeshBasicMaterial(wireframeOptions)
-      wireframeMaterial.color.setRGB(col[0] - 0.05, col[1] - 0.05, col[2] - 0.05)
-      voxel = new THREE.Mesh(@_cube, cubeMaterial)
+      # wireframeMaterial.color.setRGB(0, 0, 0) # or color - .05
+
+      voxel = VoxelFactory.freshVoxel(color)
+
       voxel.wireMesh = new THREE.Mesh(wireframeCube, wireframeMaterial)
       voxel.isVoxel = true
-      voxel.position.x = x
-      voxel.position.y = y
-      voxel.position.z = z
-      voxel.wireMesh.position.copy(voxel.position)
+      voxel.wireMesh.myVoxel = voxel
+      voxel.wireMesh.isWireMesh = true
+      voxel.position.x += x
+      voxel.position.y += y
+      voxel.position.z += z
+      voxel.wireMesh.position.x = x
+      voxel.wireMesh.position.y = y
+      voxel.wireMesh.position.z = z
       voxel.wireMesh.visible = @_showWireframe
       voxel.matrixAutoUpdate = false
       voxel.updateMatrix()

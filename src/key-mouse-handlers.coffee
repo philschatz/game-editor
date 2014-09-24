@@ -97,12 +97,17 @@ module.exports = (SceneManager, Interactions, Input, HashManager) ->
       intersect = MainCamera.getIntersecting()
       if intersect
         if Input.isShiftDown
+          # TODO: Move this logic into a SceneManager.removeVoxel
           unless intersect.object is SceneManager.plane
-            SceneManager.scene.remove intersect.object.wireMesh
-            SceneManager.scene.remove intersect.object
+            if intersect.object.isWireMesh
+              obj = intersect.object.myVoxel
+            else
+              obj = intersect.object
+            SceneManager.scene.remove obj.wireMesh
+            SceneManager.scene.remove obj
         else
           {x, y, z} = SceneManager.brush.position
-          color = ColorManager.colors[ColorManager.currentColor]
+          color = ColorManager.currentColor
           SceneManager.addVoxel(x, y, z, color)  unless y is 2000
       HashManager.updateHash()
       SceneManager.render()

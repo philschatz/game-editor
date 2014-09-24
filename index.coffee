@@ -281,7 +281,7 @@ window.startEditor = ->
       for x in [x1..x2] by 50
         for y in [y1..y2] by 50
           for z in [z1..z2] by 50
-            SceneManager.addVoxel(x, y, z, ColorManager.colors[idx])
+            SceneManager.addVoxel(x, y, z, idx)
     return
 
 
