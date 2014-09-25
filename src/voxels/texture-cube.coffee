@@ -1,22 +1,46 @@
 
 
-module.exports = (textureSides) ->
-  geometry = new THREE.CubeGeometry(50, 50, 50)
-  materials = []
+module.exports = new class TextureCubeBuilder
 
-  # create textures array for all cube sides
-  for i in [0..5]
-     img = new Image()
-     tex = new THREE.Texture(img)
-     img.src = "./src/voxels/textures/#{textureSides[i]}.png"
-     img.tex = tex
+    _materialNames: {} # filename to index
+    _materials: [] # Array of all materials
+    _meshMaterial: null
 
-     img.onload = ->
-        @tex.needsUpdate = true
+    constructor: ->
+      @_meshMaterial = new THREE.MeshFaceMaterial(@_materials)
 
-     mat = new THREE.MeshBasicMaterial(color: 0x00ff00, map: tex, transparent: false, overdraw: true)
-     materials.push(mat)
+    # allMaterials: -> @_materials
+    meshFaceMaterial: -> @_meshMaterial
 
-  cube = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials))
-  cube.name = textureSides[0]
-  cube
+    freshCube: (textureSides) ->
+      geometry = new THREE.CubeGeometry(50, 50, 50)
+
+      alreadyReindexedFaces = []
+      # create textures array for all cube sides
+      for i in [0..5]
+        side = textureSides[i]
+        unless @_materialNames[side]?
+          img = new Image()
+          tex = new THREE.Texture(img)
+          img.src = "./src/voxels/textures/#{side}.png"
+          img.tex = tex
+
+          img.onload = ->
+            @tex.needsUpdate = true
+
+          mat = new THREE.MeshBasicMaterial(color: 0x00ff00, map: tex, transparent: false, overdraw: true)
+          materialIndex = @_materials.length
+          @_materials.push(mat)
+          @_materialNames[side] = materialIndex
+
+        faces = geometry.faces.filter (face) ->
+          if face.materialIndex is i and alreadyReindexedFaces.indexOf(face) < 0
+            return true
+
+        for face in faces
+          face.materialIndex = @_materialNames[side]
+          alreadyReindexedFaces.push(face)
+
+      cube = new THREE.Mesh(geometry, @_meshMaterial)
+      cube.name = textureSides[0]
+      cube

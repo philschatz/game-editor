@@ -1,7 +1,7 @@
 ladderTop     = require './voxels/ladder-top.json' # extension is optional
 ladderBottom  = require './voxels/ladder-bottom.json' # extension is optional
 ladderMiddle  = require './voxels/ladder-middle.json' # extension is optional
-textureCube    = require './voxels/texture-cube'
+TextureCube    = require './voxels/texture-cube'
 
 ColorManager = require './color-manager'
 
@@ -51,12 +51,12 @@ module.exports = new class VoxelFactory
 
 
     @_VOXEL_MAP =
-      'brick-light'   : textureCube(['brick-light-1', 'brick-light-2', 'grass', 'grass', 'brick-light-5', 'brick-light-6'])
-      'brick-medium'  : textureCube(['brick-medium-1', 'brick-medium-2', 'grass', 'grass', 'brick-medium-5', 'brick-medium-6'])
-      'brick-dark'    : textureCube(['brick-dark-1', 'brick-dark-2', 'grass', 'grass', 'brick-dark-5', 'brick-dark-6'])
-      'brick-grasstop': textureCube(['brick-grasstop-1', 'brick-grasstop-2', 'grass', 'grass', 'brick-grasstop-1', 'brick-grasstop-2'])
-      'bridge-post-top': textureCube(['bridge-post-top', 'bridge-post-top', 'grass', 'grass', 'bridge-post-top', 'bridge-post-top'])
-      'bridge-post'   : textureCube(['bridge-post-1', 'bridge-post-1', 'grass', 'grass', 'bridge-post-1', 'bridge-post-1'])
+      'brick-light'   : TextureCube.freshCube(['brick-light-1', 'brick-light-2', 'grass', 'grass', 'brick-light-5', 'brick-light-6'])
+      'brick-medium'  : TextureCube.freshCube(['brick-medium-1', 'brick-medium-2', 'grass', 'grass', 'brick-medium-5', 'brick-medium-6'])
+      'brick-dark'    : TextureCube.freshCube(['brick-dark-1', 'brick-dark-2', 'grass', 'grass', 'brick-dark-5', 'brick-dark-6'])
+      'brick-grasstop': TextureCube.freshCube(['brick-grasstop-1', 'brick-grasstop-2', 'grass', 'grass', 'brick-grasstop-1', 'brick-grasstop-2'])
+      'bridge-post-top': TextureCube.freshCube(['bridge-post-top', 'bridge-post-top', 'grass', 'grass', 'bridge-post-top', 'bridge-post-top'])
+      'bridge-post'   : TextureCube.freshCube(['bridge-post-1', 'bridge-post-1', 'grass', 'grass', 'bridge-post-1', 'bridge-post-1'])
       'ladder-top'    : loader(ladderTop)
       'ladder-bottom' : loader(ladderBottom)
       'ladder-middle' : loader(ladderMiddle)
