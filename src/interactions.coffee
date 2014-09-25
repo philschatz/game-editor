@@ -97,7 +97,7 @@ module.exports = (Input, SceneManager) ->
             brushMaterials[0].color.setRGB(0, 0, 0) # black
             @rectangle = THREE.SceneUtils.createMultiMaterialObject(cube, brushMaterials)
 
-            @rectangle.position = {x:(x2-x1)/2+x1, y:(y2-y1)/2+y1, z:(z2-z1)/2+z1}
+            @rectangle.position.set((x2-x1)/2+x1, (y2-y1)/2+y1, (z2-z1)/2+z1)
             SceneManager.scene.add(@rectangle)
 
           else
