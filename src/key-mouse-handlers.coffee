@@ -103,8 +103,8 @@ module.exports = (SceneManager, Interactions, Input, HashManager) ->
               obj = intersect.object.myVoxel
             else
               obj = intersect.object
-            SceneManager.scene.remove obj.wireMesh
-            SceneManager.scene.remove obj
+            SceneManager.scene.remove(obj.wireMesh) if obj.wireMesh
+            SceneManager.scene.remove(obj)
         else
           {x, y, z} = SceneManager.brush.position
           color = ColorManager.currentColor
@@ -119,7 +119,7 @@ module.exports = (SceneManager, Interactions, Input, HashManager) ->
       for child in SceneManager.scene.children
         if child.isVoxel
           child.position.addVectors(child.position, vector)
-          child.wireMesh.position.addVectors(child.wireMesh.position, vector)
+          child.wireMesh?.position.addVectors(child.wireMesh.position, vector)
 
       HashManager.updateHash()
 
