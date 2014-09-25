@@ -29,8 +29,25 @@ module.exports = (THREE, Input) ->
     _step: 50
     _showWireframe: true
 
-    init: (@_container) ->
+
+    prepare: (@_container) ->
       window.scene = @scene = new THREE.Scene()
+      hasWebGL = (->
+        try
+          return !!window.WebGLRenderingContext and !!document.createElement('canvas').getContext('experimental-webgl')
+        catch e
+          return false
+        return
+      )()
+      if hasWebGL
+        @renderer = new THREE.WebGLRenderer(antialias: true)
+      else
+        @renderer = new THREE.CanvasRenderer()
+      @renderer.setSize(@_container.clientWidth, @_container.clientHeight)
+
+
+    init: (@_container) ->
+      @renderer.setSize(@_container.clientWidth, @_container.clientHeight)
       @_camera = new THREE.OrthographicCamera(@_container.clientWidth / -1, @_container.clientWidth / 1, @_container.clientHeight / 1, @_container.clientHeight / -1, 1, 10000)
       MainCamera.init(@scene, @_camera, @_container, @_target)
       MainCamera.updateCamera({x:0, y:0, z:0})
@@ -84,18 +101,6 @@ module.exports = (THREE, Input) ->
       directionalLight = new THREE.DirectionalLight(0xffffff)
       directionalLight.position.set(1, 0.75, 0.5).normalize()
       @scene.add directionalLight
-      hasWebGL = (->
-        try
-          return !!window.WebGLRenderingContext and !!document.createElement('canvas').getContext('experimental-webgl')
-        catch e
-          return false
-        return
-      )()
-      if hasWebGL
-        @renderer = new THREE.WebGLRenderer(antialias: true)
-      else
-        @renderer = new THREE.CanvasRenderer()
-      @renderer.setSize(@_container.clientWidth, @_container.clientHeight)
 
 
     addVoxel: (x, y, z, color) ->

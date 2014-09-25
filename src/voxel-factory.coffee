@@ -56,7 +56,7 @@ module.exports = new class VoxelFactory
       'brick-dark'    : TextureCube.freshCube(['brick-dark-1', 'brick-dark-2', 'grass', 'grass', 'brick-dark-5', 'brick-dark-6'])
       'brick-grasstop': TextureCube.freshCube(['brick-grasstop-1', 'brick-grasstop-2', 'grass', 'grass', 'brick-grasstop-1', 'brick-grasstop-2'])
       'bridge-post-top': TextureCube.freshCube(['bridge-post-top', 'bridge-post-top', 'grass', 'grass', 'bridge-post-top', 'bridge-post-top'])
-      'bridge-post'   : TextureCube.freshCube(['bridge-post-1', 'bridge-post-1', 'grass', 'grass', 'bridge-post-1', 'bridge-post-1'])
+      'bridge-post'   : TextureCube.freshCube(['bridge-post-1', 'bridge-post-2', 'grass', 'grass', 'bridge-post-1', 'bridge-post-2'])
       'ladder-top'    : loader(ladderTop)
       'ladder-bottom' : loader(ladderBottom)
       'ladder-middle' : loader(ladderMiddle)

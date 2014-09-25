@@ -112,16 +112,22 @@ window.startEditor = ->
 
 
   window.exportImage = ->
+    iconMaker = new IconMaker(SceneManager)
     for color in [0..12]
       image = new Image()
-      image.src = IconMaker.renderVoxel(VoxelFactory.freshVoxel(color, true))
-      document.body.appendChild(image)
+      image.src = iconMaker.renderVoxel(VoxelFactory.freshVoxel(color, true))
+      $img = $(image)
+      $img.attr('data-color', ''+color)
+      $img.addClass('color')
+      $("i.color[data-color=#{color}]").replaceWith($img)
+
+    iconMaker.dispose()
 
 
 
 
 
-  exportImage()
+  # exportImage()
   # return
 
 
@@ -376,6 +382,9 @@ window.startEditor = ->
 
     bindEventsAndPlugins()
     container = document.getElementById("editor-area")
+    SceneManager.prepare(container)
+    # build all the pallette pngs
+    exportImage()
     SceneManager.init(container)
     container.appendChild(SceneManager.renderer.domElement)
     KeyMouse.attachEvents()
@@ -440,7 +449,10 @@ window.startEditor = ->
     addColorToPalette c
     c++
   showWelcome()
-  init()
+
+  # Wait until all the texture files have loaded
+  setTimeout(init, 2000)
+
   raf(window).on "data", -> SceneManager.render()
   exports.viewInstructions = ->
     $("#welcome").modal()

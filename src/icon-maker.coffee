@@ -1,16 +1,18 @@
-module.exports = new class IconMaker
+module.exports = class IconMaker
   width: 64
   height: 64
-  constructor: ->
-    @scene = new THREE.Scene()
+  constructor: (SceneManager) ->
+    @scene = SceneManager.scene
     @camera = new THREE.OrthographicCamera(50/-2, 50/2, 50/-2, 50/2, 1, 1000)
     @camera.aspect = @width / @height
     @camera.position.z = -500
     # Move the @camera because some voxels are shifted (TODO: Fix voxels so they are always centered)
 
-    @scene.add(new THREE.AmbientLight(0x606060))
+    @ambient = new THREE.AmbientLight(0x606060)
+    @scene.add(@ambient)
     # @renderer = new THREE.WebGLRenderer(antialias: true)
-    @renderer = new THREE.CanvasRenderer()
+    # @renderer = new THREE.CanvasRenderer()
+    @renderer = SceneManager.renderer
     @renderer.setSize(@width, @height)
     @renderer.setClearColor(new THREE.Color().setRGB(1,1,1))
 
@@ -20,6 +22,8 @@ module.exports = new class IconMaker
     @ctx = @canvas.getContext('2d')
 
   dispose: ->
+    @scene.remove(@ambient)
+    delete @ambient
     delete @scene
     delete @camera
     delete @renderer
