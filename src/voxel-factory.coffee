@@ -10,6 +10,8 @@ COLOR_MAP =
   '2': 'brick-medium'
   '3': 'brick-dark'
   '4': 'brick-grasstop'
+  '5': 'bridge-post-top'
+  '7': 'bridge-post'
   '10': 'ladder-top'
   '11': 'ladder-middle'
   '12': 'ladder-bottom'
@@ -53,6 +55,8 @@ module.exports = new class VoxelFactory
       'brick-medium'  : textureCube(['brick-medium-1', 'brick-medium-2', 'grass', 'grass', 'brick-medium-5', 'brick-medium-6'])
       'brick-dark'    : textureCube(['brick-dark-1', 'brick-dark-2', 'grass', 'grass', 'brick-dark-5', 'brick-dark-6'])
       'brick-grasstop': textureCube(['brick-grasstop-1', 'brick-grasstop-2', 'grass', 'grass', 'brick-grasstop-1', 'brick-grasstop-2'])
+      'bridge-post-top': textureCube(['bridge-post-top', 'bridge-post-top', 'grass', 'grass', 'bridge-post-top', 'bridge-post-top'])
+      'bridge-post'   : textureCube(['bridge-post-1', 'bridge-post-1', 'grass', 'grass', 'bridge-post-1', 'bridge-post-1'])
       'ladder-top'    : loader(ladderTop)
       'ladder-bottom' : loader(ladderBottom)
       'ladder-middle' : loader(ladderMiddle)
