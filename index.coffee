@@ -31,6 +31,7 @@ KeyMouse = require('./src/key-mouse-handlers')(SceneManager, Interactions, Input
 
 VoxelFactory = require './src/voxel-factory'
 IconMaker = require './src/icon-maker'
+TextureCube = require './src/voxels/texture-cube'
 
 # Stupid negative modulo in JS
 Number::mod = (n) ->
@@ -52,14 +53,21 @@ window.startEditor = ->
     geo = new THREE.Geometry()
     for i in SceneManager.scene.children
       if i?.isVoxel
-        if i.material
+        # Simple color cube
+        if i.material?.color
           c = i.material.color
           for f in i.geometry.faces
             # f.vertexColors = [c, c, c]
             f.color = c
           THREE.GeometryUtils.merge(geo, i)
 
-        else if i instanceof THREE.Object3D
+        else if i.material # Textured cube
+
+          for face in i.geometry.faces
+            face.color.set(face.materialIndex)
+
+          THREE.GeometryUtils.merge(geo, i)
+        else if i instanceof THREE.Object3D # Like a ladder
           # throw new Error('whoops, looks like this is not a ladder...') unless i.children.length is 2
           child = i.children[0] # TODO:
           mesh = child.clone()
@@ -73,43 +81,28 @@ window.startEditor = ->
     for i in SceneManager.scene.children
       scene.remove(SceneManager.scene.children[0]) if SceneManager.scene.children[0]
 
-    removeDuplicateFaces = (geometry) ->
-      for i in [0..geometry.faces.length - 1]
-        centroid = geometry.faces[i].centroid
-        for j in [0..i - 1]
-          f2 = geometry.faces[j]
-          if f2
-            centroid2 = f2.centroid
-            if centroid.equals(centroid2)
-              delete geometry.faces[i]
-              delete geometry.faces[j]
-              console.log 'removed duplicate'
-        geometry.faces = geometry.faces.filter( (a) -> return a if a)
-        return geometry
 
-    # removeDuplicateFaces(geo)
-
-
-
-    cubeMaterial = new SceneManager._CubeMaterial(
-      vertexColors: THREE.VertexColors
-      transparent: true
-    )
-    # json = new THREE.GeometryExporter().parse(geo)
-    # geo2 = new THREE.GeometryLoader().parse(json)
-
-    # txt = new THREE.OBJExporter().parse(geo)
-    # geo2 = new THREE.OBJLoader().parse(txt)
+    # cubeMaterial = new SceneManager._CubeMaterial(
+    #   vertexColors: THREE.VertexColors
+    #   transparent: true
+    # )
+    cubeMaterial = TextureCube.meshFaceMaterial()
 
     mesh = new THREE.Mesh(geo, cubeMaterial)
     txt = new THREE.ObjectExporter().parse(mesh)
     geo2 = new THREE.ObjectLoader().parse(txt)
 
+    for face in geo2.geometry.faces
+      color = face.color.getHex()
+      face.materialIndex = color if color < cubeMaterial.materials.length
+
+    mesh2 = new THREE.Mesh(geo2.geometry, cubeMaterial)
+
     console.log JSON.stringify(txt)
 
     # mesh = new THREE.Mesh(geo2, cubeMaterial)
     # scene.add(mesh)
-    scene.add(geo2)
+    scene.add(mesh2)
 
 
   window.exportImage = ->
