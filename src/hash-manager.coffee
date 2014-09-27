@@ -41,9 +41,9 @@ module.exports = (SceneManager) ->
       for i of SceneManager.scene.children
         object = SceneManager.scene.children[i]
         if object.isVoxel and object isnt SceneManager.plane and object isnt SceneManager.brush
-          current.x = (object.position.x - 25) / 50
-          current.y = (object.position.y - 25) / 50
-          current.z = (object.position.z - 25) / 50
+          current.x = (object.position.x - 8) / 16
+          current.y = (object.position.y - 8) / 16
+          current.z = (object.position.z - 8) / 16
 
           current.c = object.colorCode
           # colorString = [
@@ -170,6 +170,6 @@ module.exports = (SceneManager) ->
                 0.0
                 0.0
               ]
-            SceneManager.addVoxel current.x * 50 + 25, current.y * 50 + 25, current.z * 50 + 25, current.c
+            SceneManager.addVoxel current.x * 16 + 8, current.y * 16 + 8, current.z * 16 + 8, current.c
       @updateHash(ColorManager.colors)
       return

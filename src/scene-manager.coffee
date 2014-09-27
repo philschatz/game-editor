@@ -22,11 +22,11 @@ module.exports = (THREE, Input) ->
 
 
     _CubeMaterial: THREE.MeshBasicMaterial
-    _cube: new THREE.BoxGeometry( 50, 50, 50 )
+    _cube: new THREE.BoxGeometry( 16, 16, 16 )
     _axisCamera: null
     _projector: null
-    _size: 500
-    _step: 50
+    _size: 160
+    _step: 16
     _showWireframe: true
 
 
@@ -73,7 +73,7 @@ module.exports = (THREE, Input) ->
       @grid.type = THREE.LinePieces
       @scene.add(@grid)
       @_projector = new THREE.Projector()
-      @plane = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), new THREE.MeshBasicMaterial())
+      @plane = new THREE.Mesh(new THREE.PlaneGeometry(20 * 16, 20 * 16), new THREE.MeshBasicMaterial())
       @plane.rotation.x = -Math.PI / 2
       @plane.visible = false
       @plane.isPlane = true
@@ -105,7 +105,7 @@ module.exports = (THREE, Input) ->
 
     addVoxel: (x, y, z, color) ->
 
-      wireframeCube = new THREE.BoxGeometry(50.5, 50.5 , 50.5)
+      wireframeCube = new THREE.BoxGeometry(16.5, 16.5 , 16.5)
       wireframeOptions =
         color: 0xEEEEEE
         wireframe: true

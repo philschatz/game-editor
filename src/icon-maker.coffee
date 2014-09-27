@@ -3,9 +3,9 @@ module.exports = class IconMaker
   height: 64
   constructor: (SceneManager) ->
     @scene = SceneManager.scene
-    @camera = new THREE.OrthographicCamera(50/-2, 50/2, 50/-2, 50/2, 1, 1000)
+    @camera = new THREE.OrthographicCamera(16/-2, 16/2, 16/-2, 16/2, 1, 1000)
     @camera.aspect = @width / @height
-    @camera.position.z = -500
+    @camera.position.z = -160
     # Move the @camera because some voxels are shifted (TODO: Fix voxels so they are always centered)
 
     @ambient = new THREE.AmbientLight(0x606060)

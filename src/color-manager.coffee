@@ -7,7 +7,7 @@ colors = [
   '34495E'
   'E67E22'
   'ECF0F1'
-  'FFF500'
+  'FFF160'
   'FF0000'
   '00FF38'
   'BD00FF'

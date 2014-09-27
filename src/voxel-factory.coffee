@@ -22,17 +22,17 @@ COLOR_MAP =
 
 module.exports = new class VoxelFactory
 
-  _cube: new THREE.BoxGeometry( 50, 50, 50 )
+  _cube: new THREE.BoxGeometry( 16, 16, 16 )
 
   constructor: ->
     loader = (config) ->
       voxel = new THREE.ObjectLoader().parse(config)
-      voxel.scale.x = 1/16
-      voxel.scale.y = 1/16
-      voxel.scale.z = 1/16
-      voxel.position.y += -25
+      voxel.scale.x = 1/16 / (50/16)
+      voxel.scale.y = 1/16 / (50/16)
+      voxel.scale.z = 1/16 / (50/16)
+      voxel.position.y += -8
 
-      wireframeCube = new THREE.BoxGeometry(50.5, 50.5 , 50.5)
+      wireframeCube = new THREE.BoxGeometry(16.5, 16.5 , 16.5)
       wireframeOptions =
         color: 0xEEEEEE
         wireframe: true
@@ -99,7 +99,7 @@ module.exports = new class VoxelFactory
       voxel.name = "color-#{color}"
 
       if addWireframe
-        wireframeCube = new THREE.BoxGeometry(50.5, 50.5 , 50.5)
+        wireframeCube = new THREE.BoxGeometry(16.5, 16.5 , 16.5)
         wireframeOptions =
           color: 0xEEEEEE
           wireframe: true

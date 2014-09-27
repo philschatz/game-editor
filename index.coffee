@@ -316,9 +316,9 @@ window.startEditor = ->
       [x1, x2] = sort(x1, x2)
       [y1, y2] = sort(y1, y2)
       [z1, z2] = sort(z1, z2)
-      for x in [x1..x2] by 50
-        for y in [y1..y2] by 50
-          for z in [z1..z2] by 50
+      for x in [x1..x2] by 16
+        for y in [y1..y2] by 16
+          for z in [z1..z2] by 16
             SceneManager.addVoxel(x, y, z, idx)
     return
 
@@ -482,9 +482,9 @@ window.startEditor = ->
       el.isVoxel
     )
     voxelsReal = voxels.map((v) ->
-      x: (v.position.x - 25) / 50
-      y: (v.position.y - 25) / 50
-      z: (v.position.z - 25) / 50
+      x: (v.position.x - 8) / 16
+      y: (v.position.y - 8) / 16
+      z: (v.position.z - 8) / 16
       c: v.wireMesh.material.color.getHexString()
     )
     console.log exportFunction(voxelsReal)

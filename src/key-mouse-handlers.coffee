@@ -75,9 +75,9 @@ module.exports = (SceneManager, Interactions, Input, HashManager) ->
         normal.applyMatrix4(matrixRotationWorld)
 
         position = new (SceneManager.THREE().Vector3)().addVectors(intersect.point, normal)
-        position.x = Math.floor(position.x / 50) * 50 + 25
-        position.y = Math.floor(position.y / 50) * 50 + 25
-        position.z = Math.floor(position.z / 50) * 50 + 25
+        position.x = Math.floor(position.x / 16) * 16 + 8
+        position.y = Math.floor(position.y / 16) * 16 + 8
+        position.z = Math.floor(position.z / 16) * 16 + 8
         Input.startPosition = position
         Input.isMouseRotating = false
       else
@@ -132,20 +132,20 @@ module.exports = (SceneManager, Interactions, Input, HashManager) ->
           MainCamera.zoom(-100)
         # Move the entire level
         when 'A'.charCodeAt(0)
-          translateVoxels(new THREE.Vector3(-50, 0, 0))
+          translateVoxels(new THREE.Vector3(-16, 0, 0))
         when 'D'.charCodeAt(0)
-          translateVoxels(new THREE.Vector3(50, 0, 0))
+          translateVoxels(new THREE.Vector3(16, 0, 0))
         when 'W'.charCodeAt(0)
-          translateVoxels(new THREE.Vector3(0, 50, 0))
+          translateVoxels(new THREE.Vector3(0, 16, 0))
         when 'S'.charCodeAt(0)
-          translateVoxels(new THREE.Vector3(0, -50, 0))
+          translateVoxels(new THREE.Vector3(0, -16, 0))
         when 'Q'.charCodeAt(0)
-          translateVoxels(new THREE.Vector3(0, 0, -50))
+          translateVoxels(new THREE.Vector3(0, 0, -16))
         when 'E'.charCodeAt(0)
-          translateVoxels(new THREE.Vector3(0, 0, 50))
+          translateVoxels(new THREE.Vector3(0, 0, 16))
         # when 49
         #   exports.setColor 0
-        # when 50
+        # when 16
         #   exports.setColor 1
         # when 51
         #   exports.setColor 2
