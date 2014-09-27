@@ -1,6 +1,7 @@
 ladderTop     = require './voxels/ladder-top.json' # extension is optional
 ladderBottom  = require './voxels/ladder-bottom.json' # extension is optional
 ladderMiddle  = require './voxels/ladder-middle.json' # extension is optional
+bridge        = require './voxels/bridge.json' # extension is optional
 TextureCube    = require './voxels/texture-cube'
 
 ColorManager = require './color-manager'
@@ -11,10 +12,13 @@ COLOR_MAP =
   '3': 'brick-dark'
   '4': 'brick-grasstop'
   '5': 'bridge-post-top'
+  '6': 'bridge'
   '7': 'bridge-post'
   '10': 'ladder-top'
   '11': 'ladder-middle'
   '12': 'ladder-bottom'
+
+# COLOR_MAP = {} # Used for editing voxels
 
 module.exports = new class VoxelFactory
 
@@ -57,6 +61,7 @@ module.exports = new class VoxelFactory
       'brick-grasstop': TextureCube.freshCube(['brick-grasstop-1', 'brick-grasstop-2', 'grass', 'grass', 'brick-grasstop-1', 'brick-grasstop-2'])
       'bridge-post-top': TextureCube.freshCube(['bridge-post-top', 'bridge-post-top', 'grass', 'grass', 'bridge-post-top', 'bridge-post-top'])
       'bridge-post'   : TextureCube.freshCube(['bridge-post-1', 'bridge-post-2', 'grass', 'grass', 'bridge-post-1', 'bridge-post-2'])
+      'bridge'        : loader(bridge)
       'ladder-top'    : loader(ladderTop)
       'ladder-bottom' : loader(ladderBottom)
       'ladder-middle' : loader(ladderMiddle)
@@ -86,6 +91,7 @@ module.exports = new class VoxelFactory
       # col = colors[c] or colors[0]
       col = ColorManager.colors[color]
       unless col
+        console.log color
         throw new Error('BUG! color not found. Maybe just use black?')
 
       cubeMaterial.color.setRGB(col[0], col[1], col[2])

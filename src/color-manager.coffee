@@ -13,6 +13,7 @@ colors = [
   'BD00FF'
   '08c9ff'
   'D32020'
+  'FFFF00'
 ].map((c) ->
   ColorUtils.hex2rgb c
 )
