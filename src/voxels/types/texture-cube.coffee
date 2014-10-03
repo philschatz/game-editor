@@ -22,7 +22,7 @@ module.exports = new class TextureCubeBuilder
         unless @_materialNames[side]?
           img = new Image()
           tex = new THREE.Texture(img)
-          img.src = "./src/voxels/textures/#{side}.png"
+          img.src = "./src/voxels/types/textures/#{side}.png"
           img.tex = tex
 
           img.onload = ->

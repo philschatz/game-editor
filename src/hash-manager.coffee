@@ -1,5 +1,3 @@
-ColorManager = require './color-manager'
-
 
 # https://gist.github.com/665235
 decode = (string) ->
@@ -139,7 +137,7 @@ module.exports = (SceneManager) ->
 
         while c < nC
           hex = hexColors.substr(c * 6, 6)
-          ColorManager.colors[c] = ColorUtils.hex2rgb(hex)
+          # ColorManager.colors[c] = ColorUtils.hex2rgb(hex)
           addColorToPalette c
           c++
       frameMask = 'A'
@@ -164,12 +162,6 @@ module.exports = (SceneManager) ->
 
           if code.charAt(0) is '1'
             throw new Error('BUG: no negative colors') if current.c < 0
-            while !ColorManager.colors[current.c]
-              ColorManager.colors.push [
-                0.0
-                0.0
-                0.0
-              ]
             SceneManager.addVoxel current.x * 16 + 8, current.y * 16 + 8, current.z * 16 + 8, current.c
-      @updateHash(ColorManager.colors)
+      @updateHash()
       return

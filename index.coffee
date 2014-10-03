@@ -17,7 +17,6 @@ require './js/loaders/ObjectLoader'
 
 
 
-
 ColorUtils = require './src/color-utils'
 ColorManager = require './src/color-manager'
 AxisCamera = require './src/axis-camera'
@@ -29,9 +28,10 @@ Interactions = require('./src/interactions')(Input, SceneManager)
 
 KeyMouse = require('./src/key-mouse-handlers')(SceneManager, Interactions, Input, HashManager)
 
-VoxelFactory = require './src/voxel-factory'
+PaletteManager = require './src/voxels/palette-manager'
+VoxelFactory = require './src/voxels/voxel-factory'
 IconMaker = require './src/icon-maker'
-TextureCube = require './src/voxels/texture-cube'
+TextureCube = require './src/voxels/types/texture-cube'
 
 # Stupid negative modulo in JS
 Number::mod = (n) ->
@@ -93,29 +93,29 @@ window.startEditor = ->
     mesh2 = new THREE.Mesh(textureGeo, cubeMaterial2)
     scene.add(mesh)
     scene.add(mesh2)
-    return
 
     txt = new THREE.ObjectExporter().parse(mesh)
     geo2 = new THREE.ObjectLoader().parse(txt)
 
-    for face in geo2.geometry.faces
-      color = face.color.getHex()
-      face.materialIndex = color if color < cubeMaterial.materials.length
-
-    mesh2 = new THREE.Mesh(geo2.geometry, cubeMaterial)
+    # for face in geo2.geometry.faces
+    #   color = face.color.getHex()
+    #   face.materialIndex = color if color < cubeMaterial.materials.length
+    #
+    # mesh2 = new THREE.Mesh(geo2.geometry, cubeMaterial)
 
     console.log JSON.stringify(txt)
 
     # mesh = new THREE.Mesh(geo2, cubeMaterial)
     # scene.add(mesh)
-    scene.add(mesh2)
+    # scene.add(mesh2)
 
 
   window.exportImage = ->
     iconMaker = new IconMaker(SceneManager)
     for color in [0..12]
       image = new Image()
-      image.src = iconMaker.renderVoxel(VoxelFactory.freshVoxel(color, true))
+      colorName = PaletteManager.voxelName(color)
+      image.src = iconMaker.renderVoxel(VoxelFactory.freshVoxel(colorName, false))
       $img = $(image)
       $img.attr('data-color', ''+color)
       $img.addClass('color')

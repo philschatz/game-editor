@@ -1,7 +1,8 @@
 MainCamera = require './main-camera'
 AxisCamera = require './axis-camera'
 
-VoxelFactory = require './voxel-factory'
+PaletteManager = require './voxels/palette-manager'
+VoxelFactory = require './voxels/voxel-factory'
 
 module.exports = (THREE, Input) ->
   # VoxelFactory = VoxelFactory(THREE)
@@ -115,9 +116,12 @@ module.exports = (THREE, Input) ->
       wireframeMaterial = new THREE.MeshBasicMaterial(wireframeOptions)
       # wireframeMaterial.color.setRGB(0, 0, 0) # or color - .05
 
-      voxel = VoxelFactory.freshVoxel(color, true) # true = addWireframe
+      colorName = PaletteManager.voxelName(color)
+      voxel = VoxelFactory.freshVoxel(colorName, true) # true = addWireframe
 
       voxel.isVoxel = true
+      voxel.colorCode = color
+
       voxel.position.x += x
       voxel.position.y += y
       voxel.position.z += z
