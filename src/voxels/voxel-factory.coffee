@@ -1,12 +1,9 @@
-ladderTop     = require './types/ladder-top.json' # extension is optional
-ladderBottom  = require './types/ladder-bottom.json'
-ladderMiddle  = require './types/ladder-middle.json'
-bridge        = require './types/bridge.json'
-TextureCube    = require './types/texture-cube'
+PaletteManager   = require './palette-manager'
+TextureCube    = require './texture-cube'
 
 
-loader = (config) ->
-  voxel = new THREE.ObjectLoader().parse(config)
+geometryLoader = (config) ->
+  voxel = new THREE.ObjectLoader().parse(config.geometry)
   voxel.scale.x = 1/16 / (50/16)
   voxel.scale.y = 1/16 / (50/16)
   voxel.scale.z = 1/16 / (50/16)
@@ -33,17 +30,20 @@ loader = (config) ->
   group
 
 
-VOXEL_TEMPLATE_MAP =
-  'brick-light'   : TextureCube.freshCube(['brick-light-1', 'brick-light-2', 'grass', 'grass', 'brick-light-5', 'brick-light-6'])
-  'brick-medium'  : TextureCube.freshCube(['brick-medium-1', 'brick-medium-2', 'grass', 'grass', 'brick-medium-5', 'brick-medium-6'])
-  'brick-dark'    : TextureCube.freshCube(['brick-dark-1', 'brick-dark-2', 'grass', 'grass', 'brick-dark-5', 'brick-dark-6'])
-  'brick-grasstop': TextureCube.freshCube(['brick-grasstop-1', 'brick-grasstop-2', 'grass', 'grass', 'brick-grasstop-1', 'brick-grasstop-2'])
-  'bridge-post-top': TextureCube.freshCube(['bridge-post-top', 'bridge-post-top', 'grass', 'grass', 'bridge-post-top', 'bridge-post-top'])
-  'bridge-post'   : TextureCube.freshCube(['bridge-post-1', 'bridge-post-2', 'grass', 'grass', 'bridge-post-1', 'bridge-post-2'])
-  'bridge'        : loader(bridge)
-  'ladder-top'    : loader(ladderTop)
-  'ladder-bottom' : loader(ladderBottom)
-  'ladder-middle' : loader(ladderMiddle)
+textureLoader = (config) ->
+  {front_url, back_url, top_url, bottom_url, left_url, right_url} = config
+  # Unsure if the order below is correct or not but it's close
+  TextureCube.freshCube([front_url, back_url, top_url, bottom_url, left_url, right_url])
+
+
+VOXEL_TEMPLATE_MAP = {}
+for voxelName, config of PaletteManager.allVoxelConfigs()
+  template = switch config.type
+    when 'geometry' then geometryLoader(config)
+    when 'texture'  then textureLoader(config)
+    else throw new Error('BUG: Unsupported Voxel type')
+  VOXEL_TEMPLATE_MAP[voxelName] = template
+
 
 
 module.exports = new class VoxelFactory

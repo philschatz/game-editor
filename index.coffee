@@ -31,7 +31,7 @@ KeyMouse = require('./src/key-mouse-handlers')(SceneManager, Interactions, Input
 PaletteManager = require './src/voxels/palette-manager'
 VoxelFactory = require './src/voxels/voxel-factory'
 IconMaker = require './src/icon-maker'
-TextureCube = require './src/voxels/types/texture-cube'
+TextureCube = require './src/voxels/texture-cube'
 
 # Stupid negative modulo in JS
 Number::mod = (n) ->
