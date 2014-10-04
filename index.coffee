@@ -43,13 +43,6 @@ Number::mod = (n) ->
 
 window.startEditor = ->
   container = null
-  shareDialog = null
-  mouse3D = null
-
-
-  color = 0
-
-  fill = true
 
 
   $('.preview-level').on 'click', ->

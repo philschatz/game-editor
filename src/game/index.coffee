@@ -1,6 +1,7 @@
 ActionTypes = require('./actions/types')
 window.PlayerManager = require('./actions/player-manager')
 createGame = require('voxel-engine')
+kbControls = require('kb-controls')
 # toolbar = require('toolbar')
 
 # highlight = require('voxel-highlight')
@@ -57,6 +58,29 @@ module.exports = (SceneManager) ->
   createGame::showChunk = (chunk) ->
     # createGame_showChunk.apply(@, arguments)
 
+  createGame::initializeControls = (opts) ->
+    # player control
+    @buttons = kbControls(document.body, opts.keybindings || @defaultButtons)
+    @buttons.disable()
+    @optout = false
+    # @interact = interact(@view.element)
+    # @interact
+    #     .on('attain', @onControlChange.bind(this, true))
+    #     .on('release', @onControlChange.bind(this, false))
+    #     .on('opt-out', @onControlOptOut.bind(this))
+    @hookupControls(this.buttons, opts)
+    @onControlChange(true)
+
+  createGame::onControlChange = (gained, stream) ->
+    @paused = false
+
+    if !gained and !@optout
+      @buttons.disable()
+    else
+      @buttons.enable()
+      # stream.pipe(this.controls.createWriteRotationStream())
+
+
 
   # setup the game and add some trees
   game = createGame
@@ -103,6 +127,7 @@ module.exports = (SceneManager) ->
   substack.playerSkin.mesh.scale.y = 1/16
   substack.playerSkin.mesh.scale.z = 1/16
   substack.possess()
+  SceneManager.setTarget(substack.avatar)
   initialCoords = mapConfig.playerPosition or [0, 5, 0]
   substack.yaw.position.set initialCoords[0], initialCoords[1], initialCoords[2]
   rotatingCameraTo = null

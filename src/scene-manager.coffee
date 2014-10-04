@@ -175,3 +175,6 @@ module.exports = (THREE, Input) ->
       @_axisCamera.lookAt(@_target)
       @renderer.render(@scene, @_axisCamera)
       return
+
+    setTarget: (mesh) ->
+      @_target = mesh.position

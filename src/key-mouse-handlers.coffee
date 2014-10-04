@@ -127,9 +127,9 @@ module.exports = (SceneManager, Interactions, Input, HashManager) ->
     onDocumentKeyDown: (event) ->
       switch event.keyCode
         when 189
-          MainCamera.zoom(100)
-        when 187
           MainCamera.zoom(-100)
+        when 187
+          MainCamera.zoom(100)
         # Move the entire level
         when 'A'.charCodeAt(0)
           translateVoxels(new THREE.Vector3(-(16/16), 0, 0))

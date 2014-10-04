@@ -21,7 +21,7 @@ module.exports = class MainCamera
 
     distance = @camera.position.distanceTo(origin)
     tooFar = distance > 200
-    tooClose = Math.abs(@camera.top) < 10
+    tooClose = Math.abs(@camera.top) < 5
     return  if delta > 0 and tooFar
     return  if delta < 0 and tooClose
     @radius = distance # for mouse drag calculations to be correct
