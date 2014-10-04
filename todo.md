@@ -2,8 +2,8 @@ TODO:
 
 - [-] extract collision-detection and physics
   - [ ] get jump up to work
-  - [ ] get walk left/right (and change depth) to work
-  - [ ] get climbing to work now that we have voxel collision
+  - [x] get walk left/right (and change depth) to work
+  - [-] get climbing to work now that we have voxel collision
 - [ ] use voxel collision info for collision-detection
   - [ ] Map-flattening logic needs to be smarter about pillars in front of walkable area
 - [x] remove the take-over mouse stuff in the engine

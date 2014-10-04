@@ -255,7 +255,7 @@ module.exports = (SceneManager) ->
         boxX = playerX + (j)
         block = @sparseCollisionMap[cameraType]['' + boxX + '|' + boxY]
         if block
-          if block < 10
+          if block < 10 and block >= 0
             boxes += '0' + block
           else
             boxes += block
@@ -302,7 +302,7 @@ module.exports = (SceneManager) ->
             if dir % 2 is 1
               pos = [B, y, a]
             block = game.getBlock(pos)
-            if block and collisionTypes?[block]
+            if block # and collisionTypes?[block]
               break
 
           game.sparseCollisionMap[dir]['' + a + '|' + y] = B  if block

@@ -45,8 +45,11 @@ window.startEditor = ->
   container = null
 
 
+  alreadyCreatedGame = false
+
   $('.preview-level').on 'click', ->
-    GAME(SceneManager)
+    GAME(SceneManager) unless alreadyCreatedGame
+    alreadyCreatedGame = true
 
 
   window.exportGeometry = ->
