@@ -75,9 +75,9 @@ module.exports = (SceneManager, Interactions, Input, HashManager) ->
         normal.applyMatrix4(matrixRotationWorld)
 
         position = new (SceneManager.THREE().Vector3)().addVectors(intersect.point, normal)
-        position.x = Math.floor(position.x / 16) * 16 + 8
-        position.y = Math.floor(position.y / 16) * 16 + 8
-        position.z = Math.floor(position.z / 16) * 16 + 8
+        position.x = Math.floor(position.x / (16/16)) * (16/16) + 8
+        position.y = Math.floor(position.y / (16/16)) * (16/16) + 8
+        position.z = Math.floor(position.z / (16/16)) * (16/16) + 8
         Input.startPosition = position
         Input.isMouseRotating = false
       else
@@ -132,20 +132,20 @@ module.exports = (SceneManager, Interactions, Input, HashManager) ->
           MainCamera.zoom(-100)
         # Move the entire level
         when 'A'.charCodeAt(0)
-          translateVoxels(new THREE.Vector3(-16, 0, 0))
+          translateVoxels(new THREE.Vector3(-(16/16), 0, 0))
         when 'D'.charCodeAt(0)
-          translateVoxels(new THREE.Vector3(16, 0, 0))
+          translateVoxels(new THREE.Vector3((16/16), 0, 0))
         when 'W'.charCodeAt(0)
-          translateVoxels(new THREE.Vector3(0, 16, 0))
+          translateVoxels(new THREE.Vector3(0, (16/16), 0))
         when 'S'.charCodeAt(0)
-          translateVoxels(new THREE.Vector3(0, -16, 0))
+          translateVoxels(new THREE.Vector3(0, -(16/16), 0))
         when 'Q'.charCodeAt(0)
-          translateVoxels(new THREE.Vector3(0, 0, -16))
+          translateVoxels(new THREE.Vector3(0, 0, -(16/16)))
         when 'E'.charCodeAt(0)
-          translateVoxels(new THREE.Vector3(0, 0, 16))
+          translateVoxels(new THREE.Vector3(0, 0, (16/16)))
         # when 49
         #   exports.setColor 0
-        # when 16
+        # when (16/16)
         #   exports.setColor 1
         # when 51
         #   exports.setColor 2
@@ -163,7 +163,7 @@ module.exports = (SceneManager, Interactions, Input, HashManager) ->
         #   exports.setColor 8
         # when 48
         #   exports.setColor 9
-        when 16
+        when 17-1 # sixteen
           Input.isShiftDown = true
         when 17
           Input.isCtrlDown = true
@@ -175,7 +175,7 @@ module.exports = (SceneManager, Interactions, Input, HashManager) ->
 
     onDocumentKeyUp: (event) ->
       switch event.keyCode
-        when 16
+        when (16/16)
           Input.isShiftDown = false
         when 17
           Input.isCtrlDown = false

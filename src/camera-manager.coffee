@@ -1,5 +1,5 @@
 module.exports = class MainCamera
-  radius: 1600
+  radius: (16/16) * 100
   _theta: 0
   _phi: 0
 
@@ -17,9 +17,11 @@ module.exports = class MainCamera
       y: 0
       z: 0
 
+    delta = -delta / 50 # Since the world is 1x1x1 unit large
+
     distance = @camera.position.distanceTo(origin)
-    tooFar = distance > 6000
-    tooClose = Math.abs(@camera.top) < 200
+    tooFar = distance > 200
+    tooClose = Math.abs(@camera.top) < 10
     return  if delta > 0 and tooFar
     return  if delta < 0 and tooClose
     @radius = distance # for mouse drag calculations to be correct
@@ -28,6 +30,7 @@ module.exports = class MainCamera
     @camera.bottom -= delta / 2
     @camera.left -= delta * aspect / 2
     @camera.right += delta * aspect / 2
+
 
     # @camera.updateMatrix();
     @camera.updateProjectionMatrix()

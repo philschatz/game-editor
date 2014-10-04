@@ -22,16 +22,16 @@ module.exports = (Input, SceneManager) ->
 
           position = new (SceneManager.THREE().Vector3)().addVectors(intersect.point, normal)
           updateBrush = ->
-            SceneManager.brush.position.x = Math.floor(position.x / 16) * 16 + 8
-            SceneManager.brush.position.y = Math.floor(position.y / 16) * 16 + 8
-            SceneManager.brush.position.z = Math.floor(position.z / 16) * 16 + 8
+            SceneManager.brush.position.x = Math.floor(position.x / (16/16)) * (16/16) + (16/16)/2
+            SceneManager.brush.position.y = Math.floor(position.y / (16/16)) * (16/16) + (16/16)/2
+            SceneManager.brush.position.z = Math.floor(position.z / (16/16)) * (16/16) + (16/16)/2
             return
 
           if Input.isAltDown
             newCube = [
-              Math.floor(position.x / 16)
-              Math.floor(position.y / 16)
-              Math.floor(position.z / 16)
+              Math.floor(position.x / (16/16))
+              Math.floor(position.y / (16/16))
+              Math.floor(position.z / (16/16))
             ]
             SceneManager.brush.currentCube = newCube  unless SceneManager.brush.currentCube
             if SceneManager.brush.currentCube.join('') isnt newCube.join('')
@@ -57,20 +57,20 @@ module.exports = (Input, SceneManager) ->
             THREE = SceneManager.THREE()
 
             # Draw a rectangle
-            x1 = Math.floor(Input.startPosition.x / 16) * 16 + 8
-            y1 = Math.floor(Input.startPosition.y / 16) * 16 + 8
-            z1 = Math.floor(Input.startPosition.z / 16) * 16 + 8
-            x2 = Math.floor(position.x / 16) * 16 + 8
-            y2 = Math.floor(position.y / 16) * 16 + 8
-            z2 = Math.floor(position.z / 16) * 16 + 8
+            x1 = Math.floor(Input.startPosition.x / (16/16)) * (16/16) + (16/16)/2
+            y1 = Math.floor(Input.startPosition.y / (16/16)) * (16/16) + (16/16)/2
+            z1 = Math.floor(Input.startPosition.z / (16/16)) * (16/16) + (16/16)/2
+            x2 = Math.floor(position.x / (16/16)) * (16/16) + (16/16)/2
+            y2 = Math.floor(position.y / (16/16)) * (16/16) + (16/16)/2
+            z2 = Math.floor(position.z / (16/16)) * (16/16) + (16/16)/2
 
             Input.endPosition = {x:x2, y:y2, z:z2}
 
             bbox = (x1, x2) ->
               if x1 <= x2
-                [x1 - 8, x2 + 8]
+                [x1 - (16/16)/2, x2 + (16/16)/2]
               else
-                [x1 + 8, x2 - 8]
+                [x1 + (16/16)/2, x2 - (16/16)/2]
 
             [x1, x2] = bbox(x1, x2)
             [y1, y2] = bbox(y1, y2)

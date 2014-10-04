@@ -19,15 +19,15 @@ module.exports = (THREE, Input) ->
 
     _container: null
     _camera: null
-    _target: new THREE.Vector3( 0, 200, 0 ) # -1200, 300, 900
+    _target: new THREE.Vector3( 0, 4 * (16/16), 0 ) # -1200, 300, 900
 
 
     _CubeMaterial: THREE.MeshBasicMaterial
-    _cube: new THREE.BoxGeometry( 16, 16, 16 )
+    _cube: new THREE.BoxGeometry( (16/16), (16/16), (16/16) )
     _axisCamera: null
     _projector: null
-    _size: 160
-    _step: 16
+    _size: (16/16) * 10
+    _step: (16/16)
     _showWireframe: true
 
 
@@ -49,13 +49,13 @@ module.exports = (THREE, Input) ->
 
     init: (@_container) ->
       @renderer.setSize(@_container.clientWidth, @_container.clientHeight)
-      width = @_container.clientWidth
-      height = @_container.clientHeight
-      @_camera = new THREE.OrthographicCamera(-1 * width, 1 * width, 1 * height,-1 * height, 1, 10000)
+      width = 50 # @_container.clientWidth
+      height = width * (@_container.clientHeight / @_container.clientWidth) # @_container.clientHeight
+      @_camera = new THREE.OrthographicCamera(-1 * width, 1 * width, 1 * height,-1 * height, 1, 1000)
       # @_camera = new THREE.PerspectiveCamera(45, width/height, 1, 10000)
       MainCamera.init(@scene, @_camera, @_container, @_target)
       MainCamera.updateCamera({x:0, y:0, z:0})
-      @_axisCamera = new THREE.OrthographicCamera(@_container.clientWidth / -2, @_container.clientWidth / 2, @_container.clientHeight / 2, @_container.clientHeight / -2, 1, 10000)
+      @_axisCamera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 1000)
 
       AxisCamera.init(@scene, @_axisCamera, @_container, @_target)
       AxisCamera.updateCamera({x:0, y:0, z:0})
@@ -77,7 +77,7 @@ module.exports = (THREE, Input) ->
       @grid.type = THREE.LinePieces
       @scene.add(@grid)
       @_projector = new THREE.Projector()
-      @plane = new THREE.Mesh(new THREE.PlaneGeometry(20 * 16, 20 * 16), new THREE.MeshBasicMaterial())
+      @plane = new THREE.Mesh(new THREE.PlaneGeometry(20 * (16/16), 20 * (16/16)), new THREE.MeshBasicMaterial())
       @plane.rotation.x = -Math.PI / 2
       @plane.visible = false
       @plane.isPlane = true
@@ -109,7 +109,7 @@ module.exports = (THREE, Input) ->
 
     addVoxel: (x, y, z, color) ->
 
-      wireframeCube = new THREE.BoxGeometry(16.5, 16.5 , 16.5)
+      wireframeCube = new THREE.BoxGeometry((16/16) + .5, (16/16) + .5 , (16/16) + .5)
       wireframeOptions =
         color: 0xEEEEEE
         wireframe: true
@@ -140,7 +140,6 @@ module.exports = (THREE, Input) ->
       @scene.add(voxel)
       @scene.add(voxel.wireMesh) if voxel.wireMesh
       return
-
 
     render: ->
       return console.warn 'Trying to render scene before initialized' unless @_camera

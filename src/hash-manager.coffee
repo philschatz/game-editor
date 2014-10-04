@@ -39,9 +39,9 @@ module.exports = (SceneManager) ->
       for i of SceneManager.scene.children
         object = SceneManager.scene.children[i]
         if object.isVoxel and object isnt SceneManager.plane and object isnt SceneManager.brush
-          current.x = (object.position.x - 8) / 16
-          current.y = (object.position.y - 8) / 16
-          current.z = (object.position.z - 8) / 16
+          current.x = (object.position.x - (16/16)/2) / (16/16)
+          current.y = (object.position.y - (16/16)/2) / (16/16)
+          current.z = (object.position.z - (16/16)/2) / (16/16)
 
           current.c = object.colorCode
           # colorString = [
@@ -162,6 +162,6 @@ module.exports = (SceneManager) ->
 
           if code.charAt(0) is '1'
             throw new Error('BUG: no negative colors') if current.c < 0
-            SceneManager.addVoxel current.x * 16 + 8, current.y * 16 + 8, current.z * 16 + 8, current.c
+            SceneManager.addVoxel current.x * (16/16) + (16/16)/2, current.y * (16/16) + (16/16)/2, current.z * (16/16) + (16/16)/2, current.c
       @updateHash()
       return

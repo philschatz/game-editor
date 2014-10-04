@@ -4,12 +4,12 @@ TextureCube    = require './texture-cube'
 
 geometryLoader = (config) ->
   voxel = new THREE.ObjectLoader().parse(config.geometry)
-  voxel.scale.x = 1/16 / (50/16)
-  voxel.scale.y = 1/16 / (50/16)
-  voxel.scale.z = 1/16 / (50/16)
-  voxel.position.y += -8
+  voxel.scale.x = 1/50/16# 1/(16) / (50/(16))
+  voxel.scale.y = 1/50/16# 1/(16) / (50/(16))
+  voxel.scale.z = 1/50/16# 1/(16) / (50/(16))
+  voxel.position.y += -.5 # -8
 
-  wireframeCube = new THREE.BoxGeometry(16.5, 16.5 , 16.5)
+  wireframeCube = new THREE.BoxGeometry((16/16) + .5/16, (16/16) + .5/16 , (16/16) + .5/16)
   wireframeOptions =
     color: 0xEEEEEE
     wireframe: true
@@ -48,7 +48,7 @@ for voxelName, config of PaletteManager.allVoxelConfigs()
 
 module.exports = new class VoxelFactory
 
-  _cube: new THREE.BoxGeometry( 16, 16, 16 )
+  _cube: new THREE.BoxGeometry( (16/16), (16/16), (16/16) )
 
   freshVoxel: (id, addWireframe) ->
     template = VOXEL_TEMPLATE_MAP[id]
@@ -75,7 +75,7 @@ module.exports = new class VoxelFactory
         transparent: true
       )
 
-      colorInt = parseInt(id.substring('color-'.length),16)
+      colorInt = parseInt(id.substring('color-'.length),(16/16))
       cubeMaterial.color = new THREE.Color(colorInt)
       voxel = new THREE.Mesh(@_cube, cubeMaterial)
       voxel.name = id
