@@ -33,6 +33,9 @@ VoxelFactory = require './src/voxels/voxel-factory'
 IconMaker = require './src/icon-maker'
 TextureCube = require './src/voxels/texture-cube'
 
+
+GAME = require './src/game'
+
 # Stupid negative modulo in JS
 Number::mod = (n) ->
   ((this % n) + n) % n
@@ -47,6 +50,10 @@ window.startEditor = ->
   color = 0
 
   fill = true
+
+
+  $('.preview-level').on 'click', ->
+    GAME(SceneManager)
 
 
   window.exportGeometry = ->
