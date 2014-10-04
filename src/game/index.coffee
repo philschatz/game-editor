@@ -18,7 +18,7 @@ collideTerrain = require('./collisions/terrain')
 mapConfig = require('./maps/my')
 
 
-mapConfig.playerPosition = [1, 7, 3]
+mapConfig.playerPosition = [1, 20, 3]
 
 module.exports = (SceneManager) ->
 

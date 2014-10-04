@@ -132,17 +132,17 @@ module.exports = (SceneManager, Interactions, Input, HashManager) ->
           MainCamera.zoom(100)
         # Move the entire level
         when 'A'.charCodeAt(0)
-          translateVoxels(new THREE.Vector3(-(16/16), 0, 0))
+          translateVoxels(new THREE.Vector3(-(16/16), 0, 0)) if Input.isShiftDown
         when 'D'.charCodeAt(0)
-          translateVoxels(new THREE.Vector3((16/16), 0, 0))
+          translateVoxels(new THREE.Vector3((16/16), 0, 0)) if Input.isShiftDown
         when 'W'.charCodeAt(0)
-          translateVoxels(new THREE.Vector3(0, (16/16), 0))
+          translateVoxels(new THREE.Vector3(0, (16/16), 0)) if Input.isShiftDown
         when 'S'.charCodeAt(0)
-          translateVoxels(new THREE.Vector3(0, -(16/16), 0))
+          translateVoxels(new THREE.Vector3(0, -(16/16), 0)) if Input.isShiftDown
         when 'Q'.charCodeAt(0)
-          translateVoxels(new THREE.Vector3(0, 0, -(16/16)))
+          translateVoxels(new THREE.Vector3(0, 0, -(16/16))) if Input.isShiftDown
         when 'E'.charCodeAt(0)
-          translateVoxels(new THREE.Vector3(0, 0, (16/16)))
+          translateVoxels(new THREE.Vector3(0, 0, (16/16))) if Input.isShiftDown
         # when 49
         #   exports.setColor 0
         # when (16/16)
