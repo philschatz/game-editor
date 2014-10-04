@@ -49,7 +49,10 @@ module.exports = (THREE, Input) ->
 
     init: (@_container) ->
       @renderer.setSize(@_container.clientWidth, @_container.clientHeight)
-      @_camera = new THREE.OrthographicCamera(@_container.clientWidth / -1, @_container.clientWidth / 1, @_container.clientHeight / 1, @_container.clientHeight / -1, 1, 10000)
+      width = @_container.clientWidth
+      height = @_container.clientHeight
+      @_camera = new THREE.OrthographicCamera(-1 * width, 1 * width, 1 * height,-1 * height, 1, 10000)
+      # @_camera = new THREE.PerspectiveCamera(45, width/height, 1, 10000)
       MainCamera.init(@scene, @_camera, @_container, @_target)
       MainCamera.updateCamera({x:0, y:0, z:0})
       @_axisCamera = new THREE.OrthographicCamera(@_container.clientWidth / -2, @_container.clientWidth / 2, @_container.clientHeight / 2, @_container.clientHeight / -2, 1, 10000)
