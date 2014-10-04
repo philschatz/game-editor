@@ -75,9 +75,9 @@ module.exports = (SceneManager, Interactions, Input, HashManager) ->
         normal.applyMatrix4(matrixRotationWorld)
 
         position = new (SceneManager.THREE().Vector3)().addVectors(intersect.point, normal)
-        position.x = Math.floor(position.x / (16/16)) * (16/16) + 8
-        position.y = Math.floor(position.y / (16/16)) * (16/16) + 8
-        position.z = Math.floor(position.z / (16/16)) * (16/16) + 8
+        position.x = Math.floor(position.x / (16/16)) * (16/16) + (16/16)/2
+        position.y = Math.floor(position.y / (16/16)) * (16/16) + (16/16)/2
+        position.z = Math.floor(position.z / (16/16)) * (16/16) + (16/16)/2
         Input.startPosition = position
         Input.isMouseRotating = false
       else
