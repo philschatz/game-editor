@@ -24,10 +24,10 @@ module.exports = (other, bbox, vec, resting) ->
 
     y = coords[1]
     {perpendicAxis, multiplier} = GameManager.get2DInfo()
-    blockDepth = GameManager.get2DBlock(coords)
-    belowBlockDepth = GameManager.get2DBlock([coords[0], y - 1, coords[2]])
+    blockDepth = GameManager.getFlattenedBlock(coords)
+    belowBlockDepth = GameManager.getFlattenedBlock([coords[0], y - 1, coords[2]])
 
-    myBlock = GameManager.getPlayerBlock()
+    myBlock = GameManager.getPlayerFlattenedBlock()
     isCameraAxis = GameManager.isCameraAxis(axis)
     isVectorAxis = vec3[axis] isnt 0
 

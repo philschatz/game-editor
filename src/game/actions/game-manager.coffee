@@ -14,13 +14,13 @@ module.exports = new class GameManager
     {axis, perpendicAxis, dir, multiplier}
 
 
-  get2DBlock: (coords) ->
+  getFlattenedBlock: (coords) ->
     {axis, perpendicAxis, dir} = @get2DInfo()
     y = coords[1]
     @getGame().sparseCollisionMap[dir]['' + Math.floor(coords[axis]) + '|' + y]
 
-  getPlayerBlock: ->
-    @get2DBlock(@getGame().controlling.aabb().base)
+  getPlayerFlattenedBlock: ->
+    @getFlattenedBlock(@getGame().controlling.aabb().base)
 
   isCameraAxis: (axis) ->
     @get2DInfo().axis is axis
