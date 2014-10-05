@@ -10,7 +10,9 @@
     "beefy": "0.0.11",
     "browserify": "^5.9.1",
     "coffeeify": "^0.7.0",
-    "kb-controls": "^0.2.0"
+    "kb-controls": "^0.2.0",
+    "underscore": "^1.7.0",
+    "voxel-physical": "^0.0.7"
   },
   "scripts": {
     "test": "./node_modules/.bin/browserify index.coffee -o bundle.js --extension='.coffee' --transform coffeeify",

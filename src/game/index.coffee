@@ -14,12 +14,13 @@ skin = require('minecraft-skin')
 # blockSelector = toolbar({el: '#tools'})
 voxel = require('voxel')
 voxelView = require('voxel-view')
+VoxelPhysical = require('voxel-physical')
 collideTerrain = require('./collisions/terrain')
 mapConfig = require('./maps/my')
 
 PALETTE = require '../voxels/palette-manager'
 
-mapConfig.playerPosition = [1, 20, 3]
+mapConfig.playerPosition = [1, 20, 2.5]
 
 module.exports = (SceneManager) ->
 
@@ -81,6 +82,12 @@ module.exports = (SceneManager) ->
       @buttons.enable()
       # stream.pipe(this.controls.createWriteRotationStream())
 
+  # Change the terminal velocity defaults for a player
+  createGame::makePhysical = (target, envelope, blocksCreation) ->
+    # obj = VoxelPhysical(target, @potentialCollisionSet(), envelope or [1/2, 1.5, 1/2])
+    obj = VoxelPhysical(target, @potentialCollisionSet(), envelope or [.01, 1, .01])
+    obj.blocksCreation = !!blocksCreation
+    return obj
 
 
   # setup the game and add some trees
