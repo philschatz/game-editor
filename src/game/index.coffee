@@ -17,6 +17,7 @@ voxelView = require('voxel-view')
 collideTerrain = require('./collisions/terrain')
 mapConfig = require('./maps/my')
 
+PALETTE = require '../voxels/palette-manager'
 
 mapConfig.playerPosition = [1, 20, 3]
 
@@ -302,7 +303,7 @@ module.exports = (SceneManager) ->
             if dir % 2 is 1
               pos = [B, y, a]
             block = game.getBlock(pos)
-            if block # and collisionTypes?[block]
+            if block # and PALETTE.collisionFor(block-1) in ['top', 'all'] TODO: Why is this -1?
               break
 
           game.sparseCollisionMap[dir]['' + a + '|' + y] = B  if block

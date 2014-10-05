@@ -44,4 +44,15 @@ PALETTE = require './types/nature-palette'
 module.exports =
   voxelName: (color) -> PALETTE.colors[color]
   # voxelConfig: (voxelName) -> PALETTE.voxels[voxelName]
+  collisionFor: (color) ->
+    voxelName = PALETTE.colors[color]
+
+    if color is 7
+      console.log voxelName
+      # console.log PALETTE.voxels[voxelName].collision
+
+    if voxelName and PALETTE.voxels[voxelName]
+      PALETTE.voxels[voxelName].collision
+    else
+      null
   allVoxelConfigs: -> PALETTE.voxels
