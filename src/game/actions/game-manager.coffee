@@ -24,3 +24,18 @@ module.exports = new class GameManager
 
   isCameraAxis: (axis) ->
     @get2DInfo().axis is axis
+
+  # Returns an array of coords. (me ... block-on-screen] (inclusive)
+  # So you can loop and decide how much to change depth
+  getBlockDepthsInFrontOf: (coords, isMeInclusive) ->
+    {axis, perpendicAxis, dir, multiplier} = @get2DInfo()
+    min = @getFlattenedBlock(coords)
+    max = Math.floor(coords[perpendicAxis])
+    max += (16/16) * multiplier unless isMeInclusive
+    coord = [0, coords[1], 0]
+    coord[axis] = Math.floor(coords[axis])
+    blocks = []
+    for a in [max..min] by multiplier
+      coord[perpendicAxis] = a
+      blocks.push(a) if @getGame().getBlock(coord)
+    blocks

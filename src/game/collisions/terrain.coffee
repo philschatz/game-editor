@@ -1,4 +1,6 @@
+_ = require 'underscore'
 GameManager = require '../actions/game-manager'
+PaletteManager = require '../../voxels/palette-manager'
 
 # other -
 # bbox - player bbox
@@ -62,21 +64,64 @@ module.exports = (other, bbox, vec, resting) ->
             console.log 'fallingg......'
             newDepth = blockDepth
             tile = true # HACK to tell the game there's a collision
-      else if isCameraAxis and not isBehind(myBlock) and blockDepth?
+      else if isCameraAxis
 
-        # I am walking and there is a flattened block next to me
-        console.log 'walking and block next to me'
-        newDepth = blockDepth + multiplier  if (isBehind(blockDepth) or isInside(blockDepth)) and isBelowTopCollide(blockDepth)
-        tile = false
-      else if isCameraAxis and isBehind(myBlock)
+        if isBehind(myBlock)
+          # I am walking and I am behind a block
+          console.log 'walking behind a block'
+          console.log game.controlling
+          tile = false
 
-        # I am walking and I am behind a block
-        console.log 'walking behind a block'
-        tile = false
+        else
 
-    if newDepth? and newDepth isnt @controlling.aabb().base[perpendicAxis]
+          ###
+            This bit is hairy. (modeled in the space between lighthouse and a pillar)
+            1. If first below is top/all and there is no wall above it just move to it; done
+            2. Find last wall (nearest me)
+            3. Loop through all adjacent walls until an opening appears
+            4. From there, find last below (nearest opening) that is top/all and move to it; done
+            5. Otherwise, move in front of first and let fall; done
+          ###
+
+          # 1. If first below is top/all ...
+          tmpCoords = [coords[0], y - 1, coords[2]]
+          tmpCoords[perpendicAxis] = belowBlockDepth
+          if belowBlockDepth? and PaletteManager.collisionFor(GameManager.getGame().getBlock(tmpCoords)) in ['top', 'all']
+            # 1. ... and there is no wall above it ...
+            tmpCoords[1] = y
+            unless GameManager.getGame().getBlock(tmpCoords)
+              # 1. ... just move to it; done
+              newDepth = belowBlockDepth
+              tile = false
+
+          unless newDepth?
+            # 2. Find last wall (nearest me)
+            blockDepths = GameManager.getBlockDepthsInFrontOf(coords, true)
+            if blockDepths.length
+              lastWallDepth = _.first(blockDepths)
+              # 3. Loop through all adjacent walls until an opening appears
+              i = 0
+              while blockDepths[i]? and blockDepths[i] is lastWallDepth + i * multiplier
+                i++
+              lastWallDepth += i * multiplier
+
+              # 4. From there, find last below (nearest opening) that is top/all and move to it; done
+              tmpCoords[1] = y - 1
+              tmpCoords[perpendicAxis] = lastWallDepth
+              walkableDepth = _.first(GameManager.getBlockDepthsInFrontOf(tmpCoords, true))
+              if walkableDepth?
+                newDepth = walkableDepth
+                tile = false
+              else
+                # 5. Otherwise, move in front of first and let fall; done
+                newDepth = lastWallDepth
+                tile = false
+
+
+
+    if newDepth? and Math.floor(newDepth) isnt Math.floor(@controlling.aabb().base[perpendicAxis])
       newCoords = @controlling.aabb().base
-      newCoords[perpendicAxis] = newDepth + .5 # to center the player
+      newCoords[perpendicAxis] = Math.floor(newDepth) + .5 # to center the player
       console.log 'moving from:', @controlling.aabb().base
       console.log 'moving to  :', newCoords
       @controlling.moveTo(newCoords[0], newCoords[1], newCoords[2])
