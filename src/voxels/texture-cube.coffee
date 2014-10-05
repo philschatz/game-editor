@@ -28,7 +28,7 @@ module.exports = new class TextureCubeBuilder
           img.onload = ->
             @tex.needsUpdate = true
 
-          mat = new THREE.MeshBasicMaterial(color: 0x00ff00, map: tex, transparent: false, overdraw: true)
+          mat = new THREE.MeshBasicMaterial(color: 0xffffff, map: tex, transparent: false, overdraw: true)
           materialIndex = @_materials.length
           @_materials.push(mat)
           @_materialNames[side] = materialIndex

@@ -100,11 +100,12 @@ module.exports = (THREE, Input) ->
       @brush.position.y = 2000
       @brush.overdraw = false
       @scene.add(@brush)
-      ambientLight = new THREE.AmbientLight(0x606060)
-      @scene.add(ambientLight)
-      directionalLight = new THREE.DirectionalLight(0xffffff)
-      directionalLight.position.set(1, 0.75, 0.5).normalize()
-      @scene.add directionalLight
+      # ambientLight = new THREE.AmbientLight(0x0)
+      # @scene.add(ambientLight)
+      # directionalLight = new THREE.DirectionalLight(0xffffff)
+      # directionalLight.position.set(0, 20, -100).normalize()
+      # directionalLight.lookAt(@_target)
+      # @scene.add directionalLight
 
 
     addVoxel: (x, y, z, color) ->
