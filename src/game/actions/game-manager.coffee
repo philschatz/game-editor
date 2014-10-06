@@ -34,7 +34,7 @@ module.exports = new class GameManager
     {axis, perpendicAxis, dir, multiplier} = @get2DInfo()
     min = @_getFlattenedBlock(coords)
     max = @_getBackFlattenedBlock(coords)
-    coord = [0, coords[1], 0]
+    coord = [null, coords[1], null]
     coord[axis] = Math.floor(coords[axis])
     blocks = []
     for a in [min..max] by -1 * multiplier
@@ -42,6 +42,9 @@ module.exports = new class GameManager
       color = @_getGame().getBlock(coord)
       blocks.push([a, PaletteManager.collisionFor(color)]) if color
     blocks
+
+  getFirstBlockDepth: (coords) ->
+    @_getFlattenedBlock(coords)
 
   blockTypeAt: (coords) ->
     color = @_getGame().getBlock(coords)

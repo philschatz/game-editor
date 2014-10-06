@@ -122,6 +122,37 @@ collideTest = ({map, expectedDepth, axis, dir, expectedHit, playerCoord}) ->
 # --------------------- Tests start below -----------------
 
 
+# console.log('Behind a wall2. No need to move')
+# collideTest
+#   map: [
+#     # Floor below the player
+#     [
+#       ['all'] # ---> Z axis (depth)
+#       ['top', 'top', null, 'top']
+#     ]
+#     # The player level
+#     [
+#       [null , null , 'none'] # ---> Z axis (depth)
+#       [null , null , 'none'] # The wall
+#     ]
+#   ]
+
+
+console.log('Behind a wall. No need to move')
+collideTest
+  map: [
+    # Floor below the player
+    [
+      ['all'] # ---> Z axis (depth)
+      ['top', null, 'top']
+    ]
+    # The player level
+    [
+      [null , 'none'] # ---> Z axis (depth)
+      [null , 'none'] # The wall
+    ]
+  ]
+
 
 console.log('Simple walk with top in front, no moving (Do not move the player unnecessarily)')
 collideTest

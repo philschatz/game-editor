@@ -25,6 +25,7 @@ module.exports = (other, bbox, vec, resting) ->
     isVelocityAxis = vec3[axis] isnt 0
 
     isPlayerBehind = (depth) ->
+      return false unless depth?
       multiplier * (bbox.base[perpendicAxis] - depth) < 0
 
     isPlayerInFront = (depth) ->
@@ -56,11 +57,18 @@ module.exports = (other, bbox, vec, resting) ->
 
     if isVelocityAxis
 
+      # If the player is behind a wall then operate as if the level was rotated 180 degrees.
+      # This means reversing the blockDepth lists and changing the `+ multiplier` to
+      # put the player "in front" of a wall
+      isBehindWall = isPlayerBehind(GameManager.getFirstBlockDepth(@controlling.aabb().base))
+      isBehindWallMultiplier = if isBehindWall then -1 else 1
+
       # If below front has collide then change depth (only if we are not already standing on one)
       if GameManager.blockTypeAt(belowCoords) in ['top', 'all']
         tile = false
       else
         blocksBelow = GameManager.getBlockDepths(belowCoords)
+        blocksBelow.reverse() if isBehindWall
         changeDepthIfBelowFrontHasCollide(blocksBelow)
 
       # if axis is 1 and dir is -1 and coords[1] isnt Math.floor(bbox.base[1])
@@ -69,6 +77,7 @@ module.exports = (other, bbox, vec, resting) ->
       # else
       if isCameraAxis
         blocks = GameManager.getBlockDepths(coords)
+        blocks.reverse() if isBehindWall
 
         # If I am walking into a wall
         if blocks.length
@@ -78,7 +87,7 @@ module.exports = (other, bbox, vec, resting) ->
           while blocks.length
             [depth, type] = _.first(blocks)
             tmpCoord = belowCoords[...]
-            tmpCoord[perpendicAxis] = depth + multiplier
+            tmpCoord[perpendicAxis] = depth + multiplier * isBehindWallMultiplier
             belowType = GameManager.blockTypeAt(tmpCoord)
             if belowType in ['top', 'all']
               break
@@ -86,7 +95,7 @@ module.exports = (other, bbox, vec, resting) ->
 
           if blocks.length
             [depth] = _.first(blocks)
-            newDepth = depth + multiplier
+            newDepth = depth + multiplier * isBehindWallMultiplier
 
           else if canWalkOver()
             # We are already standing on something. Leave the player alone
@@ -94,7 +103,7 @@ module.exports = (other, bbox, vec, resting) ->
           else
             blocks = [originalFront]
             [depth] = _.first(blocks)
-            newDepth = depth + multiplier
+            newDepth = depth + multiplier * isBehindWallMultiplier
 
 
 

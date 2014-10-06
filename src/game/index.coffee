@@ -20,7 +20,7 @@ mapConfig = require('./maps/my')
 
 PALETTE = require '../voxels/palette-manager'
 
-mapConfig.playerPosition = [1, 20, 2.5]
+mapConfig.playerPosition = [-1.5, 20, 2.5]
 
 module.exports = (SceneManager) ->
 
