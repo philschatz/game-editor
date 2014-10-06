@@ -45,11 +45,8 @@ module.exports =
   voxelName: (color) -> PALETTE.colors[color]
   # voxelConfig: (voxelName) -> PALETTE.voxels[voxelName]
   collisionFor: (color) ->
+    color -= 1 # The game makes 0 be "No Voxel" so everything is shifted
     voxelName = PALETTE.colors[color]
-
-    if color is 7
-      console.log voxelName
-      # console.log PALETTE.voxels[voxelName].collision
 
     if voxelName and PALETTE.voxels[voxelName]
       PALETTE.voxels[voxelName].collision

@@ -43,6 +43,8 @@ module.exports = (other, bbox, vec, resting) ->
     isBelowTopCollide = (depth) ->
       multiplier * (belowBlockDepth - depth) > 0
 
+    lastWallDepth = null # Hack to see if there is a wall (don't search behind for a top-collide)
+
 
     # Collision cases:
     #
@@ -76,6 +78,7 @@ module.exports = (other, bbox, vec, resting) ->
 
           ###
             This bit is hairy. (modeled in the space between lighthouse and a pillar)
+            0. If there is no wall then done
             1. If first below is top/all and there is no wall above it just move to it; done
             2. Find last wall (nearest me)
             3. Loop through all adjacent walls until an opening appears
@@ -83,39 +86,86 @@ module.exports = (other, bbox, vec, resting) ->
             5. Otherwise, move in front of first and let fall; done
           ###
 
-          # 1. If first below is top/all ...
-          tmpCoords = [coords[0], y - 1, coords[2]]
-          tmpCoords[perpendicAxis] = belowBlockDepth
-          if belowBlockDepth? and PaletteManager.collisionFor(GameManager.getGame().getBlock(tmpCoords)) in ['top', 'all']
-            # 1. ... and there is no wall above it ...
-            tmpCoords[1] = y
-            unless GameManager.getGame().getBlock(tmpCoords)
-              # 1. ... just move to it; done
-              newDepth = belowBlockDepth
-              tile = false
+          blockDepths = GameManager.getBlockDepthsInFrontOf(coords, true)
+          unless blockDepths.length
+            tile = false
 
-          unless newDepth?
-            # 2. Find last wall (nearest me)
-            blockDepths = GameManager.getBlockDepthsInFrontOf(coords, true)
-            if blockDepths.length
-              lastWallDepth = _.first(blockDepths)
-              # 3. Loop through all adjacent walls until an opening appears
-              i = 0
-              while blockDepths[i]? and blockDepths[i] is lastWallDepth + i * multiplier
-                i++
-              lastWallDepth += i * multiplier
+          else
+            # 0. I am about to walk into a wall
 
-              # 4. From there, find last below (nearest opening) that is top/all and move to it; done
-              tmpCoords[1] = y - 1
-              tmpCoords[perpendicAxis] = lastWallDepth
-              walkableDepth = _.first(GameManager.getBlockDepthsInFrontOf(tmpCoords, true))
-              if walkableDepth?
-                newDepth = walkableDepth
+            # 1. If first below is top/all ...
+            tmpCoords = [coords[0], y - 1, coords[2]]
+            tmpCoords[perpendicAxis] = belowBlockDepth
+            if belowBlockDepth? and PaletteManager.collisionFor(GameManager.getGame().getBlock(tmpCoords)) in ['top', 'all']
+              # 1. ... and there is no wall above it ...
+              tmpCoords[1] = y
+              unless GameManager.getGame().getBlock(tmpCoords)
+                # 1. ... just move to it; done
+                newDepth = belowBlockDepth
                 tile = false
-              else
-                # 5. Otherwise, move in front of first and let fall; done
-                newDepth = lastWallDepth
-                tile = false
+
+            unless newDepth?
+              # 2. Find last wall (nearest me)
+              blockDepths = GameManager.getBlockDepthsInFrontOf(coords, true)
+              if blockDepths.length
+                lastWallDepth = _.first(blockDepths)
+                # 3. Loop through all adjacent walls until an opening appears
+                i = 0
+                while blockDepths[i]? and blockDepths[i] is lastWallDepth + i * multiplier
+                  i++
+                lastWallDepth += i * multiplier
+
+                # 4. From there, find last below (nearest opening) that is top/all and move to it; done
+                tmpCoords[1] = y - 1
+                tmpCoords[perpendicAxis] = lastWallDepth
+                walkableDepth = _.first(GameManager.getBlockDepthsInFrontOf(tmpCoords, true))
+                if walkableDepth?
+                  newDepth = walkableDepth
+                  tile = false
+                else
+                  # 5. Otherwise, move in front of first and let fall; done
+                  newDepth = lastWallDepth
+                  tile = false
+
+
+    # Now, check if the player is floating above a hole. If so, move the player forward or backward
+    tmpCoords = [coords[0], y - 1, coords[2]]
+    tmpCoords[perpendicAxis] = newDepth if newDepth?
+    blockBelow = GameManager.getGame().getBlock(tmpCoords)
+    if blockBelow and PaletteManager.collisionFor(blockBelow) in ['top', 'all']
+      # We are fine. player is standing on a top/all-collide block
+    else
+      # Find the nearest top-collide block in front
+      blockDepthsInFront = GameManager.getBlockDepthsInFrontOf(tmpCoords, true)
+      walkableDepth = null
+      for depth in blockDepthsInFront
+        tmpCoords[perpendicAxis] = depth
+        blockBelow = GameManager.getGame().getBlock(tmpCoords)
+        if blockBelow and PaletteManager.collisionFor(blockBelow) in ['top', 'all']
+          walkableDepth = depth
+          break
+
+      if walkableDepth?
+        newDepth = walkableDepth
+      else if lastWallDepth?
+        # Let the player fall
+      else
+        # Try behind the player
+        # Find the nearest top-collide block in front
+        blockDepthsBehind = GameManager.getBlockDepthsBehindOf(tmpCoords, false)
+        walkableDepth = null
+        for depth in blockDepthsBehind
+          tmpCoords[perpendicAxis] = depth
+          blockBelow = GameManager.getGame().getBlock(tmpCoords)
+          if blockBelow and PaletteManager.collisionFor(blockBelow) in ['top', 'all']
+            walkableDepth = depth
+            break
+
+        if walkableDepth?
+          newDepth = walkableDepth
+        else
+          # We tried. they are really falling
+          console.log('really falling!')
 
 
 

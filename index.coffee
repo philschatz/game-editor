@@ -1,3 +1,10 @@
+# Stupid negative modulo in JS
+Number::mod = (n) ->
+  ((this % n) + n) % n
+
+# require './test-collision'
+
+
 THREE = window.THREE
 raf = require("raf")
 
@@ -35,10 +42,6 @@ TextureCube = require './src/voxels/texture-cube'
 
 
 GAME = require './src/game'
-
-# Stupid negative modulo in JS
-Number::mod = (n) ->
-  ((this % n) + n) % n
 
 
 window.startEditor = ->

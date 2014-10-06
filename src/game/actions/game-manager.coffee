@@ -19,6 +19,12 @@ module.exports = new class GameManager
     y = coords[1]
     @getGame().sparseCollisionMap[dir]['' + Math.floor(coords[axis]) + '|' + y]
 
+  getBackFlattenedBlock: (coords) ->
+    {axis, perpendicAxis, dir} = @get2DInfo()
+    y = coords[1]
+    @getGame().sparseCollisionMap[(dir + 2).mod(4)]['' + Math.floor(coords[axis]) + '|' + y]
+
+
   getPlayerFlattenedBlock: ->
     @getFlattenedBlock(@getGame().controlling.aabb().base)
 
@@ -36,6 +42,19 @@ module.exports = new class GameManager
     coord[axis] = Math.floor(coords[axis])
     blocks = []
     for a in [max..min] by multiplier
+      coord[perpendicAxis] = a
+      blocks.push(a) if @getGame().getBlock(coord)
+    blocks
+
+  getBlockDepthsBehindOf: (coords, isMeInclusive) ->
+    {axis, perpendicAxis, dir, multiplier} = @get2DInfo()
+    max = @getBackFlattenedBlock(coords)
+    min = Math.floor(coords[perpendicAxis])
+    min += (16/16) * multiplier unless isMeInclusive
+    coord = [0, coords[1], 0]
+    coord[axis] = Math.floor(coords[axis])
+    blocks = []
+    for a in [min..max] by -1 * multiplier
       coord[perpendicAxis] = a
       blocks.push(a) if @getGame().getBlock(coord)
     blocks
