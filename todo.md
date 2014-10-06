@@ -1,7 +1,7 @@
 TODO:
 
 - [-] extract collision-detection and physics
-  - [ ] get jump up to work
+  - [-] get jump up to work
   - [x] get walk left/right (and change depth) to work
   - [-] get climbing to work now that we have voxel collision
 - [x] use voxel collision info for collision-detection

@@ -71,6 +71,11 @@ module.exports = (other, bbox, vec, resting) ->
         blocksBelow.reverse() if isBehindWall
         changeDepthIfBelowFrontHasCollide(blocksBelow)
 
+      if axis is 1 and dir is 1 # Jumping
+        tile = false
+        return
+      else if axis is 1 and dir is -1
+
       # if axis is 1 and dir is -1 and coords[1] isnt Math.floor(bbox.base[1])
       #   # the last bit checks to make sure we are actually falling instead of just checking the current voxel where the player is.
       #
