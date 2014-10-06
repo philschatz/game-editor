@@ -89,12 +89,10 @@ collideTest = ({map, expectedDepth, axis, dir, expectedHit, playerCoord}) ->
     # all are defined above
     {axis, perpendicAxis, dir, multiplier}
   GameManager.blockTypeAt = (coords) -> getBlock(coords)
-  GameManager.getFlattenedBlock = (coords) -> getFlattenedBlock(coords)
-  GameManager.getBackFlattenedBlock = (coords) -> getBackFlattenedBlock(coords)
-  GameManager.getPlayerFlattenedBlock = -> getFlattenedBlock(playerCoord)
+  GameManager._getFlattenedBlock = (coords) -> getFlattenedBlock(coords)
+  GameManager._getBackFlattenedBlock = (coords) -> getBackFlattenedBlock(coords)
   GameManager.isCameraAxis = -> true
-  GameManager.getGame = -> {getBlock}
-  # GameManager.getBlockDepthsInFrontOf(coords) No need to implement this
+  GameManager._getGame = -> {getBlock}
   PaletteManager.collisionFor = (color) -> color
 
   # Run the collision detector

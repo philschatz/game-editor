@@ -20,8 +20,6 @@ module.exports = (other, bbox, vec, resting) ->
     belowCoords = [coords[0], y - 1, coords[2]]
 
     {perpendicAxis, multiplier} = GameManager.get2DInfo()
-    blockDepth = GameManager.getFlattenedBlock(coords)
-    belowBlockDepth = GameManager.getFlattenedBlock([coords[0], y - 1, coords[2]])
 
     isCameraAxis = GameManager.isCameraAxis(axis)
     isVelocityAxis = vec3[axis] isnt 0
@@ -57,19 +55,19 @@ module.exports = (other, bbox, vec, resting) ->
 
 
     if isVelocityAxis
-      blocksBelow = GameManager.getBlockDepths(belowCoords)
 
       # If below front has collide then change depth (only if we are not already standing on one)
       if GameManager.blockTypeAt(belowCoords) in ['top', 'all']
         tile = false
       else
+        blocksBelow = GameManager.getBlockDepths(belowCoords)
         changeDepthIfBelowFrontHasCollide(blocksBelow)
 
-      if axis is 1 and dir is -1 and coords[1] isnt Math.floor(bbox.base[1])
-        # the last bit checks to make sure we are actually falling instead of just checking the current voxel where the player is.
-
-
-      else if isCameraAxis
+      # if axis is 1 and dir is -1 and coords[1] isnt Math.floor(bbox.base[1])
+      #   # the last bit checks to make sure we are actually falling instead of just checking the current voxel where the player is.
+      #
+      # else
+      if isCameraAxis
         blocks = GameManager.getBlockDepths(coords)
 
         # If I am walking into a wall
