@@ -51,8 +51,10 @@ window.startEditor = ->
   alreadyCreatedGame = false
 
   $('.preview-level').on 'click', ->
-    GAME(SceneManager) unless alreadyCreatedGame
-    alreadyCreatedGame = true
+    if not alreadyCreatedGame
+      exportGeometry()
+      GAME(SceneManager)
+      alreadyCreatedGame = true
 
 
   window.exportGeometry = ->
@@ -100,8 +102,8 @@ window.startEditor = ->
     scene.add(mesh)
     scene.add(mesh2)
 
-    txt = new THREE.ObjectExporter().parse(mesh)
-    geo2 = new THREE.ObjectLoader().parse(txt)
+    # txt = new THREE.ObjectExporter().parse(mesh)
+    # geo2 = new THREE.ObjectLoader().parse(txt)
 
     # for face in geo2.geometry.faces
     #   color = face.color.getHex()
@@ -109,11 +111,13 @@ window.startEditor = ->
     #
     # mesh2 = new THREE.Mesh(geo2.geometry, cubeMaterial)
 
-    console.log JSON.stringify(txt)
+    # console.log JSON.stringify(txt)
 
     # mesh = new THREE.Mesh(geo2, cubeMaterial)
     # scene.add(mesh)
     # scene.add(mesh2)
+
+    HashManager.disableUpdateHash()
 
 
   window.exportImage = ->

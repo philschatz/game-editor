@@ -18,7 +18,10 @@ encode = (array) ->
 module.exports = (SceneManager) ->
   new class HashManager
 
+    disableUpdateHash: -> @_disableUpdateHash = true
+
     updateHash: ->
+      return if @_disableUpdateHash
       currentFrame = 0
       animationFrames = []
       data = []
