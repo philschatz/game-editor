@@ -80,16 +80,15 @@ collideTest = ({map, expectedDepth, axis, dir, expectedHit, playerCoord}) ->
     controlling:
       aabb: ->
         # Collision detector mutates this array so recreate it here
-        [x, y, z] = playerCoord
-        base: [x, y, z]
+        base: playerCoord[..]
       moveTo: (x, y, z) ->
         coord = [x, y, z]
-        console.log 'Moving to', coord
         ACTUAL_DEPTH = Math.floor(coord[perpendicAxis]) # Collision detector adds .5 to the coord to center the player
 
   GameManager.get2DInfo = ->
     # all are defined above
     {axis, perpendicAxis, dir, multiplier}
+  GameManager.blockTypeAt = (coords) -> getBlock(coords)
   GameManager.getFlattenedBlock = (coords) -> getFlattenedBlock(coords)
   GameManager.getBackFlattenedBlock = (coords) -> getBackFlattenedBlock(coords)
   GameManager.getPlayerFlattenedBlock = -> getFlattenedBlock(playerCoord)
@@ -105,7 +104,7 @@ collideTest = ({map, expectedDepth, axis, dir, expectedHit, playerCoord}) ->
 
   # The player coordinates
   bbox =
-    base: [0,1,0] # player is standing on something
+    base: playerCoord[..] # player is standing on something
 
   # Create a THREE.Vector3 velocity vector
   vec = [0, 0, 0]
@@ -131,7 +130,7 @@ collideTest
   map: [
     # Floor below the player
     [
-      ['top'       ] # ---> Z axis (depth)
+      ['all'       ] # ---> Z axis (depth)
       ['top', 'top']
       # |
       # |
@@ -149,7 +148,7 @@ collideTest
   map: [
     # Floor below the player
     [
-      ['top'] # ---> Z axis (depth)
+      ['all'] # ---> Z axis (depth)
       ['top']
       # |
       # |
@@ -168,26 +167,35 @@ collideTest
     # Floor below the player
     [
       [           ]
-      [null, 'top'] # ---> Z axis (depth)
+      [null, 'all'] # ---> Z axis (depth)
       [null, 'top']
     ]
     # The player level (empty)
   ]
 
 
-console.log('Bump the player over 1 unit')
+console.log('Bump the player forward 1 unit')
 collideTest
   expectedDepth: 1
   map: [
     # Floor below the player
     [
-      ['top'      ] # ---> Z axis (depth)
+      ['all'      ] # ---> Z axis (depth)
       [null, 'top']
-      # |
-      # |
-      # V
-      #
-      # X axis
+    ]
+    # The player level (empty)
+  ]
+
+
+console.log('Bump the player backward 1 unit')
+collideTest
+  playerCoord: [0, 1, 1]
+  expectedDepth: 0
+  map: [
+    # Floor below the player
+    [
+      [null , 'all'] # ---> Z axis (depth)
+      ['top'       ]
     ]
     # The player level (empty)
   ]
@@ -199,10 +207,10 @@ collideTest
   map: [
     # Floor below the player
     [
-      ['top'      ] # ---> Z axis (depth)
+      ['all'      ] # ---> Z axis (depth)
       [null, 'top']
     ]
-    # The player level (empty)
+    # The player level
     [
       [          ] # ---> Z axis (depth)
       ['none'    ] # The wall
@@ -210,16 +218,16 @@ collideTest
   ]
 
 
-console.log('Simple wall. Bump the player over 1 unit')
+console.log('Simple wall2. Bump the player over 1 unit')
 collideTest
   expectedDepth: 1
   map: [
     # Floor below the player
     [
-      ['top'       ] # ---> Z axis (depth)
+      ['all'       ] # ---> Z axis (depth)
       ['top', 'top']
     ]
-    # The player level (empty)
+    # The player level
     [
       [            ] # ---> Z axis (depth)
       ['none'      ] # The wall
@@ -233,10 +241,10 @@ collideTest
   map: [
     # Floor below the player
     [
-      ['top'               ] # ---> Z axis (depth)
+      ['all'               ] # ---> Z axis (depth)
       [null , 'top',       ]
     ]
-    # The player level (empty)
+    # The player level
     [
       [                    ] # ---> Z axis (depth)
       ['none', null, 'none'] # The wall
@@ -250,13 +258,30 @@ collideTest
   map: [
     # Floor below the player
     [
-      ['top'               ] # ---> Z axis (depth)
+      ['all'               ] # ---> Z axis (depth)
       [null , 'top', 'none']
     ]
-    # The player level (empty)
+    # The player level
     [
       [                    ] # ---> Z axis (depth)
       ['none', null, 'none'] # The wall
+    ]
+  ]
+
+console.log('Complex wall2. Do not move the player even though there is a post in front')
+collideTest
+  # expectedDepth: 1
+  playerCoord: [0, 1, 1]
+  map: [
+    # Floor below the player
+    [
+      [null , 'all'        ] # ---> Z axis (depth)
+      [null , 'top'        ]
+    ]
+    # The player level
+    [
+      [                    ] # ---> Z axis (depth)
+      [null , null , 'none'] # The wall
     ]
   ]
 
@@ -267,10 +292,28 @@ collideTest
   map: [
     # Floor below the player
     [
-      ['top'] # ---> Z axis (depth)
+      ['all'] # ---> Z axis (depth)
       ['top']
     ]
-    # The player level (empty)
+    # The player level
+    [
+      [      ] # ---> Z axis (depth)
+      ['none'] # The wall
+    ]
+  ]
+
+
+console.log('Simple wall. Move up only if necessary. It is not necessary in this case')
+collideTest
+  # expectedDepth: 1
+  playerCoord: [0, 1, 2]
+  map: [
+    # Floor below the player
+    [
+      [null, null,  'all'] # ---> Z axis (depth)
+      [null, 'top', 'top']
+    ]
+    # The player level
     [
       [      ] # ---> Z axis (depth)
       ['none'] # The wall

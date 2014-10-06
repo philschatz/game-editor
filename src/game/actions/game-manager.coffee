@@ -1,3 +1,5 @@
+PaletteManager = require '../../voxels/palette-manager'
+
 module.exports = new class GameManager
   getGame: -> window.game
   get2DInfo: ->
@@ -31,6 +33,26 @@ module.exports = new class GameManager
   isCameraAxis: (axis) ->
     @get2DInfo().axis is axis
 
+  getBlockDepths: (coords) ->
+    {axis, perpendicAxis, dir, multiplier} = @get2DInfo()
+    min = @getFlattenedBlock(coords)
+    max = @getBackFlattenedBlock(coords)
+    coord = [0, coords[1], 0]
+    coord[axis] = Math.floor(coords[axis])
+    blocks = []
+    for a in [min..max] by -1 * multiplier
+      coord[perpendicAxis] = a
+      color = @getGame().getBlock(coord)
+      blocks.push([a, PaletteManager.collisionFor(color)]) if color
+    blocks
+
+  blockTypeAt: (coords) ->
+    color = @getGame().getBlock(coords)
+    if color
+      PaletteManager.collisionFor(color)
+    else
+      undefined
+
   # Returns an array of coords. (me ... block-on-screen] (inclusive)
   # So you can loop and decide how much to change depth
   getBlockDepthsInFrontOf: (coords, isMeInclusive) ->
@@ -43,7 +65,8 @@ module.exports = new class GameManager
     blocks = []
     for a in [max..min] by multiplier
       coord[perpendicAxis] = a
-      blocks.push(a) if @getGame().getBlock(coord)
+      color = @getGame().getBlock(coord)
+      blocks.push([a, PaletteManager.collisionFor(color)]) if color
     blocks
 
   getBlockDepthsBehindOf: (coords, isMeInclusive) ->
