@@ -15,7 +15,9 @@ skin = require('minecraft-skin')
 voxel = require('voxel')
 voxelView = require('voxel-view')
 VoxelPhysical = require('voxel-physical')
-collideTerrain = require('./collisions/terrain')
+Collision3DTilemap = require './collisions/collision-3d-tilemap'
+CollideTerrain = require('./collisions/terrain')
+GameManager = require './actions/game-manager'
 mapConfig = require('./maps/my')
 
 PALETTE = require '../voxels/palette-manager'
@@ -28,6 +30,13 @@ module.exports = (SceneManager) ->
   createGame::addLights = ->
     @scene = SceneManager.scene
   createGame::render = ->
+
+  # createGame::collideVoxels = Collision3DTilemap(
+  #   createGame::getBlock.bind(this),
+  #   1,
+  #   [Infinity, Infinity, Infinity],
+  #   [-Infinity, -Infinity, -Infinity]
+  # )
 
   myMap = mapConfig.map
   myTextures = mapConfig.textures
@@ -49,11 +58,8 @@ module.exports = (SceneManager) ->
 
   createGame::gravity = [0, -0.00000090, 0]
 
-  # other -
-  # bbox - player bbox
-  # vec -
-  # resting -
-  createGame::collideTerrain = collideTerrain
+  # Custom collision detector that moves the player in the depth axis
+  createGame::collideTerrain = CollideTerrain
 
 
   createGame_showChunk = createGame::showChunk
@@ -85,7 +91,7 @@ module.exports = (SceneManager) ->
   # Change the terminal velocity defaults for a player
   createGame::makePhysical = (target, envelope, blocksCreation) ->
     # obj = VoxelPhysical(target, @potentialCollisionSet(), envelope or [1/2, 1.5, 1/2])
-    obj = VoxelPhysical(target, @potentialCollisionSet(), envelope or [.01, 1, .01])
+    obj = VoxelPhysical(target, @potentialCollisionSet(), envelope or [1/2, 10000.5, 1/2])
     obj.blocksCreation = !!blocksCreation
     return obj
 
@@ -157,9 +163,11 @@ module.exports = (SceneManager) ->
     else #z
       cameraAxis = 2
       cameraPerpendicAxis = 0
-    y = Math.floor(game.controlling.aabb().base[1])
-    myBlock = @sparseCollisionMap[cameraType]['' + Math.floor(game.controlling.aabb().base[cameraAxis]) + '|' + y]
-    myBlockBelow = @sparseCollisionMap[cameraType]['' + Math.floor(game.controlling.aabb().base[cameraAxis]) + '|' + (y - 1)]
+
+    myBase = game.controlling.aabb().base
+    y = Math.floor(myBase[1])
+    myBlock = GameManager.blockTypeAt(myBase)
+    myBlockBelow = GameManager.blockTypeAt([myBase[0], y - 1, myBase[2]])
     if game.controls.state.climbing and not (game.controls.state.forward or game.controls.state.backward) and myBlock?
       game.controlling.resting.y = true
 
@@ -240,22 +248,22 @@ module.exports = (SceneManager) ->
       @controlling.velocity.y = 0
       @controlling.velocity.z = 0
 
-    # # player debugging
-    # boxes = ''
-    # cameraType = @controlling.rotation.y / Math.PI * 2
-    # cameraType = Math.round(cameraType).mod(4)
-    # cameraDir = 1
-    # cameraAxis = undefined
-    # cameraPerpendicAxis = undefined
-    # cameraDir = -1  if cameraType >= 2
-    # if cameraType.mod(2) is 0 #x
-    #   cameraAxis = 0
-    #   cameraPerpendicAxis = 2
-    # else #z
-    #   cameraAxis = 2
-    #   cameraPerpendicAxis = 0
-    # playerX = Math.floor(@controlling.aabb().base[cameraAxis])
-    # playerY = Math.floor(@controlling.aabb().base[1])
+    # player debugging
+    boxes = ''
+    cameraType = @controlling.rotation.y / Math.PI * 2
+    cameraType = Math.round(cameraType).mod(4)
+    cameraDir = 1
+    cameraAxis = undefined
+    cameraPerpendicAxis = undefined
+    cameraDir = -1  if cameraType >= 2
+    if cameraType.mod(2) is 0 #x
+      cameraAxis = 0
+      cameraPerpendicAxis = 2
+    else #z
+      cameraAxis = 2
+      cameraPerpendicAxis = 0
+    playerX = Math.floor(@controlling.aabb().base[cameraAxis])
+    playerY = Math.floor(@controlling.aabb().base[1])
     #
     # for i in [-2..2]
     #   for j in [-2..2]
@@ -277,11 +285,11 @@ module.exports = (SceneManager) ->
     #       boxes += ' '
     #   boxes += '<br/>'
     #
-    # boxes += 'me = [' + Math.floor(@controlling.aabb().base[0]) + ', ' + Math.floor(@controlling.aabb().base[1]) + ', ' + Math.floor(@controlling.aabb().base[2]) + ']'
-    # boxes += '<br/>cameraAxis = ' + cameraAxis
-    # boxes += '<br/>cameraDir = ' + cameraDir
-    # boxes += '<br/>curAction = ' + PlayerManager.currentAction().constructor.name  if PlayerManager.currentAction()
-    # document.getElementById('player-boxes').innerHTML = boxes
+    boxes += 'me = [' + Math.floor(@controlling.aabb().base[0]) + ', ' + Math.floor(@controlling.aabb().base[1]) + ', ' + Math.floor(@controlling.aabb().base[2]) + ']'
+    boxes += '<br/>cameraAxis = ' + cameraAxis
+    boxes += '<br/>cameraDir = ' + cameraDir
+    boxes += '<br/>curAction = ' + PlayerManager.currentAction().constructor.name  if PlayerManager.currentAction()
+    document.getElementById('player-boxes').innerHTML = boxes
     if rotatingCameraDir
       game.controlling.rotation.y += rotatingCameraDir * Math.PI / 50
       if rotatingCameraDir > 0 and game.controlling.rotation.y - rotatingCameraTo > 0
@@ -292,29 +300,4 @@ module.exports = (SceneManager) ->
         rotatingCameraDir = 0
     return
 
-  buildCollisionMap = ->
-    game.sparseCollisionMap = [ {}, {}, {}, {} ]
-
-    # dir is 0, 1, 2, 3 depending on the rotation
-    # build a sparse array for each location
-    for dir in [0..3]
-      for y in [0..50]
-        for a in [-50..50]
-          block = null
-          prevBlockBelow = null
-          for b in [-50..50]
-            B = b
-            B = -b if dir < 2
-            if dir % 2 is 0
-              pos = [a, y, B]
-            if dir % 2 is 1
-              pos = [B, y, a]
-            block = game.getBlock(pos)
-            if block # and PALETTE.collisionFor(block-1) in ['top', 'all'] TODO: Why is this -1?
-              break
-
-          game.sparseCollisionMap[dir]['' + a + '|' + y] = B  if block
-
-
-  # Build initial collision map
-  buildCollisionMap()
+  GameManager.load()

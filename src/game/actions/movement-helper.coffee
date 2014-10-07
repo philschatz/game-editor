@@ -23,4 +23,6 @@ module.exports = new class MovementHelper
       cameraPerpendicAxis = 0
     y = Math.floor(game.controlling.aabb().base[1])
 
-    state.forward and window.game.sparseCollisionMap[cameraType]['' + Math.floor(window.game.controlling.aabb().base[cameraAxis]) + '|' + y]
+    if state.forward
+      console.log('maybe this is climbing, maybe not')
+    state.forward

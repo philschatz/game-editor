@@ -12,7 +12,7 @@
 # GameManager.getBlockDepthsInFrontOf(coords) ... [coord]
 # PaletteManager.collisionFor(color)          ... string
 
-# _ = require 'underscore'
+_ = require 'underscore'
 PaletteManager  = require './src/voxels/palette-manager'
 CollideTerrain  = require './src/game/collisions/terrain'
 GameManager     = require './src/game/actions/game-manager'
@@ -59,19 +59,6 @@ collideTest = ({map, expectedDepth, axis, dir, expectedHit, playerCoord}) ->
     row = level[x] or []
     row[z]
 
-  getFlattenedBlock = ([x, y, z]) ->
-    level = map[y] or []
-    row = level[x] or []
-    # _.last(row)
-    return undefined unless row.length
-    row.length - 1
-
-  getBackFlattenedBlock = ([x, y, z]) ->
-    level = map[y] or []
-    row = level[x] or []
-    return undefined unless row.length
-    0
-
   context =
     collideVoxels: (bbox, vec3, hit) ->
       tile = 4
@@ -87,13 +74,14 @@ collideTest = ({map, expectedDepth, axis, dir, expectedHit, playerCoord}) ->
 
   GameManager.get2DInfo = ->
     # all are defined above
-    {axis, perpendicAxis, dir, multiplier}
+    {axis, perpendicAxis, dir:0, multiplier}
   GameManager.blockTypeAt = (coords) -> getBlock(coords)
-  GameManager._getFlattenedBlock = (coords) -> getFlattenedBlock(coords)
-  GameManager._getBackFlattenedBlock = (coords) -> getBackFlattenedBlock(coords)
+  # GameManager._getFlattenedBlock = getFlattenedBlock
   GameManager.isCameraAxis = -> true
-  GameManager._getGame = -> {getBlock}
+  GameManager._getBlock = getBlock
   PaletteManager.collisionFor = (color) -> color
+
+  GameManager.load()
 
   # Run the collision detector
   other =
@@ -111,6 +99,7 @@ collideTest = ({map, expectedDepth, axis, dir, expectedHit, playerCoord}) ->
   vec = {x, y, z}
 
   resting = []
+
   CollideTerrain.apply(context, [other, bbox, vec, resting])
 
   unless !!expectedHit is !!ACTUAL_HIT
@@ -138,7 +127,7 @@ collideTest = ({map, expectedDepth, axis, dir, expectedHit, playerCoord}) ->
 #   ]
 
 
-console.log('Behind a wall. No need to move')
+console.log('Behind a wall. Must not move')
 collideTest
   map: [
     # Floor below the player
