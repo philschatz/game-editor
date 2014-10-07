@@ -25,3 +25,6 @@ GAME(SceneManager)
 
 
 raf(window).on 'data', -> SceneManager.render()
+
+
+window.startEditor = -> console.warn 'HACK for running the game. making this a noop'

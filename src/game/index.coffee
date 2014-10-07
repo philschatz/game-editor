@@ -31,12 +31,6 @@ module.exports = (SceneManager) ->
     @scene = SceneManager.scene
   createGame::render = ->
 
-  # createGame::collideVoxels = Collision3DTilemap(
-  #   createGame::getBlock.bind(this),
-  #   1,
-  #   [Infinity, Infinity, Infinity],
-  #   [-Infinity, -Infinity, -Infinity]
-  # )
 
   myMap = mapConfig.map
   myTextures = mapConfig.textures
@@ -91,7 +85,7 @@ module.exports = (SceneManager) ->
   # Change the terminal velocity defaults for a player
   createGame::makePhysical = (target, envelope, blocksCreation) ->
     # obj = VoxelPhysical(target, @potentialCollisionSet(), envelope or [1/2, 1.5, 1/2])
-    obj = VoxelPhysical(target, @potentialCollisionSet(), envelope or [1/2, 10000.5, 1/2])
+    obj = VoxelPhysical(target, @potentialCollisionSet(), envelope or [1/2, 1.5, 1/2])
     obj.blocksCreation = !!blocksCreation
     return obj
 
@@ -120,6 +114,17 @@ module.exports = (SceneManager) ->
       D: 'rotate_clockwise'
 
   window.game = game # for debugging
+
+
+  # Use modified collide-3d-tilemap that does not look up the current voxel
+  game.collideVoxels = Collision3DTilemap(
+    game.getBlock.bind(game),
+    1,
+    [Infinity, Infinity, Infinity],
+    [-Infinity, -Infinity, -Infinity]
+  )
+
+
   # container = document.querySelector('#container')
   # game.appendTo(container)
 
@@ -227,6 +232,7 @@ module.exports = (SceneManager) ->
       # Reset if te mouse moved the camera
       game.controlling.pitch.rotation.x = 0
       game.controlling.pitch.rotation.x = 0
+
     else if not rotatingCameraDir and game.controls.state.rotate_counterclockwise
 
       # 'A' was pressed
@@ -241,12 +247,17 @@ module.exports = (SceneManager) ->
       # Reset if te mouse moved the camera
       game.controlling.pitch.rotation.x = 0
       game.controlling.pitch.rotation.x = 0
-    if @controlling.aabb().base[1] < -20
+
+    if @controlling.position.y < -10
       alert 'You died a horrible death. Try again.'
       @controlling.moveTo(initialCoords[0], initialCoords[1], initialCoords[2])
       @controlling.velocity.x = 0
       @controlling.velocity.y = 0
       @controlling.velocity.z = 0
+
+      @controlling.acceleration.x = 0
+      @controlling.acceleration.y = 0
+      @controlling.acceleration.z = 0
 
     # player debugging
     boxes = ''
@@ -295,9 +306,13 @@ module.exports = (SceneManager) ->
       if rotatingCameraDir > 0 and game.controlling.rotation.y - rotatingCameraTo > 0
         game.controlling.rotation.y = rotatingCameraTo
         rotatingCameraDir = 0
+        GameManager.invalidateCache()
+
       if rotatingCameraDir < 0 and game.controlling.rotation.y - rotatingCameraTo < 0
         game.controlling.rotation.y = rotatingCameraTo
         rotatingCameraDir = 0
+        GameManager.invalidateCache()
+
     return
 
   GameManager.load()

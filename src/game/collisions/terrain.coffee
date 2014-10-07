@@ -54,98 +54,50 @@ module.exports = (other, bbox, vec, resting) ->
     playerDepth = playerBase[perpendicAxis]
 
 
-    # changeDepthIfBelowFrontHasCollide = (blocks) ->
-    #   return unless blocks.length
-    #
-    #   # If below front has collide then change depth
-    #   {depth, type} = _.first(blocks)
-    #   if type in ['top', 'all']
-    #     newDepth = depth
-    #     return true
-    #   else if type
-    #     # below is a wall. Just make sure we are in front of it
-    #     unless isPlayerInFront(multiplier, playerDepth, depth)
-    #       newDepth = depth + multiplier
-    #       return true
-    #   else
-    #     # Happily keep falling
-    #   return false
-
-
-
 
     if isVelocityAxis
 
       # If the player is behind a wall then operate as if the level was rotated 180 degrees.
       # This means reversing the blockDepth lists and changing the `+ multiplier` to
       # put the player "in front" of a wall
-      isBehindWall = isPlayerBehind(multiplier, playerDepth, GameManager.getFirstBlockDepth(playerBase)?.depth)
+      {wallDepth} = GameManager.getFlattenedInfo(playerBase)
+      isBehindWall = isPlayerBehind(multiplier, playerDepth, wallDepth)
       isBehindWallMultiplier = if isBehindWall then -1 else 1
 
-      # If below front has collide then change depth (only if we are not already standing on one)
-      if GameManager.blockTypeAt(belowCoords) in ['top', 'all']
-        tile = false
-      else
-        # blocksBelow = GameManager.getBlockDepths(belowCoords, isBehindWall)
-        firstBlockBelow = GameManager.getFirstBlockDepth(belowCoords, isBehindWall)
-        # Inlined changeDepthIfBelowFrontHasCollide(blocksBelow)
-        if firstBlockBelow?
+      {wallDepth, belowStart, belowEnd} = GameManager.getFlattenedInfo(coords, isBehindWall)
 
-          # If below front has collide then change depth
-          {depth, type} = firstBlockBelow
-          if type in ['top', 'all']
-            newDepth = depth
-            # return true
-          else if type
-            # below is a wall. Just make sure we are in front of it
-            unless isPlayerInFront(multiplier, playerDepth, depth)
-              newDepth = depth + multiplier
-              # return true
-          else
-            # Happily keep falling
-          # return false
+      # Make sure we are in front of any wall coming up (or behind if isBehindWall)
+      if not isBehindWall and isPlayerBehind(multiplier, playerDepth, wallDepth)
+        newDepth = wallDepth + multiplier
+      else if isBehindWall and isPlayerInFront(multiplier, playerDepth, wallDepth)
+        newDepth = wallDepth - multiplier
+
+
+      # This is inlined several times
+      if belowStart?
+        if belowStart <= playerDepth <= belowEnd
+          # depth is fine. May have been set by above code (icky but I'm lazy)
+          newDepth = playerDepth
+        else if playerDepth < belowStart
+          newDepth = belowStart
+        else if playerDepth > belowEnd
+          newDepth = belowEnd
 
 
       if collisionAxis is 1 and dir is 1 # Jumping
-        tile = false
-        return
+
       else if collisionAxis is 1 and dir is -1
+        # When falling, line the player up in the "acceptable" depth which has a collision block below
+        if belowStart?
+          tile = true # Hit!
 
-      # if collisionAxis is 1 and dir is -1 and coords[1] isnt Math.floor(bbox.base[1])
-      #   # the last bit checks to make sure we are actually falling instead of just checking the current voxel where the player is.
-      #
-      # else
       else if isCameraAxis
-        blocks = GameManager.getBlockDepths(coords, isBehindWall)
-
+        tile = false
         # If I am walking into a wall
-        if blocks.length
-
-          originalFrontDepth = blocks[0].depth
-
-          frontBlockDepth = null
-          for block in blocks
-            {depth, type} = block
-            # Don't allocate an array
-            tmpCoord[0] = belowCoords[0]
-            tmpCoord[1] = belowCoords[1]
-            tmpCoord[2] = belowCoords[2]
-            tmpCoord[perpendicAxis] = depth + multiplier * isBehindWallMultiplier
-
-            belowType = GameManager.blockTypeAt(tmpCoord)
-            if belowType in ['top', 'all']
-              frontBlockDepth = block.depth
-              break
-
-          if frontBlockDepth?
-            newDepth = frontBlockDepth + multiplier * isBehindWallMultiplier
-
-          else if canWalkOver(coords, belowCoords)
-            # We are already standing on something. Leave the player alone
-
-          else
-            newDepth = originalFrontDepth + multiplier * isBehindWallMultiplier
-
+        if wallDepth? and not belowStart?
+          # If there was a belowStart it already shifted me to that position.
+          # But there isn't so just shift me in front of the wall and I will start falling
+          newDepth = wallDepth + multiplier * isBehindWallMultiplier
 
 
     if newDepth? and Math.floor(newDepth) isnt Math.floor(playerDepth)

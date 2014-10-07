@@ -72,12 +72,11 @@ collideTest = ({map, expectedDepth, axis, dir, expectedHit, playerCoord}) ->
         coord = [x, y, z]
         ACTUAL_DEPTH = Math.floor(coord[perpendicAxis]) # Collision detector adds .5 to the coord to center the player
 
+  GameManager._loadMax = 3 # Normally it scourse a 100 * 50 * 100 cube
   GameManager.get2DInfo = ->
     # all are defined above
     {axis, perpendicAxis, dir:0, multiplier}
   GameManager.blockTypeAt = (coords) -> getBlock(coords)
-  # GameManager._getFlattenedBlock = getFlattenedBlock
-  GameManager.isCameraAxis = -> true
   GameManager._getBlock = getBlock
   PaletteManager.collisionFor = (color) -> color
 
@@ -109,38 +108,6 @@ collideTest = ({map, expectedDepth, axis, dir, expectedHit, playerCoord}) ->
 
 
 # --------------------- Tests start below -----------------
-
-
-# console.log('Behind a wall2. No need to move')
-# collideTest
-#   map: [
-#     # Floor below the player
-#     [
-#       ['all'] # ---> Z axis (depth)
-#       ['top', 'top', null, 'top']
-#     ]
-#     # The player level
-#     [
-#       [null , null , 'none'] # ---> Z axis (depth)
-#       [null , null , 'none'] # The wall
-#     ]
-#   ]
-
-
-console.log('Behind a wall. Must not move')
-collideTest
-  map: [
-    # Floor below the player
-    [
-      ['all'] # ---> Z axis (depth)
-      ['top', null, 'top']
-    ]
-    # The player level
-    [
-      [null , 'none'] # ---> Z axis (depth)
-      [null , 'none'] # The wall
-    ]
-  ]
 
 
 console.log('Simple walk with top in front, no moving (Do not move the player unnecessarily)')
@@ -337,3 +304,38 @@ collideTest
       ['none'] # The wall
     ]
   ]
+
+
+console.log('Behind a wall2. No need to move')
+collideTest
+  map: [
+    # Floor below the player
+    [
+      ['all'] # ---> Z axis (depth)
+      ['top', 'top', null, 'top']
+    ]
+    # The player level
+    [
+      [null , null , 'none'] # ---> Z axis (depth)
+      [null , null , 'none'] # The wall
+    ]
+  ]
+
+
+console.log('Behind a wall. Must not move')
+collideTest
+  map: [
+    # Floor below the player
+    [
+      ['all'] # ---> Z axis (depth)
+      ['top', null, 'top']
+    ]
+    # The player level
+    [
+      [null , 'none'] # ---> Z axis (depth)
+      [null , 'none'] # The wall
+    ]
+  ]
+
+
+console.log('DONE Testing!')
