@@ -49,10 +49,17 @@ window.startEditor = ->
 
   $('.preview-level').on 'click', ->
     if not alreadyCreatedGame
+      $preview = $('.preview-level')
+      $preview.text('Loading...')
+      $preview.addClass('disabled')
+      $preview.attr('alt', 'This may take a minute')
       HashManager.disableUpdateHash()
-      exportGeometry(SceneManager)
-      GAME(SceneManager)
-      alreadyCreatedGame = true
+      fn = ->
+        exportGeometry(SceneManager)
+        GAME(SceneManager)
+        alreadyCreatedGame = true
+        $preview.text('Loaded')
+      setTimeout(fn, 10)
 
   window.exportGeometry = -> exportGeometry(SceneManager)
 
