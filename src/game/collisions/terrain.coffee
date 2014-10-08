@@ -98,6 +98,8 @@ module.exports = (other, bbox, vec, resting) ->
               newDepth = collideStart
             else if playerDepth > collideEnd
               newDepth = collideEnd
+          else
+            newDepth = wallDepth
 
         else
           # This is inlined several times
@@ -139,14 +141,11 @@ module.exports = (other, bbox, vec, resting) ->
       # Moving back is only necessary when the block below is a hole or if there is a wall on or in front of it
       # Without this, the player "snaps" in front of a wall
       # when they don't really need to.
-      if isPlayerInFront(multiplier, playerDepth, newDepth) and canWalkOver(coords, belowCoords)
-        # Don't move
-      else
-        newCoords = playerBase
-        console.log 'moving from:', playerBase
-        newCoords[perpendicAxis] = Math.floor(newDepth) + .5 # to center the player
-        console.log 'moving to  :', newCoords
-        @controlling.moveTo(newCoords[0], newCoords[1], newCoords[2])
+      newCoords = playerBase
+      console.log 'moving from:', playerBase
+      newCoords[perpendicAxis] = Math.floor(newDepth) + .5 # to center the player
+      console.log 'moving to  :', newCoords
+      @controlling.moveTo(newCoords[0], newCoords[1], newCoords[2])
 
     return unless isHit
 
