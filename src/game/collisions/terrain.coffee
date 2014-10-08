@@ -36,8 +36,9 @@ module.exports = (other, bbox, vec, resting) ->
   vec3[2] = vec.z
   hit = (collisionAxis, tile, coords, dir, edge) ->
 
-    newDepth = null
-    scaleJustToBeSafe = 1.5
+    if coords[1] < -2
+      console.warn('You died by falling too much')
+      return true
 
     y = coords[1]
     # Don't reallocate an array
@@ -51,8 +52,15 @@ module.exports = (other, bbox, vec, resting) ->
     isVelocityAxis = vec3[collisionAxis] isnt 0
 
     playerBase = @controlling.aabb().base
-    playerDepth = playerBase[perpendicAxis]
+    playerDepth = Math.floor(playerBase[perpendicAxis])
 
+
+    newDepth = playerDepth
+    scaleJustToBeSafe = 1.5
+
+    setNewDepth = (depth) ->
+      if Math.floor(depth) isnt Math.floor(playerDepth)
+        newDepth = Math.floor(depth)
 
 
     if isVelocityAxis
@@ -61,43 +69,71 @@ module.exports = (other, bbox, vec, resting) ->
       # This means reversing the blockDepth lists and changing the `+ multiplier` to
       # put the player "in front" of a wall
       {wallDepth} = GameManager.getFlattenedInfo(playerBase)
-      isBehindWall = isPlayerBehind(multiplier, playerDepth, wallDepth)
+      isBehindWall = isPlayerBehind(multiplier, playerDepth, wallDepth) and not isPlayerBehind(-1* multiplier, playerDepth, GameManager.getFlattenedInfo(playerBase, true)?.wallDepth)
       isBehindWallMultiplier = if isBehindWall then -1 else 1
 
-      {wallDepth, belowStart, belowEnd} = GameManager.getFlattenedInfo(coords, isBehindWall)
+      {wallDepth, wallType, belowStart, belowEnd} = GameManager.getFlattenedInfo(coords, isBehindWall)
 
       # Make sure we are in front of any wall coming up (or behind if isBehindWall)
-      if not isBehindWall and isPlayerBehind(multiplier, playerDepth, wallDepth)
-        newDepth = wallDepth + multiplier
-      else if isBehindWall and isPlayerInFront(multiplier, playerDepth, wallDepth)
-        newDepth = wallDepth - multiplier
-
-
-      # This is inlined several times
-      if belowStart?
-        if belowStart <= playerDepth <= belowEnd
-          # depth is fine. May have been set by above code (icky but I'm lazy)
-          newDepth = playerDepth
-        else if playerDepth < belowStart
-          newDepth = belowStart
-        else if playerDepth > belowEnd
-          newDepth = belowEnd
+      # if not isBehindWall and isPlayerBehind(multiplier, playerDepth, wallDepth)
+      #   setNewDepth(wallDepth + multiplier)
+      # else if isBehindWall and isPlayerInFront(multiplier, playerDepth, wallDepth)
+      #   setNewDepth(wallDepth - multiplier)
 
 
       if collisionAxis is 1 and dir is 1 # Jumping
 
-      else if collisionAxis is 1 and dir is -1
+      else if collisionAxis is 1 and dir is -1 and coords[1] <= playerBase[1] + dir
+        # HACK: revisit the efficacy of storing belowStart instead of just start
+        # The best spot can be found in the range by looking above and belowStart
+        {belowStart, belowEnd} = GameManager.getFlattenedInfo([coords[0], y + 1, coords[2]], isBehindWall)
+
         # When falling, line the player up in the "acceptable" depth which has a collision block below
-        if belowStart?
+        if wallType in ['top', 'all']
           tile = true # Hit!
+          # This is inlined several times
+          if belowStart?
+            if belowStart <= playerDepth <= belowEnd
+              # depth is fine. May have been set by above code (icky but I'm lazy)
+              setNewDepth(playerDepth)
+            else if playerDepth < belowStart
+              setNewDepth(belowStart)
+            else if playerDepth > belowEnd
+              setNewDepth(belowEnd)
+
+        else
+          # This is inlined several times
+          if belowStart?
+            tile = true
+            if belowStart <= playerDepth <= belowEnd
+              # depth is fine. May have been set by above code (icky but I'm lazy)
+              setNewDepth(playerDepth)
+            else if playerDepth < belowStart
+              setNewDepth(belowStart)
+            else if playerDepth > belowEnd
+              setNewDepth(belowEnd)
+
+
 
       else if isCameraAxis
         tile = false
+
+        # This is inlined several times
+        if belowStart?
+          if belowStart <= playerDepth <= belowEnd
+            # depth is fine. May have been set by above code (icky but I'm lazy)
+            setNewDepth(playerDepth)
+          else if playerDepth < belowStart
+            setNewDepth(belowStart)
+          else if playerDepth > belowEnd
+            setNewDepth(belowEnd)
+
+
         # If I am walking into a wall
         if wallDepth? and not belowStart?
           # If there was a belowStart it already shifted me to that position.
           # But there isn't so just shift me in front of the wall and I will start falling
-          newDepth = wallDepth + multiplier * isBehindWallMultiplier
+          setNewDepth(wallDepth + multiplier * isBehindWallMultiplier)
 
 
     if newDepth? and Math.floor(newDepth) isnt Math.floor(playerDepth)
@@ -110,8 +146,8 @@ module.exports = (other, bbox, vec, resting) ->
         # Don't move
       else
         newCoords = playerBase
+        console.log 'moving from:', playerBase
         newCoords[perpendicAxis] = Math.floor(newDepth) + .5 # to center the player
-        console.log 'moving from:', bbox.base
         console.log 'moving to  :', newCoords
         @controlling.moveTo(newCoords[0], newCoords[1], newCoords[2])
 
