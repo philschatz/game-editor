@@ -22,7 +22,10 @@ mapConfig = require('./maps/my')
 
 PALETTE = require '../voxels/palette-manager'
 
-mapConfig.playerPosition = [-1.5, 20, 2.5]
+mapConfig.playerPosition = [-1.5, 10, 2.5]
+
+# Used by the collisiondetector so height must be 1
+PLAYER_SIZE = [1/2, .9, 1/2]
 
 module.exports = (SceneManager) ->
 
@@ -85,7 +88,7 @@ module.exports = (SceneManager) ->
   # Change the terminal velocity defaults for a player
   createGame::makePhysical = (target, envelope, blocksCreation) ->
     # obj = VoxelPhysical(target, @potentialCollisionSet(), envelope or [1/2, 1.5, 1/2])
-    obj = VoxelPhysical(target, @potentialCollisionSet(), envelope or [1/2, 1.5, 1/2])
+    obj = VoxelPhysical(target, @potentialCollisionSet(), envelope or PLAYER_SIZE)
     obj.blocksCreation = !!blocksCreation
     return obj
 
@@ -249,7 +252,7 @@ module.exports = (SceneManager) ->
       game.controlling.pitch.rotation.x = 0
 
     if @controlling.position.y < -10
-      alert 'You died a horrible death. Try again.'
+      # alert 'You died a horrible death. Try again.'
       @controlling.moveTo(initialCoords[0], initialCoords[1], initialCoords[2])
       @controlling.velocity.x = 0
       @controlling.velocity.y = 0
