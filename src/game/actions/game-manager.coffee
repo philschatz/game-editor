@@ -1,6 +1,8 @@
 PaletteManager = require '../../voxels/palette-manager'
 
-module.exports = new class GameManager
+GameManager = new class GameManager
+
+  DEBUG: false
 
   _loadMax: 50
   _cachedInfo: null
@@ -16,9 +18,9 @@ module.exports = new class GameManager
       for y in [0..@_loadMax]
         for a in [-@_loadMax..@_loadMax]
           wallDepth = null
-          wallType = null
-          belowStart = null
-          belowEnd = null
+          type = null
+          collideStart = null
+          collideEnd = null
           for b in [-@_loadMax..@_loadMax]
             B = b * multiplier
             if dir % 2 is 0
@@ -31,50 +33,56 @@ module.exports = new class GameManager
               wallDepth = B
               wallType = PaletteManager.collisionFor(myColor)
 
+
             # belowCollidables are only valid if nothing is above them (`not myColor`)
-            pos[1] = y - 1
+            pos[1] = y + 1
+            aboveColor = @_getBlock(pos)
 
-            # if a belowStart is followed by a wall then stop
-            if myColor and belowStart? and not belowEnd?
-              belowEnd = B - multiplier
+            if myColor and not collideStart? and not aboveColor
+              type = PaletteManager.collisionFor(myColor)
+              if type in ['top', 'all']
+                collideStart = B
 
-            unless myColor
-              belowColor = @_getBlock(pos)
+
+            # if a collideStart is followed by a wall then stop
+            if aboveColor and collideStart? and collideStart isnt B and not collideEnd?
+              collideEnd = B - multiplier
+
+            unless aboveColor
 
               # Check for endDepth first since it must run at least once after startDepth
-              if belowStart? and not belowEnd?
+              if collideStart? and collideStart isnt B and not collideEnd?
 
-                if belowColor
-                  type = PaletteManager.collisionFor(belowColor)
+                if myColor
+                  type = PaletteManager.collisionFor(myColor)
                   unless type in ['top', 'all']
-                    belowEnd = B - multiplier
+                    collideEnd = B - multiplier
                 else
-                  belowEnd = B - multiplier
+                  collideEnd = B - multiplier
 
-              else
-
-                if belowColor and not wallDepth?
-                  type = PaletteManager.collisionFor(belowColor)
-                  if type in ['top', 'all']
-                    belowStart = B
-
-            if wallDepth? and belowEnd?
-              break
+            # Must comment out because we need to store the back wall depth
+            # if wallDepth? and collideEnd?
+            #   break
 
           # Add the wallDepth and the range of belowCollidables
-          if wallDepth? or belowEnd?
+          if wallDepth?
 
-            # belowStart is always <= belowEnd
-            unless belowStart <= belowEnd
-              [belowStart, belowEnd] = [belowEnd, belowStart]
+            unless (collideStart? and collideEnd?) or (not collideStart? and not collideEnd?)
+              throw new Error('BUG: collideStart should always have a matching collideEnd')
+
+            # collideStart is always <= collideEnd
+            if collideEnd?
+              unless collideStart <= collideEnd
+                [collideStart, collideEnd] = [collideEnd, collideStart]
             @_sparseCollisionMap[dir]["#{y}|#{a}"] = {
               wallDepth
               wallType
-              belowStart
-              belowEnd
+              collideStart
+              collideEnd
             }
 
   _clearDebugVoxels: ->
+    return unless @DEBUG
     return unless window.scene?
     debugs = []
     for item in window.scene.children
@@ -83,6 +91,7 @@ module.exports = new class GameManager
       window.scene.remove(item)
 
   _addDebugVoxel: ([x, y, z], c) ->
+    return unless @DEBUG
     return unless window.scene?
 
     color = switch c
@@ -106,8 +115,6 @@ module.exports = new class GameManager
     voxel.position.y = y + size / 2
     voxel.position.z = z + size / 2
     window.scene.add(voxel)
-
-
 
 
   invalidateCache: -> @_cachedInfo = null
@@ -142,25 +149,31 @@ module.exports = new class GameManager
         coord[perpendicAxis] = info.wallDepth
         @_addDebugVoxel(coord, 1)
 
-      coord[1] = y - 1
-      if info.belowStart
-        coord[perpendicAxis] = info.belowStart
+      if info.collideEnd
+        if info.wallDepth is info.collideStart
+          coord[perpendicAxis] = info.collideEnd
+        else
+          coord[perpendicAxis] = info.collideStart
         @_addDebugVoxel(coord, 2)
 
-      if info.belowEnd
-        coord[perpendicAxis] = info.belowEnd
-        @_addDebugVoxel(coord, 3)
-
-
-
-
+    # End debug voxels. Return info
     @_cachedInfo
 
 
   getFlattenedInfo: (coords, isReversed) ->
+    [x, y, z] = coords
+    @getFlattenedInfoCoords(x, y, z, isReversed)
+
+
+  getFlattenedInfoCoords: (x, y, z, isReversed) ->
     {axis, perpendicAxis, dir} = @get2DInfo()
-    a = Math.floor(coords[axis]) # Can be x or z
-    y = Math.floor(coords[1])
+    a = switch axis
+      when 0 then x
+      when 2 then z
+      else throw new Error('Invalid Axis')
+
+    a = Math.floor(a) # Can be x or z
+    y = Math.floor(y)
     dir = (dir + 2) % 4 if isReversed
     @_sparseCollisionMap[dir]["#{y}|#{a}"] or {}
 
@@ -171,3 +184,6 @@ module.exports = new class GameManager
       PaletteManager.collisionFor(color)
     else
       undefined
+
+
+module.exports = window.GameManager = GameManager

@@ -25,7 +25,7 @@ PALETTE = require '../voxels/palette-manager'
 mapConfig.playerPosition = [-1.5, 10, 2.5]
 
 # Used by the collisiondetector so height must be 1
-PLAYER_SIZE = [1/2, .9, 1/2]
+PLAYER_SIZE = [.4, .9, .4]
 
 module.exports = (SceneManager) ->
 
