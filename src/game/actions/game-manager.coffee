@@ -35,14 +35,15 @@ module.exports = new class GameManager
             pos[1] = y - 1
 
             # if a belowStart is followed by a wall then stop
-            if belowStart? and myColor
+            if myColor and belowStart? and not belowEnd?
               belowEnd = B - multiplier
 
             unless myColor
+              belowColor = @_getBlock(pos)
 
               # Check for endDepth first since it must run at least once after startDepth
               if belowStart? and not belowEnd?
-                belowColor = @_getBlock(pos)
+
                 if belowColor
                   type = PaletteManager.collisionFor(belowColor)
                   unless type in ['top', 'all']
@@ -51,8 +52,8 @@ module.exports = new class GameManager
                   belowEnd = B - multiplier
 
               else
-                belowColor = @_getBlock(pos)
-                if belowColor
+
+                if belowColor and not wallDepth?
                   type = PaletteManager.collisionFor(belowColor)
                   if type in ['top', 'all']
                     belowStart = B
@@ -62,6 +63,7 @@ module.exports = new class GameManager
 
           # Add the wallDepth and the range of belowCollidables
           if wallDepth? or belowEnd?
+
             # belowStart is always <= belowEnd
             unless belowStart <= belowEnd
               [belowStart, belowEnd] = [belowEnd, belowStart]
@@ -71,6 +73,42 @@ module.exports = new class GameManager
               belowStart
               belowEnd
             }
+
+  _clearDebugVoxels: ->
+    return unless window.scene?
+    debugs = []
+    for item in window.scene.children
+      debugs.push(item) if item.isDebug
+    for item in debugs
+      window.scene.remove(item)
+
+  _addDebugVoxel: ([x, y, z], c) ->
+    return unless window.scene?
+
+    color = switch c
+      when 1 then 0xFF0000
+      when 2 then 0x999999
+      when 3 then 0x333333
+      else 0x0000FF
+
+    size = (16/16) + .5 + 2 * ((c - 1) * .2)
+    wireframeCube = new THREE.BoxGeometry(size, size , size)
+    wireframeOptions =
+      color: color
+      wireframe: true
+      wireframeLinewidth: 1
+      opacity: .5
+
+    wireframeMaterial = new THREE.MeshBasicMaterial(wireframeOptions)
+    voxel = new THREE.Mesh(wireframeCube, wireframeMaterial)
+    voxel.isDebug = true
+    voxel.position.x = x + size / 2
+    voxel.position.y = y + size / 2
+    voxel.position.z = z + size / 2
+    window.scene.add(voxel)
+
+
+
 
   invalidateCache: -> @_cachedInfo = null
 
@@ -88,6 +126,34 @@ module.exports = new class GameManager
       axis = 2
       perpendicAxis = 0
     @_cachedInfo = {axis, perpendicAxis, dir, multiplier}
+
+
+    # Mark up all the debug voxels
+    @_clearDebugVoxels()
+    coord = [null, null, null]
+    for key, info of @_sparseCollisionMap[dir]
+      [y, a] = key.split('|')
+      y = parseInt(y)
+      a = parseInt(a)
+      coord[1] = y
+      coord[axis] = a
+
+      if info.wallDepth?
+        coord[perpendicAxis] = info.wallDepth
+        @_addDebugVoxel(coord, 1)
+
+      coord[1] = y - 1
+      if info.belowStart
+        coord[perpendicAxis] = info.belowStart
+        @_addDebugVoxel(coord, 2)
+
+      if info.belowEnd
+        coord[perpendicAxis] = info.belowEnd
+        @_addDebugVoxel(coord, 3)
+
+
+
+
     @_cachedInfo
 
 
