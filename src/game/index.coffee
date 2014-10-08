@@ -53,7 +53,7 @@ module.exports = (SceneManager) ->
   Number::mod = (n) ->
     ((this % n) + n) % n
 
-  createGame::gravity = [0, -0.00000090, 0]
+  createGame::gravity = [0, -0.0000090, 0]
 
   # Custom collision detector that moves the player in the depth axis
   createGame::collideTerrain = CollideTerrain
