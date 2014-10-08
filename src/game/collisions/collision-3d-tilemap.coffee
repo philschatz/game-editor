@@ -58,9 +58,10 @@ module.exports = (field, tilesize, dimensions, offset) ->
       coords[i_axis] = vec[i_axis]
       box.translate coords
       return
-    return collideaxis(0)  if vec[0] is 0 and vec[1] is 0 and vec[2] is 0
-    collideaxis 1
-    collideaxis 2
+    return if vec[0] is 0 and vec[1] is 0 and vec[2] is 0
+    collideaxis(0)
+    collideaxis(1)
+    collideaxis(2)
     return
   dimensions = dimensions or [
     Math.sqrt(field.length) >> 0
@@ -82,4 +83,3 @@ module.exports = (field, tilesize, dimensions, offset) ->
     0
   ]
   return collide
-  return
