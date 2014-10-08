@@ -14,7 +14,11 @@ container.appendChild(SceneManager.renderer.domElement)
 
 
 HashManager.buildFromHash()
-exportGeometry(SceneManager)
+# exportGeometry(SceneManager)
+# # Or, just remove everything except the skeleton
+# items = scene.children[..]
+# for item in items
+#   scene.remove(item)
 
 
 
