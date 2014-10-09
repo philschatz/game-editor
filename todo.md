@@ -1,6 +1,6 @@
 TODO:
 
-- [ ] pause game when rotating
+- [x] pause game when rotating
 - [ ] update player state more accurately (jumping, climbing)
 - [ ] fiddle with walk/jump constants to move more accurately
 - [ ] move camera when player moves

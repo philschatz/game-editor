@@ -35,6 +35,23 @@ module.exports = (SceneManager) ->
   createGame::render = ->
 
 
+  # Mostly from voxelEngine but added @pausedPhysics
+  createGame::tick = (delta) ->
+    unless @pausedPhysics
+      i = 0
+      len = @items.length
+
+      while i < len
+        @items[i].tick delta
+        ++i
+      @materials.tick()  if @materials
+    @updateDirtyChunks()  if Object.keys(@chunksNeedsUpdate).length > 0
+    @emit "tick", delta
+    return  unless @controls
+    playerPos = @playerPosition()
+    @spatial.emit "position", playerPos, playerPos
+    return
+
   myMap = mapConfig.map
   myTextures = mapConfig.textures
   {collisionTypes} = mapConfig
@@ -189,6 +206,7 @@ module.exports = (SceneManager) ->
       # prevent moving left/right (TODO: Unless there are tiles left/right)
       game.controlling.resting.x = true
       game.controlling.resting.z = true
+
     else if game.controls.state.climbing and not (game.controls.state.forward or game.controls.state.backward) and not myBlock?
       game.controls.state.climbing = false
       game.controlling.resting.y = false
@@ -236,6 +254,8 @@ module.exports = (SceneManager) ->
       game.controlling.pitch.rotation.x = 0
       game.controlling.pitch.rotation.x = 0
 
+      game.pausedPhysics = true
+
     else if not rotatingCameraDir and game.controls.state.rotate_counterclockwise
 
       # 'A' was pressed
@@ -250,6 +270,9 @@ module.exports = (SceneManager) ->
       # Reset if te mouse moved the camera
       game.controlling.pitch.rotation.x = 0
       game.controlling.pitch.rotation.x = 0
+
+      game.pausedPhysics = true
+
 
     if @controlling.position.y < -10
       # alert 'You died a horrible death. Try again.'
@@ -310,11 +333,13 @@ module.exports = (SceneManager) ->
         game.controlling.rotation.y = rotatingCameraTo
         rotatingCameraDir = 0
         GameManager.invalidateCache()
+        game.pausedPhysics = false
 
       if rotatingCameraDir < 0 and game.controlling.rotation.y - rotatingCameraTo < 0
         game.controlling.rotation.y = rotatingCameraTo
         rotatingCameraDir = 0
         GameManager.invalidateCache()
+        game.pausedPhysics = false
 
     return
 
