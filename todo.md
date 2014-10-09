@@ -1,13 +1,19 @@
 TODO:
 
-- [-] extract collision-detection and physics
-  - [-] get jump up to work
+- [ ] pause game when rotating
+- [ ] update player state more accurately (jumping, climbing)
+- [ ] fiddle with walk/jump constants to move more accurately
+- [ ] move camera when player moves
+- [ ] support secret tunnels
+  - [ ] make blocks transparent
+- [-] get climbing to work now that we have voxel collision
+- [x] extract collision-detection and physics
+  - [x] get jump up to work
   - [x] get walk left/right (and change depth) to work
-  - [-] get climbing to work now that we have voxel collision
 - [x] use voxel collision info for collision-detection
   - [x] Map-flattening logic needs to be smarter about pillars in front of walkable area
 - [x] remove the take-over mouse stuff in the engine
-- [-] change camera target to the player
+- [x] change camera target to the player
   - [ ] support dragging the player and dropping
 - [x] add "Play" button
 - [x] encode collision into voxels
