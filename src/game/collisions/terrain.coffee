@@ -60,9 +60,9 @@ module.exports = (other, bbox, vec, resting) ->
     newDepth = playerDepth
     scaleJustToBeSafe = 1.5
 
-    # setNewDepth = (depth) -
-    #   if Math.floor(depth) isnt Math.floor(playerDepth)
-    #     newDepth = Math.floor(depth)
+    setNewDepth = (depth) ->
+      if Math.floor(depth) isnt Math.floor(newDepth)
+        newDepth = Math.floor(depth)
 
 
     if isVelocityAxis
@@ -87,31 +87,21 @@ module.exports = (other, bbox, vec, resting) ->
       else if collisionAxis is 1 and dir is -1 and coords[1] <= playerBase[1] + dir
 
         # When falling, line the player up in the "acceptable" depth which has a collision block below
-        if wallType in ['top', 'all']
-          isHit = true # Hit!
-          # This is inlined several times
-          if collideStart?
-            if collideStart <= playerDepth <= collideEnd
-              # depth is fine. May have been set by above code (icky but I'm lazy)
-              newDepth = playerDepth
-            else if playerDepth < collideStart
-              newDepth = collideStart
-            else if playerDepth > collideEnd
-              newDepth = collideEnd
-          else
-            newDepth = wallDepth
 
-        else
-          # This is inlined several times
-          if collideStart?
-            isHit = true
-            if collideStart <= playerDepth <= collideEnd
-              # depth is fine. May have been set by above code (icky but I'm lazy)
-              newDepth = playerDepth
-            else if playerDepth < collideStart
-              newDepth = collideStart
-            else if playerDepth > collideEnd
-              newDepth = collideEnd
+        # This is inlined several times
+        if collideStart?
+          isHit = true # Hit!
+          if collideStart <= playerDepth <= collideEnd
+            # depth is fine. May have been set by above code (icky but I'm lazy)
+            setNewDepth(playerDepth)
+          else if playerDepth < collideStart
+            setNewDepth(collideStart)
+          else if playerDepth > collideEnd
+            setNewDepth(collideEnd)
+
+        else if wallType in ['top', 'all']
+          isHit = true # Hit!
+          setNewDepth(wallDepth)
 
 
       else if isCameraAxis
@@ -122,18 +112,18 @@ module.exports = (other, bbox, vec, resting) ->
         if collideStart?
           if collideStart <= playerDepth <= collideEnd
             # depth is fine. May have been set by above code (icky but I'm lazy)
-            newDepth = playerDepth
+            setNewDepth(playerDepth)
           else if playerDepth < collideStart
-            newDepth = collideStart
+            setNewDepth(collideStart)
           else if playerDepth > collideEnd
-            newDepth = collideEnd
+            setNewDepth(collideEnd)
 
 
         # If I am walking into a wall
         if wallDepth? and not collideStart?
           # If there was a collideStart it already shifted me to that position.
           # But there isn't so just shift me in front of the wall and I will start falling
-          newDepth = wallDepth + multiplier * isBehindWallMultiplier
+          setNewDepth(wallDepth + multiplier * isBehindWallMultiplier)
 
 
     if newDepth? and Math.floor(newDepth) isnt Math.floor(playerDepth)
