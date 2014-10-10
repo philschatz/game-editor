@@ -1,3 +1,5 @@
+GameManager = require './game-manager'
+
 module.exports = new class MovementHelper
   isWalking: ->
     state = window.game.controls.state
@@ -13,16 +15,11 @@ module.exports = new class MovementHelper
 
   isClimbing: ->
     state = window.game.controls.state
-    cameraType = window.game.controlling.rotation.y / Math.PI * 2
-
-    if cameraType.mod(2) is 0 #x
-      cameraAxis = 0
-      cameraPerpendicAxis = 2
-    else #z
-      cameraAxis = 2
-      cameraPerpendicAxis = 0
-    y = Math.floor(game.controlling.aabb().base[1])
-
+    playerBase = window.game.controlling.aabb().base
     if state.forward
-      console.log('maybe this is climbing, maybe not')
-    state.forward
+      {wallDepth, wallType, collideStart, collideEnd} = GameManager.getFlattenedInfo(playerBase)
+      return wallType in ['ladder']
+    else if state.backward
+      playerBase[1] -= 1
+      {wallDepth, wallType, collideStart, collideEnd} = GameManager.getFlattenedInfo(playerBase)
+      return wallType in ['ladder']
