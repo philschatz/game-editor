@@ -6,21 +6,12 @@ isPlayerBehind = (multiplier, playerDepth, depth) ->
   return false unless depth?
   multiplier * (playerDepth - depth) < 0
 
-isPlayerInFront = (multiplier, playerDepth, depth) ->
-  multiplier * (playerDepth - depth) > 0
-
-
-# True if there is a collision block below and no wall in the desired spot
-canWalkOver = (coords, belowCoords) ->
-  GameManager.blockTypeAt(belowCoords) in ['top', 'all'] and not GameManager.blockTypeAt(coords)
-
 
 # other -
 # bbox - player bbox
 # vec -
 # resting -
 
-belowCoords = [null, null, null]
 tmpCoord = [null, null, null]
 
 
@@ -43,10 +34,6 @@ module.exports = (other, bbox, vec, resting) ->
     isHit = false
 
     y = coords[1]
-    # Don't reallocate an array
-    belowCoords[0] = coords[0]
-    belowCoords[1] = y - 1
-    belowCoords[2] = coords[2]
 
     {perpendicAxis, multiplier, axis} = GameManager.get2DInfo()
 
