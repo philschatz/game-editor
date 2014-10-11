@@ -1,3 +1,4 @@
+PlayerManager = require '../actions/player-manager'
 aabb = require 'aabb-3d'
 THREE = window.THREE
 
@@ -88,6 +89,10 @@ proto.tick = (dt) ->
     acceleration.y /= 8 * dt
     acceleration.y += TOTAL_FORCES.y * dt
     acceleration.y += forces.y * dt
+
+    if PlayerManager.isClimbing()
+      acceleration.y = 0
+
     velocity.y += acceleration.y * dt
     velocity.y *= friction.y
     if abs(velocity.y) < terminal.y

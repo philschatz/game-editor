@@ -28,15 +28,15 @@ module.exports = tick = (dt) ->
     target.resting.y = true
 
     if state.forward
-      target.velocity.y = @max_speed
+      target.velocity.y = @max_speed / 3
       target.resting.y = false
     else if state.backward
-      target.velocity.y = -@max_speed
+      target.velocity.y = -@max_speed / 3
       target.resting.y = false
     else if state.left
-      target.velocity.x = -@max_speed
+      target.velocity.x = -@max_speed / 3
     else if state.right
-      target.velocity.x = @max_speed
+      target.velocity.x = @max_speed / 3
 
     if state.jump
       # TODO: This should probably be inferred somehow but it does not get set soon enough
