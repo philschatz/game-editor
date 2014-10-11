@@ -18,6 +18,7 @@ module.exports = new class PlayerManager
   tick: (elapsedTime, game) ->
     # Determine if we need to change the currentAction
     for name, actionType of ActionTypes
+      continue if @currentAction() is actionType # Skip the current action state. no need to test; we're already in it
       if actionType.isAllowed(@, ActionTypes, game)
         @changeAction(actionType)
     @changeAction(@currentAction()?.act(elapsedTime, ActionTypes, game))
