@@ -14,7 +14,7 @@ skin = require('minecraft-skin')
 # blockSelector = toolbar({el: '#tools'})
 voxel = require('voxel')
 voxelView = require('voxel-view')
-VoxelPhysical = require('voxel-physical')
+VoxelPhysical = require('./customized/voxel-physical')
 Collision3DTilemap = require './customized/collision-3d-tilemap'
 # Change up arrow to be up in the Y axis (not Z)
 VoxelControlTick = require './customized/voxel-control-tick'
@@ -53,6 +53,7 @@ module.exports = (SceneManager) ->
     playerPos = @playerPosition()
     @spatial.emit "position", playerPos, playerPos
     return
+
 
   myMap = mapConfig.map
   myTextures = mapConfig.textures
