@@ -20,6 +20,5 @@ module.exports = new class MovementHelper
       {wallDepth, wallType, collideStart, collideEnd} = GameManager.getFlattenedInfo(playerBase)
       return wallType in ['ladder']
     else if state.backward
-      playerBase[1] -= 1
       {wallDepth, wallType, collideStart, collideEnd} = GameManager.getFlattenedInfo(playerBase)
       return wallType in ['ladder']

@@ -85,10 +85,11 @@ module.exports = (other, bbox, desired_vector, resting) ->
           else
             isHit = true
 
-            # desiredVectorCoords[collisionAxis] = desired_vector[axes[collisionAxis]] = edge
-            # other.acceleration[axes[collisionAxis]] = 0
-            # resting[axes[collisionAxis]] = 1
-            # other.friction[axes[(collisionAxis + 1) % 3]] = other.friction[axes[(collisionAxis + 2) % 3]] = 1
+            desiredVectorCoords[collisionAxis] = desired_vector[axes[collisionAxis]] = 0
+            other.velocity[axes[collisionAxis]] = 0
+            other.acceleration[axes[collisionAxis]] = 0
+            resting[axes[collisionAxis]] = 1
+            other.friction[axes[(collisionAxis + 1) % 3]] = other.friction[axes[(collisionAxis + 2) % 3]] = 1
             return true
 
 

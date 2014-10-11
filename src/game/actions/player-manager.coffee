@@ -22,4 +22,7 @@ module.exports = new class PlayerManager
         @changeAction(actionType)
     @changeAction(@currentAction()?.act(elapsedTime, ActionTypes, game))
 
+  # When a player dies, reset to idle
+  reset: -> @changeAction(ActionTypes.IDLE)
+
   isClimbing: -> @currentAction() is ActionTypes.CLIMBING

@@ -9,7 +9,7 @@ module.exports = new class Climbing
             ActionTypes.JUMPING, \
             ActionTypes.WALKING, \
             ActionTypes.RUNNING
-        return window.game.buttons.forward and MovementHelper.isClimbing()
+        return (window.game.buttons.forward or window.game.buttons.backward) and MovementHelper.isClimbing()
 
   begin: ->
   end: ->

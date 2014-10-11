@@ -238,6 +238,7 @@ module.exports = (SceneManager) ->
 
     if @controlling.position.y < -10
       # alert 'You died a horrible death. Try again.'
+      PlayerManager.reset()
       @controlling.moveTo(initialCoords[0], initialCoords[1], initialCoords[2])
       @controlling.velocity.x = 0
       @controlling.velocity.y = 0
