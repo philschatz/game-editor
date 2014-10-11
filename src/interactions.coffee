@@ -20,7 +20,8 @@ module.exports = (Input, SceneManager) ->
           matrixRotationWorld.extractRotation( intersect.object.matrixWorld )
           normal.applyMatrix4(matrixRotationWorld)
 
-          position = new (SceneManager.THREE().Vector3)().addVectors(intersect.point, normal)
+          # position = new (SceneManager.THREE().Vector3)().addVectors(intersect.point, normal)
+          position = new (SceneManager.THREE().Vector3)().addVectors(intersect.object.position, normal)
           updateBrush = ->
             SceneManager.brush.position.x = Math.floor(position.x / (16/16)) * (16/16) + (16/16)/2
             SceneManager.brush.position.y = Math.floor(position.y / (16/16)) * (16/16) + (16/16)/2

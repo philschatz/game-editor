@@ -32,9 +32,9 @@ module.exports = (SceneManager, Interactions, Input, HashManager) ->
         # change the mouse cursor to a + letting the user know they can rotate
         intersecting = MainCamera.getIntersecting()
         unless intersecting
-          MainCamera.container.classList.add 'rotatable'
+          MainCamera.container.classList.add('rotatable')
         else
-          MainCamera.container.classList.remove 'rotatable'
+          MainCamera.container.classList.remove('rotatable')
 
       if Input.isMouseRotating # Input.isMouseDown is 1 # left click
 
