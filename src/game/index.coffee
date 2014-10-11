@@ -16,6 +16,8 @@ voxel = require('voxel')
 voxelView = require('voxel-view')
 VoxelPhysical = require('voxel-physical')
 Collision3DTilemap = require './collisions/collision-3d-tilemap'
+# Change up arrow to be up in the Y axis (not Z)
+VoxelControlTick = require './voxel-control-tick'
 CollideTerrain = require('./collisions/terrain')
 GameManager = require './actions/game-manager'
 mapConfig = require('./maps/my')
@@ -145,6 +147,9 @@ module.exports = (SceneManager) ->
   )
 
 
+  # Change up arrow to be up in the Y axis (not Z)
+  game.controls.tick = VoxelControlTick.bind(game.controls)
+
   # container = document.querySelector('#container')
   # game.appendTo(container)
 
@@ -193,50 +198,6 @@ module.exports = (SceneManager) ->
     y = Math.floor(myBase[1])
     myBlock = GameManager.blockTypeAt(myBase)
     myBlockBelow = GameManager.blockTypeAt([myBase[0], y - 1, myBase[2]])
-    if game.controls.state.climbing and not (game.controls.state.forward or game.controls.state.backward) and myBlock?
-      game.controlling.resting.y = true
-
-      # prevent moving left/right (TODO: Unless there are tiles left/right)
-      game.controlling.resting.x = true
-      game.controlling.resting.z = true
-    else if game.controls.state.climbing and game.controls.state.forward
-      game.controlling.position.y += .1
-      game.controlling.resting.y = true
-
-      # prevent moving left/right (TODO: Unless there are tiles left/right)
-      game.controlling.resting.x = true
-      game.controlling.resting.z = true
-
-    else if game.controls.state.climbing and not (game.controls.state.forward or game.controls.state.backward) and not myBlock?
-      game.controls.state.climbing = false
-      game.controlling.resting.y = false
-    else if not game.controls.state.climbing and game.controls.state.forward and myBlock?
-      game.controls.state.climbing = true
-      game.controlling.resting.y = true
-
-      # prevent moving left/right (TODO: Unless there are tiles left/right)
-      game.controlling.resting.x = true
-      game.controlling.resting.z = true
-    else if game.controls.state.climbing and game.controls.state.backward
-      game.controlling.position.y -= .1
-      game.controlling.resting.y = true
-
-      # prevent moving left/right (TODO: Unless there are tiles left/right)
-      game.controlling.resting.x = true
-      game.controlling.resting.z = true
-
-    # } else if (!game.controls.state.climbing && game.controls.state.backward && myBlock != null) {
-    #   game.controls.state.climbing = true;
-    #   game.controlling.resting.y = true;
-    else if not game.controls.state.climbing and game.controls.state.backward and myBlockBelow?
-
-      # Allow climbing down when there is a block below
-      game.controls.state.climbing = true
-      game.controlling.resting.y = true
-
-      # prevent moving left/right (TODO: Unless there are tiles left/right)
-      game.controlling.resting.x = true
-      game.controlling.resting.z = true
     return
 
   game.on 'tick', ->

@@ -21,3 +21,5 @@ module.exports = new class PlayerManager
       if actionType.isAllowed(@, ActionTypes, game)
         @changeAction(actionType)
     @changeAction(@currentAction()?.act(elapsedTime, ActionTypes, game))
+
+  isClimbing: -> @currentAction() is ActionTypes.CLIMBING

@@ -1,6 +1,6 @@
 _ = require 'underscore'
 GameManager = require '../actions/game-manager'
-
+PlayerManager = require '../actions/player-manager'
 
 isPlayerBehind = (multiplier, playerDepth, depth) ->
   return false unless depth?
@@ -9,22 +9,22 @@ isPlayerBehind = (multiplier, playerDepth, depth) ->
 
 # other -
 # bbox - player bbox
-# vec -
+# desired_vector - Mutating this vector will move the player
 # resting -
 
 tmpCoord = [null, null, null]
 
 
 axes = ['x', 'y', 'z']
-vec3 = [null, null, null]
+desiredVectorCoords = [null, null, null]
 
 # collideTerrain
-module.exports = (other, bbox, vec, resting) ->
+module.exports = (other, bbox, desired_vector, resting) ->
   self = this
   # Don't allocate an array
-  vec3[0] = vec.x
-  vec3[1] = vec.y
-  vec3[2] = vec.z
+  desiredVectorCoords[0] = desired_vector.x
+  desiredVectorCoords[1] = desired_vector.y
+  desiredVectorCoords[2] = desired_vector.z
   hit = (collisionAxis, tile, coords, dir, edge) ->
 
     if coords[1] < -2
@@ -38,7 +38,7 @@ module.exports = (other, bbox, vec, resting) ->
     {perpendicAxis, multiplier, axis} = GameManager.get2DInfo()
 
     isCameraAxis = axis is collisionAxis
-    isVelocityAxis = vec3[collisionAxis] isnt 0
+    isVelocityAxis = desiredVectorCoords[collisionAxis] isnt 0
 
     playerBase = @controlling.aabb().base
     playerDepth = Math.floor(playerBase[perpendicAxis])
@@ -69,48 +69,73 @@ module.exports = (other, bbox, vec, resting) ->
       # else if isBehindWall and isPlayerInFront(multiplier, playerDepth, wallDepth)
       #   newDepth = wallDepth - multiplier
 
-      if collisionAxis is 1 and dir is 1 # Jumping
+      if PlayerManager.isClimbing()
+        # Only allow movement to other ladders (adjusting the depth)
 
-      else if collisionAxis is 1 and dir is -1 and coords[1] <= playerBase[1] + dir
+        if playerBase[collisionAxis] isnt coords[collisionAxis]
 
-        # When falling, line the player up in the "acceptable" depth which has a collision block below
+          # Valid movements are:
+          # - Up
+          # - Down
+          # - Left
+          # - Right
+          {wallType, wallDepth} = GameManager.getFlattenedInfoCoords(coords[0], coords[1], coords[2], isBehindWall)
+          if wallType is 'ladder'
+            setNewDepth(wallDepth)
+          else
+            isHit = true
 
-        # This is inlined several times
-        if collideStart?
-          isHit = true # Hit!
-          if collideStart <= playerDepth <= collideEnd
-            # depth is fine. May have been set by above code (icky but I'm lazy)
-            setNewDepth(playerDepth)
-          else if playerDepth < collideStart
-            setNewDepth(collideStart)
-          else if playerDepth > collideEnd
-            setNewDepth(collideEnd)
-
-        else if wallType in ['top', 'all']
-          isHit = true # Hit!
-          setNewDepth(wallDepth)
-
-
-      else if isCameraAxis
-
-        {collideStart, collideEnd} = GameManager.getFlattenedInfoCoords(coords[0], y - 1, coords[2], isBehindWall)
-
-        # This is inlined several times
-        if collideStart?
-          if collideStart <= playerDepth <= collideEnd
-            # depth is fine. May have been set by above code (icky but I'm lazy)
-            setNewDepth(playerDepth)
-          else if playerDepth < collideStart
-            setNewDepth(collideStart)
-          else if playerDepth > collideEnd
-            setNewDepth(collideEnd)
+            # desiredVectorCoords[collisionAxis] = desired_vector[axes[collisionAxis]] = edge
+            # other.acceleration[axes[collisionAxis]] = 0
+            # resting[axes[collisionAxis]] = 1
+            # other.friction[axes[(collisionAxis + 1) % 3]] = other.friction[axes[(collisionAxis + 2) % 3]] = 1
+            return true
 
 
-        # If I am walking into a wall
-        if wallDepth? and not collideStart?
-          # If there was a collideStart it already shifted me to that position.
-          # But there isn't so just shift me in front of the wall and I will start falling
-          setNewDepth(wallDepth + multiplier * isBehindWallMultiplier)
+      else
+
+        if collisionAxis is 1 and dir is 1 # Jumping
+
+        else if collisionAxis is 1 and dir is -1 and coords[1] <= playerBase[1] + dir
+
+          # When falling, line the player up in the "acceptable" depth which has a collision block below
+
+          # This is inlined several times
+          if collideStart?
+            isHit = true # Hit!
+            if collideStart <= playerDepth <= collideEnd
+              # depth is fine. May have been set by above code (icky but I'm lazy)
+              setNewDepth(playerDepth)
+            else if playerDepth < collideStart
+              setNewDepth(collideStart)
+            else if playerDepth > collideEnd
+              setNewDepth(collideEnd)
+
+          else if wallType in ['top', 'all']
+            isHit = true # Hit!
+            setNewDepth(wallDepth)
+
+
+        else if isCameraAxis
+
+          {collideStart, collideEnd} = GameManager.getFlattenedInfoCoords(coords[0], y - 1, coords[2], isBehindWall)
+
+          # This is inlined several times
+          if collideStart?
+            if collideStart <= playerDepth <= collideEnd
+              # depth is fine. May have been set by above code (icky but I'm lazy)
+              setNewDepth(playerDepth)
+            else if playerDepth < collideStart
+              setNewDepth(collideStart)
+            else if playerDepth > collideEnd
+              setNewDepth(collideEnd)
+
+
+          # If I am walking into a wall
+          if wallDepth? and not collideStart?
+            # If there was a collideStart it already shifted me to that position.
+            # But there isn't so just shift me in front of the wall and I will start falling
+            setNewDepth(wallDepth + multiplier * isBehindWallMultiplier)
 
 
     if newDepth? and Math.floor(newDepth) isnt Math.floor(playerDepth)
@@ -127,12 +152,12 @@ module.exports = (other, bbox, vec, resting) ->
     return unless isHit
 
     # boilerplate code?
-    return if Math.abs(vec3[collisionAxis]) < Math.abs(edge)
-    vec3[collisionAxis] = vec[axes[collisionAxis]] = edge
+    return if Math.abs(desiredVectorCoords[collisionAxis]) < Math.abs(edge)
+    desiredVectorCoords[collisionAxis] = desired_vector[axes[collisionAxis]] = edge
     other.acceleration[axes[collisionAxis]] = 0
     resting[axes[collisionAxis]] = dir
     other.friction[axes[(collisionAxis + 1) % 3]] = other.friction[axes[(collisionAxis + 2) % 3]] = (if collisionAxis is 1 then self.friction else 1)
     true
 
-  @collideVoxels bbox, vec3, hit.bind(this)
+  @collideVoxels bbox, desiredVectorCoords, hit.bind(this)
   return
