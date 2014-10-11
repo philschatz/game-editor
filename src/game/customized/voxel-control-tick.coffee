@@ -1,4 +1,4 @@
-PlayerManager = require './actions/player-manager'
+PlayerManager = require '../actions/player-manager'
 
 max = Math.max
 min = Math.min

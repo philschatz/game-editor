@@ -15,9 +15,9 @@ skin = require('minecraft-skin')
 voxel = require('voxel')
 voxelView = require('voxel-view')
 VoxelPhysical = require('voxel-physical')
-Collision3DTilemap = require './collisions/collision-3d-tilemap'
+Collision3DTilemap = require './customized/collision-3d-tilemap'
 # Change up arrow to be up in the Y axis (not Z)
-VoxelControlTick = require './voxel-control-tick'
+VoxelControlTick = require './customized/voxel-control-tick'
 CollideTerrain = require('./collisions/terrain')
 GameManager = require './actions/game-manager'
 mapConfig = require('./maps/my')
