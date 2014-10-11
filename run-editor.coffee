@@ -124,10 +124,10 @@ window.startEditor = ->
       updateLabel()
 
     $("##{id} .zoom-in").on 'click', ->
-      cameraManager.zoom(-100)
+      cameraManager.zoom(100)
 
     $("##{id} .zoom-out").on 'click', ->
-      cameraManager.zoom(100)
+      cameraManager.zoom(-100)
 
   cameraHandlers('axis-camera-controls', AxisCamera)
   cameraHandlers('main-camera-controls', MainCamera)
