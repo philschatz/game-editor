@@ -20,7 +20,7 @@ Collision3DTilemap = require './customized/collision-3d-tilemap'
 VoxelControlTick = require './customized/voxel-control-tick'
 CollideTerrain = require('./collisions/terrain')
 GameManager = require './actions/game-manager'
-MainCamera = require '../main-camera'
+window.MainCamera = MainCamera = require '../main-camera'
 mapConfig = require('./maps/my')
 
 PALETTE = require '../voxels/palette-manager'
@@ -289,6 +289,14 @@ module.exports = (SceneManager) ->
         rotatingCameraDir = 0
         GameManager.invalidateCache()
         game.pausedPhysics = false
+
+        # Update the camera position
+        theta = game.controlling.rotation.y * 360 / Math.PI
+        # theta = dir * 2 * Math.PI * 360 * 2  # @_theta * Math.PI / 360
+        phi = 0
+        MainCamera.rotateCameraTo(theta, phi)
+        # Updates camera position too
+
         console.log game.controlling.rotation.y
 
       if rotatingCameraDir < 0 and game.controlling.rotation.y - rotatingCameraTo < 0
@@ -296,9 +304,17 @@ module.exports = (SceneManager) ->
         rotatingCameraDir = 0
         GameManager.invalidateCache()
         game.pausedPhysics = false
+
+        # Update the camera position
+        theta = game.controlling.rotation.y * 360 / Math.PI
+        # theta = dir * 2 * Math.PI * 360 * 2  # @_theta * Math.PI / 360
+        phi = 0
+        MainCamera.rotateCameraTo(theta, phi)
+        # Updates camera position too
+
         console.log game.controlling.rotation.y
     else
-      MainCamera.updateCamera() # Update the position
+      MainCamera.updateCamera() # Update the position when the player moves
 
     return
 
