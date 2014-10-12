@@ -20,21 +20,21 @@ require './js/exporters/MaterialExporter'
 require './js/exporters/ObjectExporter'
 require './js/loaders/ObjectLoader'
 
-Input = require('./src/input-manager')(THREE)
-SceneManager = require('./src/scene-manager')(THREE, Input)
+Input = require('./src/editor/input-manager')(THREE)
+SceneManager = require('./src/editor/scene-manager')(THREE, Input)
 
-ColorUtils = require './src/color-utils'
-ColorManager = require './src/color-manager'
-AxisCamera = require './src/axis-camera'
+ColorUtils = require './src/editor/color-utils'
+ColorManager = require './src/editor/color-manager'
+AxisCamera = require './src/editor/axis-camera'
 MainCamera = require './src/main-camera'
-HashManager = require('./src/hash-manager')(SceneManager)
-Interactions = require('./src/interactions')(Input, SceneManager)
+HashManager = require('./src/editor/hash-manager')(SceneManager)
+Interactions = require('./src/editor/interactions')(Input, SceneManager)
 
-KeyMouse = require('./src/key-mouse-handlers')(SceneManager, Interactions, Input, HashManager)
+KeyMouse = require('./src/editor/key-mouse-handlers')(SceneManager, Interactions, Input, HashManager)
 
 PaletteManager = require './src/voxels/palette-manager'
 VoxelFactory = require './src/voxels/voxel-factory'
-IconMaker = require './src/icon-maker'
+IconMaker = require './src/editor/icon-maker'
 TextureCube = require './src/voxels/texture-cube'
 
 exportGeometry = require './export-geometry'

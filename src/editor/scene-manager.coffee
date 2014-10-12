@@ -1,8 +1,8 @@
-MainCamera = require './main-camera'
+MainCamera = require '../main-camera'
 AxisCamera = require './axis-camera'
 
-PaletteManager = require './voxels/palette-manager'
-VoxelFactory = require './voxels/voxel-factory'
+PaletteManager = require '../voxels/palette-manager'
+VoxelFactory = require '../voxels/voxel-factory'
 
 module.exports = (THREE, Input) ->
   # VoxelFactory = VoxelFactory(THREE)

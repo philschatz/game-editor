@@ -1,5 +1,5 @@
 ColorManager = require './color-manager'
-MainCamera = require './main-camera'
+MainCamera = require '../main-camera'
 
 module.exports = (SceneManager, Interactions, Input, HashManager) ->
 
