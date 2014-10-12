@@ -179,3 +179,5 @@ module.exports = (THREE, Input) ->
 
     setTarget: (mesh) ->
       @_target = mesh.position
+      MainCamera.setTarget(@_target)
+      AxisCamera.setTarget(@_target)

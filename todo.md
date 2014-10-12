@@ -1,12 +1,14 @@
 TODO:
 
 - [x] pause game when rotating
-- [ ] update player state more accurately (jumping, climbing)
+- [-] update player state more accurately (jumping, climbing)
 - [ ] fiddle with walk/jump constants to move more accurately
-- [ ] move camera when player moves
+- [x] move camera when player moves
+  - [ ] fix camera being slightly off when rotated enough times
 - [ ] support secret tunnels
   - [ ] make blocks transparent
-- [-] get climbing to work now that we have voxel collision
+- [x] get climbing to work now that we have voxel collision
+  - [ ] support a slight range when starting to climb
 - [x] extract collision-detection and physics
   - [x] get jump up to work
   - [x] get walk left/right (and change depth) to work
@@ -19,6 +21,7 @@ TODO:
 - [x] encode collision into voxels
 - [x] abstract voxel loading more
 - [x] support color/voxel palettes (level-edit vs voxel-edit)
+
 
 
 To support new THREEJS I needed to:
@@ -53,3 +56,12 @@ Skin.prototype.UVMap = function(mesh, face, x, y, w, h, rotateBy) {
     uvs[ (3 + rotateBy) % 4 ].y = 1 - (tileV * tileUvHeight)
   }
 }
+
+
+
+
+Player Movement:
+
+1. voxel-control : input = up/down/left/right   output = target.velocity, target.resting
+2. voxel-physical : input = velocity   calls collide, output = .position
+3. voxel-collide

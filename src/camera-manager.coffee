@@ -11,6 +11,8 @@ module.exports = class MainCamera
     {theta: @_theta, phi: @_phi}
 
 
+  setTarget: (@_target) ->
+
   zoom: (delta) ->
     origin =
       x: 0

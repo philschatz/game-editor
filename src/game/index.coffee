@@ -20,6 +20,7 @@ Collision3DTilemap = require './customized/collision-3d-tilemap'
 VoxelControlTick = require './customized/voxel-control-tick'
 CollideTerrain = require('./collisions/terrain')
 GameManager = require './actions/game-manager'
+MainCamera = require '../main-camera'
 mapConfig = require('./maps/my')
 
 PALETTE = require '../voxels/palette-manager'
@@ -178,27 +179,7 @@ module.exports = (SceneManager) ->
   rotatingCameraTo = null
   rotatingCameraDir = 0
   game.on 'tick', (elapsedTime) ->
-    PlayerManager.tick elapsedTime, game
-
-    # Support climbing if there is a climbing tile behind the player
-    cameraType = game.controlling.rotation.y / Math.PI * 2
-    cameraType = Math.round(cameraType).mod(4)
-    scaleJustToBeSafe = 1.5
-    cameraDir = 1
-    cameraAxis = undefined
-    cameraPerpendicAxis = undefined
-    cameraDir = -1  if cameraType >= 2
-    if cameraType.mod(2) is 0 #x
-      cameraAxis = 0
-      cameraPerpendicAxis = 2
-    else #z
-      cameraAxis = 2
-      cameraPerpendicAxis = 0
-
-    myBase = game.controlling.aabb().base
-    y = Math.floor(myBase[1])
-    myBlock = GameManager.blockTypeAt(myBase)
-    myBlockBelow = GameManager.blockTypeAt([myBase[0], y - 1, myBase[2]])
+    PlayerManager.tick(elapsedTime, game)
     return
 
   game.on 'tick', ->
@@ -290,19 +271,34 @@ module.exports = (SceneManager) ->
     boxes += '<br/>cameraDir = ' + cameraDir
     boxes += '<br/>curAction = ' + PlayerManager.currentAction().constructor.name  if PlayerManager.currentAction()
     document.getElementById('player-boxes').innerHTML = boxes
+
+
     if rotatingCameraDir
       game.controlling.rotation.y += rotatingCameraDir * Math.PI / 50
+
+      # Update the camera position
+      theta = game.controlling.rotation.y * 360 / Math.PI
+      # theta = dir * 2 * Math.PI * 360 * 2  # @_theta * Math.PI / 360
+      phi = 0
+      MainCamera.rotateCameraTo(theta, phi)
+      # Updates camera position too
+
+
       if rotatingCameraDir > 0 and game.controlling.rotation.y - rotatingCameraTo > 0
         game.controlling.rotation.y = rotatingCameraTo
         rotatingCameraDir = 0
         GameManager.invalidateCache()
         game.pausedPhysics = false
+        console.log game.controlling.rotation.y
 
       if rotatingCameraDir < 0 and game.controlling.rotation.y - rotatingCameraTo < 0
         game.controlling.rotation.y = rotatingCameraTo
         rotatingCameraDir = 0
         GameManager.invalidateCache()
         game.pausedPhysics = false
+        console.log game.controlling.rotation.y
+    else
+      MainCamera.updateCamera() # Update the position
 
     return
 
