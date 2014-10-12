@@ -1,6 +1,5 @@
 
-
-module.exports = (THREE) ->
+module.exports =
   isShiftDown: false
   isCtrlDown: false
   isMouseRotating: false

@@ -1,8 +1,10 @@
 ColorManager = require './color-manager'
 MainCamera = require '../main-camera'
 
-module.exports = (Input, SceneManager) ->
-  new class Interactions
+Input = require './input-manager'
+SceneManager = require './scene-manager'
+
+module.exports = new class Interactions
 
       removeRectangle: ->
         SceneManager.scene.remove(@rectangle) if @rectangle

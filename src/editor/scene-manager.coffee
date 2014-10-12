@@ -4,9 +4,9 @@ AxisCamera = require './axis-camera'
 PaletteManager = require '../voxels/palette-manager'
 VoxelFactory = require '../voxels/voxel-factory'
 
-module.exports = (THREE, Input) ->
-  # VoxelFactory = VoxelFactory(THREE)
-  new class SceneManager
+InputManager = require './input-manager' # ONLY useful for getting the mouse2d TODO: move this out
+
+module.exports = new class SceneManager
 
     # To limit the scope of requiring THREE
     THREE: -> THREE
@@ -148,7 +148,7 @@ module.exports = (THREE, Input) ->
       windowHeight = @_container.clientHeight
 
       @_camera.lookAt(@_target)
-      MainCamera.setRaycaster(@_projector.pickingRay(Input.mouse2D.clone(), @_camera))
+      MainCamera.setRaycaster(@_projector.pickingRay(InputManager.mouse2D.clone(), @_camera))
       @renderer.setViewport(0, 0, windowWidth, windowHeight)
       @renderer.setScissor(0, 0, windowWidth, windowHeight)
       @renderer.enableScissorTest(false)

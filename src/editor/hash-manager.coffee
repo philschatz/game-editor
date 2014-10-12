@@ -1,3 +1,5 @@
+SceneManager = require './scene-manager'
+
 
 # https://gist.github.com/665235
 decode = (string) ->
@@ -15,8 +17,7 @@ encode = (array) ->
   output
 
 
-module.exports = (SceneManager) ->
-  new class HashManager
+module.exports = new class HashManager
 
     disableUpdateHash: -> @_disableUpdateHash = true
 

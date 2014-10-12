@@ -2,9 +2,9 @@
 THREE = window.THREE
 raf = require("raf")
 exportGeometry = require './export-geometry'
-Input = require('./src/editor/input-manager')(THREE)
-SceneManager = require('./src/editor/scene-manager')(THREE, Input)
-HashManager = require('./src/editor/hash-manager')(SceneManager)
+InputManager = require './src/editor/input-manager'
+SceneManager = require './src/editor/scene-manager'
+HashManager = require './src/editor/hash-manager'
 GAME = require './src/game'
 
 container = document.getElementById("editor-area")

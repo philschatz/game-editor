@@ -1,17 +1,21 @@
 ColorManager = require './color-manager'
 MainCamera = require '../main-camera'
 
-module.exports = (SceneManager, Interactions, Input, HashManager) ->
+SceneManager = require './scene-manager'
+Interactions = require './interactions'
+Input = require './input-manager'
+HashManager = require './hash-manager'
 
 
-  setIsometricAngle = ->
-    # Move up to the nearest 45 degree
-    theta = Math.floor((MainCamera.getRotation().theta + 180) / 180) * 180
-    phi = 0 # The y angle
-    MainCamera.rotateCameraTo(theta, phi)
-    return
+setIsometricAngle = ->
+  # Move up to the nearest 45 degree
+  theta = Math.floor((MainCamera.getRotation().theta + 180) / 180) * 180
+  phi = 0 # The y angle
+  MainCamera.rotateCameraTo(theta, phi)
+  return
 
-  return new class KeyMouseHandlers
+
+module.exports = new class KeyMouseHandlers
     mousewheel: (event) ->
       # prevent zoom if a modal is open
       return if $('.modal').hasClass('in')

@@ -20,17 +20,17 @@ require './js/exporters/MaterialExporter'
 require './js/exporters/ObjectExporter'
 require './js/loaders/ObjectLoader'
 
-Input = require('./src/editor/input-manager')(THREE)
-SceneManager = require('./src/editor/scene-manager')(THREE, Input)
+Input = require './src/editor/input-manager'
+SceneManager = require './src/editor/scene-manager'
 
 ColorUtils = require './src/editor/color-utils'
 ColorManager = require './src/editor/color-manager'
 AxisCamera = require './src/editor/axis-camera'
 MainCamera = require './src/main-camera'
-HashManager = require('./src/editor/hash-manager')(SceneManager)
-Interactions = require('./src/editor/interactions')(Input, SceneManager)
+HashManager = require './src/editor/hash-manager'
+Interactions = require './src/editor/interactions'
 
-KeyMouse = require('./src/editor/key-mouse-handlers')(SceneManager, Interactions, Input, HashManager)
+KeyMouse = require './src/editor/key-mouse-handlers'
 
 PaletteManager = require './src/voxels/palette-manager'
 VoxelFactory = require './src/voxels/voxel-factory'
