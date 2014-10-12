@@ -182,6 +182,15 @@ module.exports = (SceneManager) ->
     PlayerManager.tick(elapsedTime, game)
     return
 
+  # Moves the camera to match the player rotation
+  rotateCamera = ->
+    # Update the camera position
+    theta = game.controlling.rotation.y * 360 / Math.PI
+    # theta = dir * 2 * Math.PI * 360 * 2  # @_theta * Math.PI / 360
+    phi = 0
+    MainCamera.rotateCameraTo(theta, phi)
+    # Updates camera position too
+
   game.on 'tick', ->
     if not rotatingCameraDir and game.controls.state.rotate_clockwise
 
@@ -276,43 +285,14 @@ module.exports = (SceneManager) ->
     if rotatingCameraDir
       game.controlling.rotation.y += rotatingCameraDir * Math.PI / 50
 
-      # Update the camera position
-      theta = game.controlling.rotation.y * 360 / Math.PI
-      # theta = dir * 2 * Math.PI * 360 * 2  # @_theta * Math.PI / 360
-      phi = 0
-      MainCamera.rotateCameraTo(theta, phi)
-      # Updates camera position too
-
-
-      if rotatingCameraDir > 0 and game.controlling.rotation.y - rotatingCameraTo > 0
+      isDoneRotating = (rotatingCameraDir > 0 and game.controlling.rotation.y - rotatingCameraTo > 0) or (rotatingCameraDir < 0 and game.controlling.rotation.y - rotatingCameraTo < 0)
+      if isDoneRotating
         game.controlling.rotation.y = rotatingCameraTo
         rotatingCameraDir = 0
         GameManager.invalidateCache()
         game.pausedPhysics = false
 
-        # Update the camera position
-        theta = game.controlling.rotation.y * 360 / Math.PI
-        # theta = dir * 2 * Math.PI * 360 * 2  # @_theta * Math.PI / 360
-        phi = 0
-        MainCamera.rotateCameraTo(theta, phi)
-        # Updates camera position too
-
-        console.log game.controlling.rotation.y
-
-      if rotatingCameraDir < 0 and game.controlling.rotation.y - rotatingCameraTo < 0
-        game.controlling.rotation.y = rotatingCameraTo
-        rotatingCameraDir = 0
-        GameManager.invalidateCache()
-        game.pausedPhysics = false
-
-        # Update the camera position
-        theta = game.controlling.rotation.y * 360 / Math.PI
-        # theta = dir * 2 * Math.PI * 360 * 2  # @_theta * Math.PI / 360
-        phi = 0
-        MainCamera.rotateCameraTo(theta, phi)
-        # Updates camera position too
-
-        console.log game.controlling.rotation.y
+      rotateCamera()
     else
       MainCamera.updateCamera() # Update the position when the player moves
 
