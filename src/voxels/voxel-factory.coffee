@@ -1,3 +1,4 @@
+THREE = require '../three'
 PaletteManager   = require './palette-manager'
 TextureCube    = require './texture-cube'
 

@@ -1,3 +1,4 @@
+THREE = require '../three'
 ColorManager = require './color-manager'
 MainCamera = require '../main-camera'
 
@@ -18,12 +19,11 @@ module.exports = new class Interactions
         if intersect
           normal = intersect.face.normal.clone()
           # normal.applyMatrix4(intersect.object.matrixRotationWorld)
-          matrixRotationWorld = new (SceneManager.THREE().Matrix4)()
+          matrixRotationWorld = new THREE.Matrix4()
           matrixRotationWorld.extractRotation( intersect.object.matrixWorld )
           normal.applyMatrix4(matrixRotationWorld)
 
-          # position = new (SceneManager.THREE().Vector3)().addVectors(intersect.point, normal)
-          position = new (SceneManager.THREE().Vector3)().addVectors(intersect.object.position, normal)
+          position = new THREE.Vector3().addVectors(intersect.object.position, normal)
           updateBrush = ->
             SceneManager.brush.position.x = Math.floor(position.x / (16/16)) * (16/16) + (16/16)/2
             SceneManager.brush.position.y = Math.floor(position.y / (16/16)) * (16/16) + (16/16)/2
@@ -57,7 +57,6 @@ module.exports = new class Interactions
           else if Input.startPosition and Input.isMouseDown # or Input.isMouseDown and not Input.isMouseRotating
 
             @removeRectangle()
-            THREE = SceneManager.THREE()
 
             # Draw a rectangle
             x1 = Math.floor(Input.startPosition.x / (16/16)) * (16/16) + (16/16)/2

@@ -1,6 +1,4 @@
 
-THREE = window.THREE
-
 raf = require("raf")
 
 GAME = require './src/game'
@@ -11,14 +9,6 @@ GAME = require './src/game'
 # var ndarray = require('ndarray')
 # var ndarrayFill = require('ndarray-fill')
 
-# require './js/exporters/OBJExporter'
-# require './js/loaders/OBJLoader'
-# # require './js/loaders/OBJLoader2'
-require './js/exporters/BufferGeometryExporter'
-require './js/exporters/GeometryExporter'
-require './js/exporters/MaterialExporter'
-require './js/exporters/ObjectExporter'
-require './js/loaders/ObjectLoader'
 
 Input = require './src/editor/input-manager'
 SceneManager = require './src/editor/scene-manager'

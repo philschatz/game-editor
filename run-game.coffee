@@ -1,5 +1,4 @@
-
-THREE = window.THREE
+THREE = require './src/three'
 raf = require("raf")
 exportGeometry = require './export-geometry'
 InputManager = require './src/editor/input-manager'

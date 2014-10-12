@@ -1,6 +1,6 @@
+THREE = require '../../three'
 PlayerManager = require '../actions/player-manager'
 aabb = require 'aabb-3d'
-THREE = window.THREE
 
 physical = (avatar, collidables, dimensions, terminal) ->
   new Physical(avatar, collidables, dimensions, terminal)

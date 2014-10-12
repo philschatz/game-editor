@@ -1,4 +1,4 @@
-
+THREE = require '../three'
 
 module.exports = new class TextureCubeBuilder
 

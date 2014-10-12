@@ -1,3 +1,4 @@
+THREE = require '../three'
 
 module.exports =
   isShiftDown: false

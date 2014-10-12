@@ -4,12 +4,10 @@ AxisCamera = require './axis-camera'
 PaletteManager = require '../voxels/palette-manager'
 VoxelFactory = require '../voxels/voxel-factory'
 
+THREE = require '../three'
 InputManager = require './input-manager' # ONLY useful for getting the mouse2d TODO: move this out
 
 module.exports = new class SceneManager
-
-    # To limit the scope of requiring THREE
-    THREE: -> THREE
 
     renderer: null
     brush: null

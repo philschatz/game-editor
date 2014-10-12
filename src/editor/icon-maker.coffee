@@ -1,3 +1,5 @@
+THREE = require '../three'
+
 module.exports = class IconMaker
   width: 64
   height: 64
