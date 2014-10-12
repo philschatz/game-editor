@@ -74,7 +74,7 @@ module.exports = (SceneManager, Interactions, Input, HashManager) ->
         matrixRotationWorld.extractRotation( intersect.object.matrixWorld )
         normal.applyMatrix4(matrixRotationWorld)
 
-        position = new (SceneManager.THREE().Vector3)().addVectors(intersect.point, normal)
+        position = new (SceneManager.THREE().Vector3)().addVectors(intersect.object.position, normal)
         position.x = Math.floor(position.x / (16/16)) * (16/16) + (16/16)/2
         position.y = Math.floor(position.y / (16/16)) * (16/16) + (16/16)/2
         position.z = Math.floor(position.z / (16/16)) * (16/16) + (16/16)/2
