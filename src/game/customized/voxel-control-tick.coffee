@@ -44,7 +44,7 @@ module.exports = tick = (dt) ->
       target.resting.y = false
       @jumping = true
       target.velocity.y = min(target.velocity.y + jump_speed * min(dt, @jump_timer), @jump_max_speed)  if @jump_timer > 0
-      @jump_timer = max(@jump_timer - dt, 0)
+      @jump_timer = @jump_max_timer
     else
       @jumping = false
     @jump_timer = (if at_rest < 0 then @jump_max_timer else @jump_timer)
