@@ -36,27 +36,42 @@ textureLoader = (config) ->
   # Unsure if the order below is correct or not but it's close
   TextureCube.freshCube([front_url, back_url, top_url, bottom_url, left_url, right_url])
 
+# Share the same geometry for simple color cubes
+colorCube = new THREE.BoxGeometry( (16/16), (16/16), (16/16) )
 
-VOXEL_TEMPLATE_MAP = {}
-for voxelName, config of PaletteManager.allVoxelConfigs()
-  template = switch config.type
-    when 'geometry' then geometryLoader(config)
-    when 'texture'  then textureLoader(config)
-    else throw new Error('BUG: Unsupported Voxel type')
-  VOXEL_TEMPLATE_MAP[voxelName] = template
+colorLoader = (config) ->
+  _CubeMaterial = THREE.MeshBasicMaterial
+  cubeMaterial = new _CubeMaterial(
+    vertexColors: THREE.VertexColors
+    transparent: true
+  )
+
+  colorInt = parseInt(config.color_hex, 16)
+  cubeMaterial.color = new THREE.Color(colorInt)
+  voxel = new THREE.Mesh(colorCube, cubeMaterial)
+  voxel.name = "color-#{config.color_hex}"
+  voxel
+
+
+VOXEL_TEMPLATE_MAP = []
 
 
 
 module.exports = new class VoxelFactory
 
-  _cube: new THREE.BoxGeometry( (16/16), (16/16), (16/16) )
+  load: (level) ->
+    PaletteManager.load(level)
+    for voxelName, config of PaletteManager.allVoxelConfigs()
+      template = switch config.type
+        when 'geometry' then geometryLoader(config)
+        when 'texture'  then textureLoader(config)
+        when 'color'    then colorLoader(config)
+        else throw new Error('BUG: Unsupported Voxel type')
+      VOXEL_TEMPLATE_MAP[voxelName] = template
+
 
   freshVoxel: (id, addWireframe) ->
     template = VOXEL_TEMPLATE_MAP[id]
-
-    unless id
-      console.warn('BUG! Invalid voxel color name. using black')
-      id = 'color-000000'
 
     if template
       voxel = template.clone()
@@ -76,7 +91,7 @@ module.exports = new class VoxelFactory
         transparent: true
       )
 
-      colorInt = parseInt(id.substring('color-'.length),(16/16))
+      colorInt = parseInt(id.substring('color-'.length), 16)
       cubeMaterial.color = new THREE.Color(colorInt)
       voxel = new THREE.Mesh(@_cube, cubeMaterial)
       voxel.name = id

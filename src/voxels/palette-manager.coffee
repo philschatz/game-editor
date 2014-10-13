@@ -20,7 +20,6 @@
 }
 ###
 
-PALETTE = require './types/nature-palette'
 
 # PALETTE =
 #   voxels: {}
@@ -41,15 +40,18 @@ PALETTE = require './types/nature-palette'
 #   ]
 
 
-module.exports =
-  voxelName: (color) -> PALETTE.colors[color]
-  # voxelConfig: (voxelName) -> PALETTE.voxels[voxelName]
+module.exports = new class PaletteManager
+  load: (level) ->
+    @_palette = level.palette
+
+  _getPalette: ->
+    throw new Error('BUG! Palette not loaded yet. Make sure .load is called and finishes first') unless @_palette
+    @_palette
+
+  # voxelConfig: (voxelName) -> @_getPalette().voxels[voxelName]
   collisionFor: (color) ->
     color -= 1 # The game makes 0 be "No Voxel" so everything is shifted
-    voxelName = PALETTE.colors[color]
 
-    if voxelName and PALETTE.voxels[voxelName]
-      PALETTE.voxels[voxelName].collision
-    else
-      null
-  allVoxelConfigs: -> PALETTE.voxels
+    @_getPalette().voxelInfo(color).collision
+
+  allVoxelConfigs: -> @_getPalette().allVoxels()

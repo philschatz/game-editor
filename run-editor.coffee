@@ -29,164 +29,183 @@ TextureCube = require './src/voxels/texture-cube'
 
 exportGeometry = require './export-geometry'
 
+LevelLoader = require './src/loaders/level'
 
 
 window.startEditor = ->
   container = null
 
 
-  alreadyCreatedGame = false
+  levelPromise = LevelLoader.load('/data/level-lighthouse.json')
+  .then (level) ->
+    VoxelFactory.load(level)
+    alreadyCreatedGame = false
 
-  $('.preview-level').on 'click', ->
-    if not alreadyCreatedGame
-      $preview = $('.preview-level')
-      $preview.text('Loading...')
-      $preview.addClass('disabled')
-      $preview.attr('alt', 'This may take a minute')
-      HashManager.disableUpdateHash()
-      fn = ->
-        exportGeometry(SceneManager)
-        GAME(SceneManager)
-        alreadyCreatedGame = true
-        $preview.text('Loaded')
-      setTimeout(fn, 10)
+    $('.preview-level').on 'click', ->
+      if not alreadyCreatedGame
+        $preview = $('.preview-level')
+        $preview.text('Loading...')
+        $preview.addClass('disabled')
+        $preview.attr('alt', 'This may take a minute')
+        HashManager.disableUpdateHash()
+        fn = ->
+          exportGeometry(SceneManager)
+          GAME(SceneManager)
+          alreadyCreatedGame = true
+          $preview.text('Loaded')
+        setTimeout(fn, 10)
 
-  window.exportGeometry = -> exportGeometry(SceneManager)
-
-
-  window.exportImage = ->
-    iconMaker = new IconMaker(SceneManager)
-    for color in [0..12]
-      image = new Image()
-      colorName = PaletteManager.voxelName(color)
-      image.src = iconMaker.renderVoxel(VoxelFactory.freshVoxel(colorName, false))
-      $img = $(image)
-      $img.attr('data-color', ''+color)
-      $img.addClass('color')
-      $("i.color[data-color=#{color}]").replaceWith($img)
-
-    iconMaker.dispose()
+    window.exportGeometry = -> exportGeometry(SceneManager)
 
 
+    window.exportImage = ->
+      iconMaker = new IconMaker(SceneManager)
+      for color in [0..12]
+        image = new Image()
+        image.src = iconMaker.renderVoxel(VoxelFactory.freshVoxel(color, false))
+        $img = $(image)
+        $img.attr('data-color', ''+color)
+        $img.addClass('color')
+
+        $color = $("i.color[data-color=#{color}]")
+        if $color[0]
+          $color.replaceWith($img)
+        else
+          addColorToPalette(color)
+          $("i.color[data-color=#{color}]").replaceWith($img)
+
+      iconMaker.dispose()
 
 
 
-  # exportImage()
-  # return
+
+
+    # exportImage()
+    # return
 
 
 
-  cameraHandlers = (id, cameraManager) ->
+    cameraHandlers = (id, cameraManager) ->
 
-    updateLabel = ->
-      {theta, phi} = cameraManager.getRotation()
-      theta = Math.round(theta / 180).mod(4)
-      label = switch theta
-        when 0 then 'X'
-        when 1 then 'Z'
-        when 2 then '-X'
-        when 3 then '-Z'
-        else '??'
-      $("##{id} .axis-label").text(label)
+      updateLabel = ->
+        {theta, phi} = cameraManager.getRotation()
+        theta = Math.round(theta / 180).mod(4)
+        label = switch theta
+          when 0 then 'X'
+          when 1 then 'Z'
+          when 2 then '-X'
+          when 3 then '-Z'
+          else '??'
+        $("##{id} .axis-label").text(label)
 
-    updateLabel()
-    setInterval updateLabel, 1000
-
-    $("##{id} .axis-label").on 'click', ->
-      {theta, phi} = cameraManager.getRotation()
-      theta += 360
-      theta -= 720 if theta >= 720
-      cameraManager.rotateCameraTo(theta, phi)
       updateLabel()
+      setInterval updateLabel, 1000
 
-    $("##{id} .rotate-left").on 'click', ->
-      {theta, phi} = cameraManager.getRotation()
-      theta -= 180
-      theta += 720 if theta < 0
-      cameraManager.rotateCameraTo(theta, phi)
-      updateLabel()
+      $("##{id} .axis-label").on 'click', ->
+        {theta, phi} = cameraManager.getRotation()
+        theta += 360
+        theta -= 720 if theta >= 720
+        cameraManager.rotateCameraTo(theta, phi)
+        updateLabel()
 
-    $("##{id} .rotate-right").on 'click', ->
-      {theta, phi} = cameraManager.getRotation()
-      theta += 180
-      theta -= 720 if theta >= 720
-      cameraManager.rotateCameraTo(theta, phi)
-      updateLabel()
+      $("##{id} .rotate-left").on 'click', ->
+        {theta, phi} = cameraManager.getRotation()
+        theta -= 180
+        theta += 720 if theta < 0
+        cameraManager.rotateCameraTo(theta, phi)
+        updateLabel()
 
-    $("##{id} .zoom-in").on 'click', ->
-      cameraManager.zoom(100)
+      $("##{id} .rotate-right").on 'click', ->
+        {theta, phi} = cameraManager.getRotation()
+        theta += 180
+        theta -= 720 if theta >= 720
+        cameraManager.rotateCameraTo(theta, phi)
+        updateLabel()
 
-    $("##{id} .zoom-out").on 'click', ->
-      cameraManager.zoom(-100)
+      $("##{id} .zoom-in").on 'click', ->
+        cameraManager.zoom(100)
 
-  cameraHandlers('axis-camera-controls', AxisCamera)
-  cameraHandlers('main-camera-controls', MainCamera)
+      $("##{id} .zoom-out").on 'click', ->
+        cameraManager.zoom(-100)
 
-  $('#axis-camera-controls .rotate-main').on 'click', ->
-    {theta, phi} = AxisCamera.getRotation()
-    MainCamera.rotateCameraTo(theta, phi)
+    cameraHandlers('axis-camera-controls', AxisCamera)
+    cameraHandlers('main-camera-controls', MainCamera)
 
-
-  showWelcome = ->
-    seenWelcome = localStorage.getItem("seenWelcome")
-    return $("#welcome").modal()  if seenWelcome
-    localStorage.setItem "seenWelcome", true
-    return
-
-  # function getVoxels() {
-  #   var hash = window.location.hash.substr(1)
-  #   var convert = new Convert()
-  #   var data = convert.toVoxels(hash)
-  #   var l = data.bounds[0]
-  #   var h = data.bounds[1]
-  #   var d = [ h[0]-l[0] + 1, h[1]-l[1] + 1, h[2]-l[2] + 1]
-  #   var len = d[0] * d[1] * d[2]
-  #   var voxels = ndarray(new Int32Array(len), [d[0], d[1], d[2]])
-  #
-  #   var ColorManager.colors = [undefined]
-  #   data.ColorManager.colors.map(function(c) {
-  #     ColorManager.colors.push('#' + ColorUtils.rgb2hex(c))
-  #   })
-  #
-  #   function generateVoxels(x, y, z) {
-  #     var offset = [x + l[0], y + l[1], z + l[2]]
-  #     var val = data.voxels[offset.join('|')]
-  #     return data.ColorManager.colors[val] ? val + 1: 0
-  #   }
-  #
-  #   ndarrayFill(voxels, generateVoxels)
-  #   return {voxels: voxels, ColorManager.colors: colors}
-  # }
+    $('#axis-camera-controls .rotate-main').on 'click', ->
+      {theta, phi} = AxisCamera.getRotation()
+      MainCamera.rotateCameraTo(theta, phi)
 
 
 
-  addColorToPalette = (idx) ->
+    # function getVoxels() {
+    #   var hash = window.location.hash.substr(1)
+    #   var convert = new Convert()
+    #   var data = convert.toVoxels(hash)
+    #   var l = data.bounds[0]
+    #   var h = data.bounds[1]
+    #   var d = [ h[0]-l[0] + 1, h[1]-l[1] + 1, h[2]-l[2] + 1]
+    #   var len = d[0] * d[1] * d[2]
+    #   var voxels = ndarray(new Int32Array(len), [d[0], d[1], d[2]])
+    #
+    #   var ColorManager.colors = [undefined]
+    #   data.ColorManager.colors.map(function(c) {
+    #     ColorManager.colors.push('#' + ColorUtils.rgb2hex(c))
+    #   })
+    #
+    #   function generateVoxels(x, y, z) {
+    #     var offset = [x + l[0], y + l[1], z + l[2]]
+    #     var val = data.voxels[offset.join('|')]
+    #     return data.ColorManager.colors[val] ? val + 1: 0
+    #   }
+    #
+    #   ndarrayFill(voxels, generateVoxels)
+    #   return {voxels: voxels, ColorManager.colors: colors}
+    # }
 
-    # add a button to the group
-    colorBox = $("i[data-color=\"" + idx + "\"]")
-    unless colorBox.length
-      base = $(".colorAddButton")
-      clone = base.clone()
-      clone.removeClass "colorAddButton"
-      clone.addClass "colorPickButton"
-      colorBox = clone.find(".colorAdd")
-      colorBox.removeClass "colorAdd"
-      colorBox.addClass "color"
-      colorBox.attr "data-color", idx
-      colorBox.text ""
-      base.before clone
-      clone.click (e) ->
-        pickColor e
-        e.preventDefault()
-        return
-
-      clone.on "contextmenu", changeColor
-    colorBox.parent().attr "data-color", "#" + ColorUtils.rgb2hex(ColorManager.colors[idx])
-    colorBox.css "background", "#" + ColorUtils.rgb2hex(ColorManager.colors[idx])
-    SceneManager.brush.children[0].material.color.setRGB ColorManager.colors[idx][0], ColorManager.colors[idx][1], ColorManager.colors[idx][2]  if ColorManager.currentColor is idx and SceneManager.brush
-    return
 
 
+    addColorToPalette = (idx) ->
+
+      # add a button to the group
+      colorBox = $("i[data-color=\"" + idx + "\"]")
+      unless colorBox.length
+        base = $(".colorAddButton")
+        clone = base.clone()
+        clone.removeClass "colorAddButton"
+        clone.addClass "colorPickButton"
+        colorBox = clone.find(".colorAdd")
+        colorBox.removeClass "colorAdd"
+        colorBox.addClass "color"
+        colorBox.attr "data-color", idx
+        colorBox.text ""
+        base.before clone
+        clone.click (e) ->
+          pickColor e
+          e.preventDefault()
+          return
+
+        clone.on "contextmenu", changeColor
+      colorBox.parent().attr "data-color", "#" + ColorUtils.rgb2hex(ColorManager.colors[idx])
+      colorBox.css "background", "#" + ColorUtils.rgb2hex(ColorManager.colors[idx])
+      SceneManager.brush.children[0].material.color.setRGB ColorManager.colors[idx][0], ColorManager.colors[idx][1], ColorManager.colors[idx][2]  if ColorManager.currentColor is idx and SceneManager.brush
+      return
+
+
+    initEditor = ->
+      bindEventsAndPlugins()
+      container = document.getElementById("editor-area")
+      SceneManager.prepare(container)
+      # build all the pallette pngs
+      exportImage()
+      SceneManager.init(container)
+      container.appendChild(SceneManager.renderer.domElement)
+      KeyMouse.attachEvents()
+      HashManager.buildFromHash()  if window.location.hash
+      HashManager.updateHash()
+      return
+
+    setTimeout(initEditor, 2000) # Wait for all the textures to load first TODO: HACK
+    raf(window).on "data", -> SceneManager.render()
 
 
 
@@ -267,6 +286,8 @@ window.startEditor = ->
     return
 
 
+
+
   bindEventsAndPlugins = ->
     $(window).on "hashchange", ->
       return localStorage.setItem("seenWelcome", true)  if updatingHash
@@ -321,22 +342,6 @@ window.startEditor = ->
 
 
 
-  init = ->
-
-
-    bindEventsAndPlugins()
-    container = document.getElementById("editor-area")
-    SceneManager.prepare(container)
-    # build all the pallette pngs
-    exportImage()
-    SceneManager.init(container)
-    container.appendChild(SceneManager.renderer.domElement)
-    KeyMouse.attachEvents()
-    HashManager.buildFromHash()  if window.location.hash
-    HashManager.updateHash()
-    return
-
-
 
 
 
@@ -385,19 +390,17 @@ window.startEditor = ->
 
 
 
+  showWelcome = ->
+    seenWelcome = localStorage.getItem("seenWelcome")
+    return $("#welcome").modal()  if seenWelcome
+    localStorage.setItem "seenWelcome", true
+    return
 
 
-  # Init code
-  c = 0
-  while c < 12
-    addColorToPalette c
-    c++
   showWelcome()
 
-  # Wait until all the texture files have loaded
-  setTimeout(init, 2000)
 
-  raf(window).on "data", -> SceneManager.render()
+
   exports.viewInstructions = ->
     $("#welcome").modal()
     return

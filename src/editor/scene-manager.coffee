@@ -118,8 +118,7 @@ module.exports = new class SceneManager
       wireframeMaterial = new THREE.MeshBasicMaterial(wireframeOptions)
       # wireframeMaterial.color.setRGB(0, 0, 0) # or color - .05
 
-      colorName = PaletteManager.voxelName(color)
-      voxel = VoxelFactory.freshVoxel(colorName, true) # true = addWireframe
+      voxel = VoxelFactory.freshVoxel(color, true) # true = addWireframe
 
       voxel.isVoxel = true
       voxel.colorCode = color

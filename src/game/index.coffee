@@ -23,8 +23,6 @@ GameManager = require './actions/game-manager'
 window.MainCamera = MainCamera = require '../main-camera'
 mapConfig = require('./maps/my')
 
-PALETTE = require '../voxels/palette-manager'
-
 mapConfig.playerPosition = [-1.5, 10, 2.5]
 
 # Used by the collisiondetector so height must be 1

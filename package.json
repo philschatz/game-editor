@@ -12,7 +12,8 @@
     "browserify": "^5.9.1",
     "coffeeify": "^0.7.0",
     "kb-controls": "^0.2.0",
-    "underscore": "^1.7.0"
+    "underscore": "^1.7.0",
+    "uri-js": "^1.4.2"
   },
   "scripts": {
     "test": "./node_modules/.bin/browserify index.coffee -o bundle.js --extension='.coffee' --transform coffeeify",

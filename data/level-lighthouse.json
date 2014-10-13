@@ -1,0 +1,8 @@
+{
+  "name": "Lighthouse",
+  "default_coords": [1, 2, 3, 4],
+  "doors": [],
+
+  "palette": "./palette-nature.json",
+  "map": "./level-lighthouse-map.json"
+}

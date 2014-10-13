@@ -1,0 +1,127 @@
+[
+  {
+    "name": "Unused Black",
+    "type": "color",
+    "color_hex": "000000"
+  },
+  {
+    "id": "brick-light",
+    "type": "texture",
+    "front_url": "./textures/brick-light-1.png",
+    "back_url": "./textures/brick-light-2.png",
+    "top_url": "./textures/grass.png",
+    "bottom_url": "./textures/grass.png",
+    "left_url": "./textures/brick-light-5.png",
+    "right_url": "./textures/brick-light-6.png"
+  },
+  {
+    "id": "brick-medium",
+    "type": "texture",
+    "front_url": "./textures/brick-medium-1.png",
+    "back_url": "./textures/brick-medium-2.png",
+    "top_url": "./textures/grass.png",
+    "bottom_url": "./textures/grass.png",
+    "left_url": "./textures/brick-medium-5.png",
+    "right_url": "./textures/brick-medium-6.png"
+  },
+  {
+    "id": "brick-dark",
+    "type": "texture",
+    "front_url": "./textures/brick-dark-1.png",
+    "back_url": "./textures/brick-dark-2.png",
+    "top_url": "./textures/grass.png",
+    "bottom_url": "./textures/grass.png",
+    "left_url": "./textures/brick-dark-5.png",
+    "right_url": "./textures/brick-dark-6.png"
+  },
+  {
+    "id": "brick-grasstop",
+    "collision": "top",
+    "type": "texture",
+    "front_url": "./textures/brick-grasstop-1.png",
+    "back_url": "./textures/brick-grasstop-2.png",
+    "top_url": "./textures/grass.png",
+    "bottom_url": "./textures/grass.png",
+    "left_url": "./textures/brick-grasstop-1.png",
+    "right_url": "./textures/brick-grasstop-2.png"
+  },
+  {
+    "id": "bridge-post-top",
+    "collision": "top",
+    "type": "texture",
+    "front_url": "./textures/bridge-post-top.png",
+    "back_url": "./textures/bridge-post-top.png",
+    "top_url": "./textures/grass.png",
+    "bottom_url": "./textures/grass.png",
+    "left_url": "./textures/bridge-post-top.png",
+    "right_url": "./textures/bridge-post-top.png"
+  },
+  {
+    "id": "bridge",
+    "name": "Bridge",
+    "collision": "top",
+    "type": "geometry",
+    "geometry_url": "./geometries/bridge.json"
+  },
+  {
+    "id": "bridge-post",
+    "type": "texture",
+    "front_url": "./textures/bridge-post-1.png",
+    "back_url": "./textures/bridge-post-2.png",
+    "top_url": "./textures/grass.png",
+    "bottom_url": "./textures/grass.png",
+    "left_url": "./textures/bridge-post-1.png",
+    "right_url": "./textures/bridge-post-2.png"
+  },
+  {
+    "name": "Unused Red",
+    "type": "color",
+    "color_hex": "fff160"
+  },
+  {
+    "name": "Unused Green",
+    "type": "color",
+    "color_hex": "ecf0f1"
+  },
+  {
+    "id": "ladder-top",
+    "name": "Ladder Top",
+    "collision": "ladder",
+    "type": "geometry",
+    "geometry_url": "./geometries/ladder-top.json"
+  },
+  {
+    "id": "ladder-middle",
+    "name": "Ladder Middle",
+    "collision": "ladder",
+    "type": "geometry",
+    "geometry_url": "./geometries/ladder-middle.json"
+  },
+  {
+    "id": "ladder-bottom",
+    "name": "Ladder Bottom",
+    "collision": "ladder",
+    "type": "geometry",
+    "geometry_url": "./geometries/ladder-bottom.json"
+  },
+  {
+    "name": "Unused Red",
+    "type": "color",
+    "color_hex": "ff9999"
+  },
+  {
+    "name": "Unused Black (markers)",
+    "type": "color",
+    "color_hex": "000000"
+  },
+  {
+    "name": "Unused Blue",
+    "type": "color",
+    "color_hex": "9999ff"
+  },
+  {
+    "name": "Unused Dark Blue",
+    "type": "color",
+    "color_hex": "3333ff"
+  }
+]
