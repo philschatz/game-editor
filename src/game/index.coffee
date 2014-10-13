@@ -112,6 +112,7 @@ module.exports = (SceneManager) ->
 
   # setup the game and add some trees
   game = createGame
+    statsDisabled: true
     view: view
     generate: (x, y, z) -> mapConfig.map.getColor(x, y, z)
     chunkDistance: 2
@@ -249,32 +250,12 @@ module.exports = (SceneManager) ->
       cameraPerpendicAxis = 0
     playerX = Math.floor(@controlling.aabb().base[cameraAxis])
     playerY = Math.floor(@controlling.aabb().base[1])
-    #
-    # for i in [-2..2]
-    #   for j in [-2..2]
-    #     boxY = playerY + (-1 * i)
-    #     boxX = playerX + (j)
-    #     block = @sparseCollisionMap[cameraType]['' + boxX + '|' + boxY]
-    #     if block
-    #       if block < 10 and block >= 0
-    #         boxes += '0' + block
-    #       else
-    #         boxes += block
-    #     else
-    #       boxes += '--'
-    #     if i is 0 and j is -1
-    #       boxes += '['
-    #     else if i is 0 and j is 0
-    #       boxes += ']'
-    #     else
-    #       boxes += ' '
-    #   boxes += '<br/>'
-    #
-    boxes += 'me = [' + Math.floor(@controlling.aabb().base[0]) + ', ' + Math.floor(@controlling.aabb().base[1]) + ', ' + Math.floor(@controlling.aabb().base[2]) + ']'
-    boxes += '<br/>cameraAxis = ' + cameraAxis
-    boxes += '<br/>cameraDir = ' + cameraDir
-    boxes += '<br/>curAction = ' + PlayerManager.currentAction().constructor.name  if PlayerManager.currentAction()
-    document.getElementById('player-boxes').innerHTML = boxes
+
+    # boxes += 'me = [' + Math.floor(@controlling.aabb().base[0]) + ', ' + Math.floor(@controlling.aabb().base[1]) + ', ' + Math.floor(@controlling.aabb().base[2]) + ']'
+    # boxes += '<br/>cameraAxis = ' + cameraAxis
+    # boxes += '<br/>cameraDir = ' + cameraDir
+    # boxes += '<br/>curAction = ' + PlayerManager.currentAction().constructor.name  if PlayerManager.currentAction()
+    # document.getElementById('player-boxes').innerHTML = boxes
 
 
     if rotatingCameraDir

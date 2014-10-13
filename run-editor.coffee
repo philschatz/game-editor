@@ -1,5 +1,5 @@
 
-raf = require("raf")
+requestAnimationFrame = require("raf")
 
 GAME = require './src/game'
 
@@ -227,7 +227,7 @@ window.startEditor = ->
       return
 
     setTimeout(initEditor, 2000) # Wait for all the textures to load first TODO: HACK
-    raf(window).on "data", -> SceneManager.render()
+    requestAnimationFrame(window).on "data", -> SceneManager.render()
 
 
 
