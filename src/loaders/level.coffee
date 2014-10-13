@@ -1,6 +1,6 @@
 $ = require 'jquery'
 URI = require 'uri-js'
-
+HashManager = require '../editor/hash-manager'
 
 ajax = (url) ->
   $.ajax(url, {dataType: 'json'})
@@ -82,20 +82,37 @@ class Palette
 
 class Map
   _map: {}
-  constructor: (root, config) ->
+  constructor: (root, config={}) ->
     # TODO: Uncompress if necessary
     # Map structure is '1|2|3' -> {color, orient}
     for [x, y, z, color, orientation] in config
       @_map["#{x}|#{y}|#{z}"] = {color, orientation}
 
+  # boundingBox: ->
+  #   {@x1, @y1, @z1, @x2, @y2, @z2}
+
+  forEach: (iterator) ->
+    for key, {color, orientation} of @_map
+      coords = key.split('|')
+      coords[0] = parseInt(coords[0])
+      coords[1] = parseInt(coords[1])
+      coords[2] = parseInt(coords[2])
+      iterator(coords[0], coords[1], coords[2], color, orientation)
+
   getInfo: (x, y, z) ->
     @_map["#{x}|#{y}|#{z}"] or {}
 
   getColor: (x, y, z) ->
-    @_map["#{x}|#{y}|#{z}"]?.color or 0
+    @_map["#{x}|#{y}|#{z}"]?.color
 
   getOrientation: (x, y, z) ->
-    @_map["#{x}|#{y}|#{z}"]?.orientation or 0
+    @_map["#{x}|#{y}|#{z}"]?.orientation
+
+  addVoxel: (x, y, z, color, orientation) ->
+    @_map["#{x}|#{y}|#{z}"] = {color, orientation}
+
+  removeVoxel: (x, y, z) ->
+    delete @_map["#{x}|#{y}|#{z}"]
 
 
 
@@ -105,7 +122,7 @@ load = (Type, rootUrl, info) -> () ->
     url = URI.resolve(rootUrl, info)
     promise = ajax(url)
     .then (config) ->
-      obj = new Type(rootUrl, config)
+      obj = new Type(url, config)
       if obj.load?
         return obj.load()
       else
@@ -117,16 +134,16 @@ load = (Type, rootUrl, info) -> () ->
 
 
 
-parseLevel = (url, isShallow, {name, default_coords, palette, map}) ->
+parseLevel = (url, isShallow, {name, default_position, palette, map}) ->
   fetchPalette = load(Palette, url, palette)
   fetchMap = load(Map, url, map)
   if isShallow
-    return {name, default_coords, fetchPalette, fetchMap}
+    return {name, default_position, fetchPalette, fetchMap}
   else
     palettePromise = fetchPalette()
     mapPromise = fetchMap()
     return $.when(palettePromise, mapPromise).then (palette, map) ->
-      return {name, default_coords, palette, map}
+      return {name, default_position, palette, map}
 
 
 
@@ -142,3 +159,15 @@ module.exports =
         parseLevel(url, isShallow, config)
 
     promise
+
+  loadHash: (paletteUrl) ->
+    map = new Map()
+    HashManager.loadFromHash window.location.hash.substring(1), (x, y, z, color, orientation) ->
+      map.addVoxel(x, y, z, color, orientation)
+
+    palettePromise = load(Palette, '/', paletteUrl)()
+    palettePromise.then (palette) ->
+      name: 'loaded-from-hash'
+      default_position: [-1.5, 10, 2.5, 0]
+      palette: palette
+      map: map

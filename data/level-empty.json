@@ -1,8 +1,8 @@
 {
-  "name": "Lighthouse",
+  "name": "Empty",
   "default_position": [-1.5, 10, 2.5, 0],
   "doors": [],
 
   "palette": "./palette-nature.json",
-  "map": "./level-lighthouse-map.json"
+  "map": "./level-empty-map.json"
 }

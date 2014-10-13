@@ -36,8 +36,12 @@ window.startEditor = ->
   container = null
 
 
-  levelPromise = LevelLoader.load('/data/level-lighthouse.json')
-  .then (level) ->
+  if window.location.hash
+    levelPromise = LevelLoader.loadHash('/data/palette-nature.json')
+  else
+    levelPromise = LevelLoader.load('/data/level-lighthouse.json')
+
+  levelPromise.then (level) ->
     VoxelFactory.load(level)
     alreadyCreatedGame = false
 
@@ -48,6 +52,7 @@ window.startEditor = ->
         $preview.addClass('disabled')
         $preview.attr('alt', 'This may take a minute')
         HashManager.disableUpdateHash()
+        window.CURRENT_LEVEL = level # Game uses this instead of parsing the hash
         fn = ->
           exportGeometry(SceneManager)
           GAME(SceneManager)
@@ -56,11 +61,19 @@ window.startEditor = ->
         setTimeout(fn, 10)
 
     window.exportGeometry = -> exportGeometry(SceneManager)
+    window.exportLevelMap = ->
+      console.warn 'You have to refresh the page if you have made edits'
+      foo = []
+      level.map.forEach (x, y, z, color, orientation) ->
+        ret = [x, y, z, color]
+        ret.push(orientation) if orientation
+        foo.push(ret)
+      console.log(JSON.stringify(foo))
 
 
     window.exportImage = ->
       iconMaker = new IconMaker(SceneManager)
-      for color in [0..12]
+      for color in [0..level.palette.size-1]
         image = new Image()
         image.src = iconMaker.renderVoxel(VoxelFactory.freshVoxel(color, false))
         $img = $(image)
@@ -185,9 +198,10 @@ window.startEditor = ->
           return
 
         clone.on "contextmenu", changeColor
-      colorBox.parent().attr "data-color", "#" + ColorUtils.rgb2hex(ColorManager.colors[idx])
-      colorBox.css "background", "#" + ColorUtils.rgb2hex(ColorManager.colors[idx])
-      SceneManager.brush.children[0].material.color.setRGB ColorManager.colors[idx][0], ColorManager.colors[idx][1], ColorManager.colors[idx][2]  if ColorManager.currentColor is idx and SceneManager.brush
+      foo = ColorManager.colors[idx] or [0,0,0]
+      colorBox.parent().attr "data-color", "#" + ColorUtils.rgb2hex(foo)
+      colorBox.css "background", "#" + ColorUtils.rgb2hex(foo)
+      SceneManager.brush.children[0].material.color.setRGB foo[0], foo[1], foo[2]  if ColorManager.currentColor is idx and SceneManager.brush
       return
 
 
@@ -200,7 +214,15 @@ window.startEditor = ->
       SceneManager.init(container)
       container.appendChild(SceneManager.renderer.domElement)
       KeyMouse.attachEvents()
-      HashManager.buildFromHash()  if window.location.hash
+      level.map.forEach (x, y, z, color, orientation) ->
+
+        # Center the voxels since they are 1x1x1
+        x = x * (16/16) + (16/16)/2
+        y = y * (16/16) + (16/16)/2
+        z = z * (16/16) + (16/16)/2
+
+        SceneManager.addVoxel(x, y, z, color, orientation)
+
       HashManager.updateHash()
       return
 
@@ -241,7 +263,7 @@ window.startEditor = ->
         SceneManager.scene.remove mesh
         return
 
-      HashManager.buildFromHash()
+      # HashManager.buildFromHash()
       return
 
     picker.on "hide", (e) ->

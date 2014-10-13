@@ -21,14 +21,15 @@ VoxelControlTick = require './customized/voxel-control-tick'
 CollideTerrain = require('./collisions/terrain')
 GameManager = require './actions/game-manager'
 window.MainCamera = MainCamera = require '../main-camera'
-mapConfig = require('./maps/my')
 
-mapConfig.playerPosition = [-1.5, 10, 2.5]
 
 # Used by the collisiondetector so height must be 1
 PLAYER_SIZE = [.4, .9, .4]
 
 module.exports = (SceneManager) ->
+
+  mapConfig = window.CURRENT_LEVEL or throw new Error('BUG! Need to load a level first')# require('./maps/my')
+
 
   # HACK to use the existing scene
   createGame::addLights = ->
@@ -54,9 +55,6 @@ module.exports = (SceneManager) ->
     return
 
 
-  myMap = mapConfig.map
-  myTextures = mapConfig.textures
-  {collisionTypes} = mapConfig
   THREE = createGame.THREE
   view = new voxelView THREE,
     ortho: true
@@ -115,9 +113,8 @@ module.exports = (SceneManager) ->
   # setup the game and add some trees
   game = createGame
     view: view
-    generate: myMap
+    generate: (x, y, z) -> mapConfig.map.getColor(x, y, z)
     chunkDistance: 2
-    materials: myTextures
     worldOrigin: [0, 0, 0]
     controls:
       discreteFire: true
@@ -172,7 +169,7 @@ module.exports = (SceneManager) ->
   substack.playerSkin.mesh.scale.z = 1/16
   substack.possess()
   SceneManager.setTarget(substack.avatar)
-  initialCoords = mapConfig.playerPosition or [0, 5, 0]
+  initialCoords = mapConfig.default_position
   substack.yaw.position.set initialCoords[0], initialCoords[1], initialCoords[2]
   rotatingCameraTo = null
   rotatingCameraDir = 0

@@ -50,8 +50,12 @@ module.exports = new class PaletteManager
 
   # voxelConfig: (voxelName) -> @_getPalette().voxels[voxelName]
   collisionFor: (color) ->
-    color -= 1 # The game makes 0 be "No Voxel" so everything is shifted
-
-    @_getPalette().voxelInfo(color).collision
+    # if color
+    #   color -= 1 # The game makes 0 be "No Voxel" so everything is shifted
+    #
+    #   @_getPalette().voxelInfo(color).collision
+    # else
+    #   return null
+    @_palette.voxelInfo(color)?.collision
 
   allVoxelConfigs: -> @_getPalette().allVoxels()
