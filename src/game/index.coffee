@@ -70,7 +70,7 @@ module.exports = (SceneManager) ->
   Number::mod = (n) ->
     ((this % n) + n) % n
 
-  createGame::gravity = [0, -0.0000090, 0]
+  createGame::gravity = [0, -0.0000045, 0]
 
   # Custom collision detector that moves the player in the depth axis
   createGame::collideTerrain = CollideTerrain
@@ -251,11 +251,11 @@ module.exports = (SceneManager) ->
     playerX = Math.floor(@controlling.aabb().base[cameraAxis])
     playerY = Math.floor(@controlling.aabb().base[1])
 
-    # boxes += 'me = [' + Math.floor(@controlling.aabb().base[0]) + ', ' + Math.floor(@controlling.aabb().base[1]) + ', ' + Math.floor(@controlling.aabb().base[2]) + ']'
-    # boxes += '<br/>cameraAxis = ' + cameraAxis
-    # boxes += '<br/>cameraDir = ' + cameraDir
-    # boxes += '<br/>curAction = ' + PlayerManager.currentAction().constructor.name  if PlayerManager.currentAction()
-    # document.getElementById('player-boxes').innerHTML = boxes
+    boxes += 'me = [' + Math.floor(@controlling.aabb().base[0]) + ', ' + Math.floor(@controlling.aabb().base[1]) + ', ' + Math.floor(@controlling.aabb().base[2]) + ']'
+    boxes += '<br/>cameraAxis = ' + cameraAxis
+    boxes += '<br/>cameraDir = ' + cameraDir
+    boxes += '<br/>curAction = ' + PlayerManager.currentAction().constructor.name  if PlayerManager.currentAction()
+    document.getElementById('player-boxes').innerHTML = boxes
 
 
     if rotatingCameraDir

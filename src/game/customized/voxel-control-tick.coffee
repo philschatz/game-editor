@@ -16,6 +16,11 @@ clamp = (value, to) ->
 # Also, when climbing, gravity does not apply
 module.exports = tick = (dt) ->
   return  unless @_target
+
+  @max_speed = 0.0112 / 2 # HACK to get the speeds to match up
+  # @jump_speed = 0.004 * 2
+  # @jump_max_speed = 0.016 * 2
+
   state = @state
   target = @_target
   speed = @speed
