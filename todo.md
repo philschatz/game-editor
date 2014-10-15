@@ -9,6 +9,7 @@ TODO:
 - [ ] orient voxels
   - [ ] update level format to store orientation
   - [ ] randomize orientation for textures (if none is set) in game
+- [ ] add a skymap http://jeromeetienne.github.io/threex.skymap/examples/basic.html
 
 - [x] pause game when rotating
 - [-] update player state more accurately (jumping, climbing)
