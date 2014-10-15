@@ -6,7 +6,7 @@ kbControls = require('kb-controls')
 
 # highlight = require('voxel-highlight')
 # toolbar = require('toolbar')
-player = require('voxel-player')
+player = require('./customized/voxel-player')
 
 # toolbar = require('toolbar')
 skin = require('minecraft-skin')
@@ -163,15 +163,12 @@ module.exports = (SceneManager) ->
   # create the player from a minecraft skin file and tell the
   # game to use it as the main player
   createPlayer = player(game)
-  substack = createPlayer('substack.png')
-  # Scale because our world size is 1 unit
-  substack.playerSkin.mesh.scale.x = 1/16
-  substack.playerSkin.mesh.scale.y = 1/16
-  substack.playerSkin.mesh.scale.z = 1/16
-  substack.possess()
+  substack = createPlayer('data/sprites/player.png')
+  # substack.possess() Don't need to posses because camera is elsewhere
+  substack.avatar.scale.set(1, 2.76, 1) # TODO: Why 2.75 for the y???
   SceneManager.setTarget(substack.avatar)
   initialCoords = mapConfig.default_position
-  substack.yaw.position.set initialCoords[0], initialCoords[1], initialCoords[2]
+  substack.yaw.position.set(initialCoords[0], initialCoords[1], initialCoords[2])
   rotatingCameraTo = null
   rotatingCameraDir = 0
   game.on 'tick', (elapsedTime) ->
@@ -198,10 +195,6 @@ module.exports = (SceneManager) ->
       rotatingCameraDir = 1
       rotatingCameraTo = y * Math.PI / 2
 
-      # Reset if te mouse moved the camera
-      game.controlling.pitch.rotation.x = 0
-      game.controlling.pitch.rotation.x = 0
-
       game.pausedPhysics = true
 
     else if not rotatingCameraDir and game.controls.state.rotate_counterclockwise
@@ -214,10 +207,6 @@ module.exports = (SceneManager) ->
       y -= 1
       rotatingCameraDir = -1
       rotatingCameraTo = y * Math.PI / 2
-
-      # Reset if te mouse moved the camera
-      game.controlling.pitch.rotation.x = 0
-      game.controlling.pitch.rotation.x = 0
 
       game.pausedPhysics = true
 
