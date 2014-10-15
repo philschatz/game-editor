@@ -39,7 +39,7 @@ module.exports = new class SceneManager
         return
       )()
       if hasWebGL
-        @renderer = new THREE.WebGLRenderer(antialias: true)
+        @renderer = new THREE.WebGLRenderer(antialias: false) # for *much* better FPS (60 no matter what I do)
       else
         @renderer = new THREE.CanvasRenderer()
       @renderer.setSize(@_container.clientWidth, @_container.clientHeight)
