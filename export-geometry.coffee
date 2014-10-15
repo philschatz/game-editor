@@ -7,37 +7,40 @@ module.exports = (SceneManager) ->
 
   doStuff = ->
     for index in [0..Math.min(children.length - 1, 10)]
-      i = children.pop()
+      child = children.pop()
 
-      if i?.isVoxel
+      if child?.isVoxel
         # Simple color cube
-        if i.material?.color
-          c = i.material.color
-          for f in i.geometry.faces
+        if child.material?.color
+          c = child.material.color
+          for f in child.geometry.faces
             # f.vertexColors = [c, c, c]
             f.color = c
-          THREE.GeometryUtils.merge(colorGeo, i)
+          THREE.GeometryUtils.merge(colorGeo, child)
 
-        else if i.material # Textured cube
+        else if child.material # Textured cube
 
-          for face in i.geometry.faces
+          # Colors are only useful for exporting
+          for face in child.geometry.faces
             face.color.set(face.materialIndex)
 
-          THREE.GeometryUtils.merge(textureGeo, i)
-        else if i instanceof THREE.Object3D # Like a ladder
-          # throw new Error('whoops, looks like this is not a ladder...') unless i.children.length is 2
-          child = i.children[0] # TODO:
-          mesh = child.clone()
-          mesh.position.addVectors(mesh.position, i.position)
+
+          THREE.GeometryUtils.merge(textureGeo, child)
+        else if child instanceof THREE.Object3D # Like a ladder
+          # throw new Error('whoops, looks like this is not a ladder...') unless child.children.length is 2
+          foo = child.children[0] # TODO:
+          mesh = foo.clone()
+          mesh.position.addVectors(mesh.position, child.position)
+          mesh.rotation.y = foo.rotation.y
           THREE.GeometryUtils.merge(colorGeo, mesh)
 
         else
           throw new Error('whoops!')
 
-      SceneManager.scene.remove(i)
+      SceneManager.scene.remove(child)
       # TO maybe help with Garbage collection... delete everything from the voxel
-      for key of i
-        delete i[key]
+      # for key of child
+      #   delete child[key]
 
 
     # Once all children have been merged and removed...

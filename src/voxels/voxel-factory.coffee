@@ -22,19 +22,22 @@ geometryLoader = (config) ->
   group = new THREE.Object3D()
   group.add(voxel)
 
-  group.wireMesh = new THREE.Mesh(wireframeCube, wireframeMaterial)
-  group.wireMesh.myVoxel = group
-  group.wireMesh.isWireMesh = true
+  wireMesh = new THREE.Mesh(wireframeCube, wireframeMaterial)
+  wireMesh.myVoxel = group
+  wireMesh.isWireMesh = true
 
   group.add(group.wireMesh)
 
-  group
+  {wireMesh, voxel: group, canRandomlyRotate: false}
 
 
-textureLoader = (config) ->
+textureLoader = (config, doNotRandomize) ->
   {front_url, back_url, top_url, bottom_url, left_url, right_url} = config
   # Unsure if the order below is correct or not but it's close
-  TextureCube.freshCube([front_url, back_url, top_url, bottom_url, left_url, right_url])
+  voxel = TextureCube.freshCube([front_url, back_url, top_url, bottom_url, left_url, right_url])
+
+  {voxel, canRandomlyRotate: true}
+
 
 # Share the same geometry for simple color cubes
 colorCube = new THREE.BoxGeometry( (16/16), (16/16), (16/16) )
@@ -50,7 +53,8 @@ colorLoader = (config) ->
   cubeMaterial.color = new THREE.Color(colorInt)
   voxel = new THREE.Mesh(colorCube, cubeMaterial)
   voxel.name = "color-#{config.color_hex}"
-  voxel
+
+  {voxel, canRandomlyRotate:false}
 
 
 VOXEL_TEMPLATE_MAP = []
@@ -74,11 +78,14 @@ module.exports = new class VoxelFactory
     template = VOXEL_TEMPLATE_MAP[id]
 
     if template
-      voxel = template.clone()
+      voxel = template.voxel.clone()
       if template.wireMesh
         voxel.wireMesh = template.wireMesh.clone()
         voxel.wireMesh.isWireMesh = true
         voxel.wireMesh.myVoxel = voxel
+
+      if template.canRandomlyRotate
+        voxel.rotation.y = Math.round(Math.random() * 4) * Math.PI / 2
 
       voxel.name = id
 
