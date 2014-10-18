@@ -169,7 +169,7 @@ module.exports = (SceneManager) ->
   # substack.possess() Don't need to posses because camera is elsewhere
   substack.avatar.scale.set(1, 2.76, 1) # TODO: Why 2.75 for the y???
 
-  playerTexture = substack.avatar.material.map
+  playerTexture = substack.avatar.children[0].material.map
   playerTexture.wrapS = THREE.RepeatWrapping
   playerTexture.wrapT = THREE.RepeatWrapping
   playerTexture.repeat.set( 1 / 8, 1 / 4 ) # Tiles Horiz, Tiles Vert

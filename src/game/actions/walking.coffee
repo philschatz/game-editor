@@ -26,8 +26,11 @@ module.exports = new class Walking
         return PlayerManager.isGrounded() and MovementHelper.isWalking() and not MovementHelper.isJumping() and not PlayerManager.pushingInstance
 
   begin: (game, sprite) ->
+    # Rotate the sprite depending on if the left or right key were pressed last
     if game.controls.state.left
-      game.controlling.avatar.rotation = Math.PI
+      game.controlling.avatar.children[0].rotation.y = Math.PI
+    else
+      game.controlling.avatar.children[0].rotation.y = 0
     ANIMATION.start(sprite)
 
   end: -> ANIMATION.stop()

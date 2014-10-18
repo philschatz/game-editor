@@ -20,9 +20,16 @@ parseXYZ = (x, y, z) ->
 
 skin = (THREE, img, skinOpts) ->
   map = THREE.ImageUtils.loadTexture( img )
-  material = new THREE.SpriteMaterial({map})
-  sprite = new THREE.Sprite(material)
-  mesh: sprite
+  # material = new THREE.SpriteMaterial({map})
+  # sprite = new THREE.Sprite(material)
+
+  material = new THREE.MeshBasicMaterial({map, side:THREE.DoubleSide, transparent:true})
+  geometry = new THREE.PlaneGeometry(1, 1)
+  sprite = new THREE.Mesh(geometry, material)
+  sprite2 = new THREE.Object3D()
+  sprite2.add(sprite)
+
+  mesh: sprite2
 
 
 module.exports = (game) ->

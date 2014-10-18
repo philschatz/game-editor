@@ -15,7 +15,7 @@ class Animation
   constructor: (@_offsets) ->
 
   start: (@_sprite) ->
-    @_spriteTexture = @_sprite.material.map
+    @_spriteTexture = @_sprite.children[0].material.map
     @isPlaying = true
     # @update(0)
     SpriteAnimationHandler.addToUpdate(@)
