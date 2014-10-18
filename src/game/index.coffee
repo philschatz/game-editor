@@ -8,6 +8,8 @@ kbControls = require('kb-controls')
 # toolbar = require('toolbar')
 player = require('./customized/voxel-player')
 
+{LinearSpriteAnimation} = require '../sprite-animation'
+
 # toolbar = require('toolbar')
 skin = require('minecraft-skin')
 
@@ -166,6 +168,13 @@ module.exports = (SceneManager) ->
   substack = createPlayer('data/sprites/player.png')
   # substack.possess() Don't need to posses because camera is elsewhere
   substack.avatar.scale.set(1, 2.76, 1) # TODO: Why 2.75 for the y???
+
+  playerTexture = substack.avatar.material.map
+  playerTexture.wrapS = THREE.RepeatWrapping
+  playerTexture.wrapT = THREE.RepeatWrapping
+  playerTexture.repeat.set( 1 / 8, 1 / 4 ) # Tiles Horiz, Tiles Vert
+
+
   SceneManager.setTarget(substack.avatar)
   initialCoords = mapConfig.default_position
   substack.yaw.position.set(initialCoords[0], initialCoords[1], initialCoords[2])

@@ -1,3 +1,5 @@
+{SpriteAnimationHandler} = require '../sprite-animation'
+
 MainCamera = require '../main-camera'
 AxisCamera = require './axis-camera'
 
@@ -139,8 +141,11 @@ module.exports = new class SceneManager
       @scene.add(voxel.wireMesh) if voxel.wireMesh
       return
 
-    render: ->
+    render: (elapsedMs) ->
       return console.warn 'Trying to render scene before initialized' unless @_camera
+
+      SpriteAnimationHandler.update(elapsedMs)
+
       windowWidth = @_container.clientWidth
       windowHeight = @_container.clientHeight
 

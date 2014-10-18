@@ -227,7 +227,7 @@ window.startEditor = ->
       return
 
     setTimeout(initEditor, 2000) # Wait for all the textures to load first TODO: HACK
-    requestAnimationFrame(window).on "data", -> SceneManager.render()
+    requestAnimationFrame(window).on "data", (args...) -> SceneManager.render(args...)
 
 
 

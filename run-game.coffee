@@ -35,7 +35,7 @@ LevelLoader.load('/data/level-lighthouse.json')
   window.CURRENT_LEVEL = level
   GAME(SceneManager)
 
-  raf(window).on 'data', -> SceneManager.render()
+  raf(window).on 'data', (args...) -> SceneManager.render(args...)
 
 
 window.startEditor = -> console.warn 'HACK for running the game. making this a noop'

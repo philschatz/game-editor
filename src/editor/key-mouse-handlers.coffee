@@ -114,7 +114,7 @@ module.exports = new class KeyMouseHandlers
           color = ColorManager.currentColor
           SceneManager.addVoxel(x, y, z, color)  unless y is 2000
       HashManager.updateHash()
-      SceneManager.render()
+      SceneManager.render(0)
       Interactions.interact()
       return
 

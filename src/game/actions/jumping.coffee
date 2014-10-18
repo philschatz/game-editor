@@ -1,5 +1,9 @@
 MovementHelper = require './movement-helper'
 
+{StillAnimation} = require '../../sprite-animation'
+
+ANIMATION = new StillAnimation([0, 2])
+
 module.exports = new class Jumping
   isAllowed: (PlayerManager, ActionTypes, game)->
     switch PlayerManager.currentAction()
@@ -16,6 +20,6 @@ module.exports = new class Jumping
             ActionTypes.RUNNING
         return MovementHelper.isJumping()
 
-  begin: ->
-  end: ->
+  begin: (game, sprite) -> ANIMATION.start(sprite)
+  end: -> ANIMATION.stop()
   act: ->
