@@ -3,6 +3,8 @@
   "default_position": [-1.5, 10, 2.5, 0],
   "doors": [],
 
+  "player_url": "./player.json",
+
   "palette_url": "./palette-nature.json",
   "map_url": "./level-lighthouse-map.json"
 }

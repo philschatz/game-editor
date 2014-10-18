@@ -112,5 +112,7 @@ module.exports =
 
       name: 'loaded-from-hash'
       default_position: [-1.5, 10, 2.5, 0]
+      player:
+        sprite_href: '/data/sprites/player.png'
       getPalette: -> palette
       getMap: -> map

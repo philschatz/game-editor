@@ -165,7 +165,7 @@ module.exports = (SceneManager) ->
   # create the player from a minecraft skin file and tell the
   # game to use it as the main player
   createPlayer = player(game)
-  substack = createPlayer('data/sprites/player.png')
+  substack = createPlayer(mapConfig.player.sprite_href)
   # substack.possess() Don't need to posses because camera is elsewhere
   substack.avatar.scale.set(1, 2.76, 1) # TODO: Why 2.75 for the y???
 
