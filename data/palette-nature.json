@@ -7,54 +7,54 @@
   {
     "id": "brick-light",
     "type": "texture",
-    "front_url": "./textures/brick-light-1.png",
-    "back_url": "./textures/brick-light-2.png",
-    "top_url": "./textures/grass.png",
-    "bottom_url": "./textures/grass.png",
-    "left_url": "./textures/brick-light-5.png",
-    "right_url": "./textures/brick-light-6.png"
+    "front_href": "./textures/brick-light-1.png",
+    "back_href": "./textures/brick-light-2.png",
+    "top_href": "./textures/grass.png",
+    "bottom_href": "./textures/grass.png",
+    "left_href": "./textures/brick-light-5.png",
+    "right_href": "./textures/brick-light-6.png"
   },
   {
     "id": "brick-medium",
     "type": "texture",
-    "front_url": "./textures/brick-medium-1.png",
-    "back_url": "./textures/brick-medium-2.png",
-    "top_url": "./textures/grass.png",
-    "bottom_url": "./textures/grass.png",
-    "left_url": "./textures/brick-medium-5.png",
-    "right_url": "./textures/brick-medium-6.png"
+    "front_href": "./textures/brick-medium-1.png",
+    "back_href": "./textures/brick-medium-2.png",
+    "top_href": "./textures/grass.png",
+    "bottom_href": "./textures/grass.png",
+    "left_href": "./textures/brick-medium-5.png",
+    "right_href": "./textures/brick-medium-6.png"
   },
   {
     "id": "brick-dark",
     "type": "texture",
-    "front_url": "./textures/brick-dark-1.png",
-    "back_url": "./textures/brick-dark-2.png",
-    "top_url": "./textures/grass.png",
-    "bottom_url": "./textures/grass.png",
-    "left_url": "./textures/brick-dark-5.png",
-    "right_url": "./textures/brick-dark-6.png"
+    "front_href": "./textures/brick-dark-1.png",
+    "back_href": "./textures/brick-dark-2.png",
+    "top_href": "./textures/grass.png",
+    "bottom_href": "./textures/grass.png",
+    "left_href": "./textures/brick-dark-5.png",
+    "right_href": "./textures/brick-dark-6.png"
   },
   {
     "id": "brick-grasstop",
     "collision": "top",
     "type": "texture",
-    "front_url": "./textures/brick-grasstop-1.png",
-    "back_url": "./textures/brick-grasstop-2.png",
-    "top_url": "./textures/grass.png",
-    "bottom_url": "./textures/grass.png",
-    "left_url": "./textures/brick-grasstop-1.png",
-    "right_url": "./textures/brick-grasstop-2.png"
+    "front_href": "./textures/brick-grasstop-1.png",
+    "back_href": "./textures/brick-grasstop-2.png",
+    "top_href": "./textures/grass.png",
+    "bottom_href": "./textures/grass.png",
+    "left_href": "./textures/brick-grasstop-1.png",
+    "right_href": "./textures/brick-grasstop-2.png"
   },
   {
     "id": "bridge-post-top",
     "collision": "top",
     "type": "texture",
-    "front_url": "./textures/bridge-post-top.png",
-    "back_url": "./textures/bridge-post-top.png",
-    "top_url": "./textures/grass.png",
-    "bottom_url": "./textures/grass.png",
-    "left_url": "./textures/bridge-post-top.png",
-    "right_url": "./textures/bridge-post-top.png"
+    "front_href": "./textures/bridge-post-top.png",
+    "back_href": "./textures/bridge-post-top.png",
+    "top_href": "./textures/grass.png",
+    "bottom_href": "./textures/grass.png",
+    "left_href": "./textures/bridge-post-top.png",
+    "right_href": "./textures/bridge-post-top.png"
   },
   {
     "id": "bridge",
@@ -66,12 +66,12 @@
   {
     "id": "bridge-post",
     "type": "texture",
-    "front_url": "./textures/bridge-post-1.png",
-    "back_url": "./textures/bridge-post-2.png",
-    "top_url": "./textures/grass.png",
-    "bottom_url": "./textures/grass.png",
-    "left_url": "./textures/bridge-post-1.png",
-    "right_url": "./textures/bridge-post-2.png"
+    "front_href": "./textures/bridge-post-1.png",
+    "back_href": "./textures/bridge-post-2.png",
+    "top_href": "./textures/grass.png",
+    "bottom_href": "./textures/grass.png",
+    "left_href": "./textures/bridge-post-1.png",
+    "right_href": "./textures/bridge-post-2.png"
   },
   {
     "name": "Unused Red",

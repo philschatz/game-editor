@@ -32,9 +32,9 @@ geometryLoader = (config) ->
 
 
 textureLoader = (config, doNotRandomize) ->
-  {front_url, back_url, top_url, bottom_url, left_url, right_url} = config
+  {front_href, back_href, top_href, bottom_href, left_href, right_href} = config
   # Unsure if the order below is correct or not but it's close
-  voxel = TextureCube.freshCube([front_url, back_url, top_url, bottom_url, left_url, right_url])
+  voxel = TextureCube.freshCube([front_href, back_href, top_href, bottom_href, left_href, right_href])
 
   {voxel, canRandomlyRotate: true}
 

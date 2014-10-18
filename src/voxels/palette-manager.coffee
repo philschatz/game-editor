@@ -11,12 +11,12 @@
   type: 'geometry' # or 'texture'
   geometry_url: './geometries/ladder-top.json'
   # or for textures:
-  top_url   : './textures/grass-top.png'
-  bottom_url: './textures/brick-bottom.png'
-  front_url : './textures/brick-front.png'
-  back_url  : './textures/brick-front.png'
-  left_url  : './textures/brick-left.png'
-  right_url : './textures/brick-right.png'
+  top_href   : './textures/grass-top.png'
+  bottom_href: './textures/brick-bottom.png'
+  front_href : './textures/brick-front.png'
+  back_href  : './textures/brick-front.png'
+  left_href  : './textures/brick-left.png'
+  right_href : './textures/brick-right.png'
 }
 ###
 

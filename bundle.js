@@ -59485,12 +59485,12 @@ module.exports = THREE;
   type: 'geometry' # or 'texture'
   geometry_url: './geometries/ladder-top.json'
    * or for textures:
-  top_url   : './textures/grass-top.png'
-  bottom_url: './textures/brick-bottom.png'
-  front_url : './textures/brick-front.png'
-  back_url  : './textures/brick-front.png'
-  left_url  : './textures/brick-left.png'
-  right_url : './textures/brick-right.png'
+  top_href   : './textures/grass-top.png'
+  bottom_href: './textures/brick-bottom.png'
+  front_href : './textures/brick-front.png'
+  back_href  : './textures/brick-front.png'
+  left_href  : './textures/brick-left.png'
+  right_href : './textures/brick-right.png'
 }
  */
 var PALETTE;
@@ -59602,59 +59602,59 @@ module.exports = {
   voxels: {
     'brick-light': {
       type: 'texture',
-      front_url: './textures/brick-light-1.png',
-      back_url: './textures/brick-light-2.png',
-      top_url: './textures/grass.png',
-      bottom_url: './textures/grass.png',
-      left_url: './textures/brick-light-5.png',
-      right_url: './textures/brick-light-6.png'
+      front_href: './textures/brick-light-1.png',
+      back_href: './textures/brick-light-2.png',
+      top_href: './textures/grass.png',
+      bottom_href: './textures/grass.png',
+      left_href: './textures/brick-light-5.png',
+      right_href: './textures/brick-light-6.png'
     },
     'brick-medium': {
       type: 'texture',
-      front_url: './textures/brick-medium-1.png',
-      back_url: './textures/brick-medium-2.png',
-      top_url: './textures/grass.png',
-      bottom_url: './textures/grass.png',
-      left_url: './textures/brick-medium-5.png',
-      right_url: './textures/brick-medium-6.png'
+      front_href: './textures/brick-medium-1.png',
+      back_href: './textures/brick-medium-2.png',
+      top_href: './textures/grass.png',
+      bottom_href: './textures/grass.png',
+      left_href: './textures/brick-medium-5.png',
+      right_href: './textures/brick-medium-6.png'
     },
     'brick-dark': {
       type: 'texture',
-      front_url: './textures/brick-dark-1.png',
-      back_url: './textures/brick-dark-2.png',
-      top_url: './textures/grass.png',
-      bottom_url: './textures/grass.png',
-      left_url: './textures/brick-dark-5.png',
-      right_url: './textures/brick-dark-6.png'
+      front_href: './textures/brick-dark-1.png',
+      back_href: './textures/brick-dark-2.png',
+      top_href: './textures/grass.png',
+      bottom_href: './textures/grass.png',
+      left_href: './textures/brick-dark-5.png',
+      right_href: './textures/brick-dark-6.png'
     },
     'brick-grasstop': {
       collision: 'top',
       type: 'texture',
-      front_url: './textures/brick-grasstop-1.png',
-      back_url: './textures/brick-grasstop-2.png',
-      top_url: './textures/grass.png',
-      bottom_url: './textures/grass.png',
-      left_url: './textures/brick-grasstop-1.png',
-      right_url: './textures/brick-grasstop-2.png'
+      front_href: './textures/brick-grasstop-1.png',
+      back_href: './textures/brick-grasstop-2.png',
+      top_href: './textures/grass.png',
+      bottom_href: './textures/grass.png',
+      left_href: './textures/brick-grasstop-1.png',
+      right_href: './textures/brick-grasstop-2.png'
     },
     'bridge-post-top': {
       collision: 'top',
       type: 'texture',
-      front_url: './textures/bridge-post-top.png',
-      back_url: './textures/bridge-post-top.png',
-      top_url: './textures/grass.png',
-      bottom_url: './textures/grass.png',
-      left_url: './textures/bridge-post-top.png',
-      right_url: './textures/bridge-post-top.png'
+      front_href: './textures/bridge-post-top.png',
+      back_href: './textures/bridge-post-top.png',
+      top_href: './textures/grass.png',
+      bottom_href: './textures/grass.png',
+      left_href: './textures/bridge-post-top.png',
+      right_href: './textures/bridge-post-top.png'
     },
     'bridge-post': {
       type: 'texture',
-      front_url: './textures/bridge-post-1.png',
-      back_url: './textures/bridge-post-2.png',
-      top_url: './textures/grass.png',
-      bottom_url: './textures/grass.png',
-      left_url: './textures/bridge-post-1.png',
-      right_url: './textures/bridge-post-2.png'
+      front_href: './textures/bridge-post-1.png',
+      back_href: './textures/bridge-post-2.png',
+      top_href: './textures/grass.png',
+      bottom_href: './textures/grass.png',
+      left_href: './textures/bridge-post-1.png',
+      right_href: './textures/bridge-post-2.png'
     },
     'bridge': {
       name: 'Bridge',
@@ -59719,9 +59719,9 @@ geometryLoader = function(config) {
 };
 
 textureLoader = function(config) {
-  var back_url, bottom_url, front_url, left_url, right_url, top_url;
-  front_url = config.front_url, back_url = config.back_url, top_url = config.top_url, bottom_url = config.bottom_url, left_url = config.left_url, right_url = config.right_url;
-  return TextureCube.freshCube([front_url, back_url, top_url, bottom_url, left_url, right_url]);
+  var back_href, bottom_href, front_href, left_href, right_href, top_href;
+  front_href = config.front_href, back_href = config.back_href, top_href = config.top_href, bottom_href = config.bottom_href, left_href = config.left_href, right_href = config.right_href;
+  return TextureCube.freshCube([front_href, back_href, top_href, bottom_href, left_href, right_href]);
 };
 
 VOXEL_TEMPLATE_MAP = {};

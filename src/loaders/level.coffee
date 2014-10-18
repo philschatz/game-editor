@@ -69,7 +69,7 @@ class Palette
 
     switch voxelConfig.type
       when 'texture'
-        for key in ['back_url', 'front_url', 'left_url', 'right_url', 'top_url', 'bottom_url']
+        for key in ['back_href', 'front_href', 'left_href', 'right_href', 'top_href', 'bottom_href']
           if voxelConfig[key]
             voxelConfig[key] = URI.resolve(root, voxelConfig[key])
 
