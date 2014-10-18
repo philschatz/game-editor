@@ -18,7 +18,7 @@ LevelLoader.load('/data/level-lighthouse.json')
   VoxelFactory.load(level)
 
   # These steps are *only* to generate the exported geometries
-  level.map.forEach (x, y, z, color, orientation) ->
+  level.getMap().forEach (x, y, z, color, orientation) ->
     x += .5
     y += .5
     z += .5

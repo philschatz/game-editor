@@ -42,7 +42,7 @@
 
 module.exports = new class PaletteManager
   load: (level) ->
-    @_palette = level.palette
+    @_palette = level.getPalette()
 
   _getPalette: ->
     throw new Error('BUG! Palette not loaded yet. Make sure .load is called and finishes first') unless @_palette

@@ -64,7 +64,7 @@ window.startEditor = ->
     window.exportLevelMap = ->
       console.warn 'You have to refresh the page if you have made edits'
       foo = []
-      level.map.forEach (x, y, z, color, orientation) ->
+      level.getMap().forEach (x, y, z, color, orientation) ->
         ret = [x, y, z, color]
         ret.push(orientation) if orientation
         foo.push(ret)
@@ -73,7 +73,7 @@ window.startEditor = ->
 
     window.exportImage = ->
       iconMaker = new IconMaker(SceneManager)
-      for color in [0..level.palette.size-1]
+      for color in [0..level.getPalette().size-1]
         image = new Image()
         image.src = iconMaker.renderVoxel(VoxelFactory.freshVoxel(color, false))
         $img = $(image)
@@ -214,7 +214,7 @@ window.startEditor = ->
       SceneManager.init(container)
       container.appendChild(SceneManager.renderer.domElement)
       KeyMouse.attachEvents()
-      level.map.forEach (x, y, z, color, orientation) ->
+      level.getMap().forEach (x, y, z, color, orientation) ->
 
         # Center the voxels since they are 1x1x1
         x = x * (16/16) + (16/16)/2

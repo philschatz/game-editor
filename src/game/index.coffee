@@ -116,7 +116,7 @@ module.exports = (SceneManager) ->
   game = createGame
     statsDisabled: true
     view: view
-    generate: (x, y, z) -> mapConfig.map.getColor(x, y, z)
+    generate: (x, y, z) -> mapConfig.getMap().getColor(x, y, z)
     chunkDistance: 2
     worldOrigin: [0, 0, 0]
     controls:
