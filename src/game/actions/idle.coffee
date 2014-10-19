@@ -82,6 +82,7 @@ module.exports = new class Idle
       when @ then true
       when  null, \
             ActionTypes.JUMPING, \
+            ActionTypes.FALLING, \
             ActionTypes.WALKING, \
             ActionTypes.RUNNING
         return PlayerManager.isGrounded() and not MovementHelper.isWalking() and not PlayerManager.pushingInstance

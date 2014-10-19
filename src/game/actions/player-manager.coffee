@@ -24,6 +24,13 @@ module.exports = new class PlayerManager
         @changeAction(actionType, game)
     @changeAction(@currentAction()?.act(elapsedTime, ActionTypes, game), game)
 
+    # Rotate the sprite depending on if the left or right key were pressed last
+    if @_game.controls.state.left
+      @_game.controlling.avatar.children[0].rotation.y = Math.PI
+    else if @_game.controls.state.right
+      @_game.controlling.avatar.children[0].rotation.y = 0
+
+
   # When a player dies, reset to idle
   reset: -> @changeAction(ActionTypes.IDLE)
 

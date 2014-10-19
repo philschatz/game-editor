@@ -22,16 +22,11 @@ module.exports = new class Walking
             ActionTypes.LOOKING_AROUND, \
             # ActionTypes.WALKING, \
             ActionTypes.RUNNING, \
-            ActionTypes.JUMPING
+            # ActionTypes.JUMPING, \
+            ActionTypes.FALLING
         return PlayerManager.isGrounded() and MovementHelper.isWalking() and not MovementHelper.isJumping() and not PlayerManager.pushingInstance
 
-  begin: (game, sprite) ->
-    # Rotate the sprite depending on if the left or right key were pressed last
-    if game.controls.state.left
-      game.controlling.avatar.children[0].rotation.y = Math.PI
-    else
-      game.controlling.avatar.children[0].rotation.y = 0
-    ANIMATION.start(sprite)
+  begin: (game, sprite) -> ANIMATION.start(sprite)
 
   end: -> ANIMATION.stop()
 

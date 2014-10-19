@@ -9,6 +9,7 @@ module.exports = ActionTypes = {
   WALKING       : require './walking'
   RUNNING       : require './running'
   JUMPING       : require './jumping'
+  FALLING       : require './falling'
   CLIMBING      : require './climbing'
   # TRAVERSING    : 0
   # ROTATING      : 0
