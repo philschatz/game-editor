@@ -1,3 +1,5 @@
 {
-  "sprite_href": "./sprites/player.png"
+  "sprite_href": "./sprites/player.png",
+  "sprite_width": 8,
+  "sprite_height": 4
 }

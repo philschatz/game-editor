@@ -106,13 +106,15 @@ module.exports =
     HashManager.loadFromHash window.location.hash.substring(1), (x, y, z, color, orientation) ->
       map.addVoxel(x, y, z, color, orientation)
 
-    palettePromise = GenericLoader_fetchUrl(paletteUrl, '')
-    palettePromise.then (paletteJson) ->
-      palette = new Palette(paletteJson)
-
+    promise = GenericLoader_parseObject '',
       name: 'loaded-from-hash'
       default_position: [-1.5, 10, 2.5, 0]
-      player:
-        sprite_href: '/data/sprites/player.png'
-      getPalette: -> palette
-      getMap: -> map
+      player_url: './data/player.json'
+      palette_url: './data/palette-nature.json'
+
+    promise.then (level) ->
+      palette = new Palette(level.palette)
+
+      level.getPalette = -> palette
+      level.getMap = -> map
+      level

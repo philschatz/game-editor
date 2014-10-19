@@ -172,7 +172,7 @@ module.exports = (SceneManager) ->
   playerTexture = substack.avatar.children[0].material.map
   playerTexture.wrapS = THREE.RepeatWrapping
   playerTexture.wrapT = THREE.RepeatWrapping
-  playerTexture.repeat.set( 1 / 8, 1 / 4 ) # Tiles Horiz, Tiles Vert
+  playerTexture.repeat.set( 1 / mapConfig.player.sprite_width, 1 / mapConfig.player.sprite_height ) # Tiles Horiz, Tiles Vert
 
 
   SceneManager.setTarget(substack.avatar)
