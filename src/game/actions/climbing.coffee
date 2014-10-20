@@ -11,7 +11,12 @@ module.exports = new class Climbing
             ActionTypes.RUNNING
         return (window.game.buttons.forward or window.game.buttons.backward) and MovementHelper.isClimbing()
 
-  begin: ->
+  begin: (game, sprite) ->
+    # Center the player 
+    sprite.position.x = Math.floor(sprite.position.x) + .5
+    sprite.position.y = Math.floor(sprite.position.y) + .5
+    sprite.position.z = Math.floor(sprite.position.z) + .5
+
   end: ->
   act: (elapsedTime, ActionTypes, game) ->
 
