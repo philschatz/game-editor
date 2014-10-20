@@ -3,6 +3,7 @@
   "default_position": [-1.5, 10, 2.5, 0],
   "doors": [],
 
-  "palette": "./palette-nature.json",
-  "map": "./level-empty-map.json"
+  "player_url": "./player.json",
+  "palette_url": "./palette-nature.json",
+  "map_url": "./level-empty-map.json"
 }

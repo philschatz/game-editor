@@ -12,7 +12,7 @@ SceneManager.prepare(container)
 SceneManager.init(container)
 container.appendChild(SceneManager.renderer.domElement)
 
-LevelLoader.load('/data/level-lighthouse.json')
+LevelLoader.load('/data/level-empty.json')
 .then (level) ->
 
   VoxelFactory.load(level)
