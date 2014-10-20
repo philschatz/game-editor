@@ -15,7 +15,7 @@ module.exports = new class MovementHelper
 
   isFalling: ->
     # window.game.controlling.atRestY() is 1
-    window.game.controlling.velocity.y < -0.004152 # Whatever gravity is...
+    window.game.controlling.velocity.y < -0.014152 # Whatever gravity is...
 
   isClimbing: ->
     state = window.game.controls.state
