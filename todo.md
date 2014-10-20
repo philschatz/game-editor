@@ -1,25 +1,26 @@
 TODO:
 
 - [x] async fetch palette info
-- [ ] async fetch level info (maybe from hash)
+- [x] async fetch level info (maybe from hash)
 - [ ] generate JSON for level
 - [ ] generate JSON for voxel
 - [ ] store color palette in localstorage
 - [ ] have voxel edit mode and level edit mode
 - [ ] orient voxels
-  - [ ] update level format to store orientation
-  - [ ] randomize orientation for textures (if none is set) in game
+  - [x] update level format to store orientation
+  - [x] randomize orientation for textures (if none is set) in game
+  - [ ] change sprites based on ladder orientation
 - [ ] add a skymap http://jeromeetienne.github.io/threex.skymap/examples/basic.html
 
 - [x] pause game when rotating
 - [-] update player state more accurately (jumping, climbing)
-- [ ] fiddle with walk/jump constants to move more accurately
+- [x] fiddle with walk/jump constants to move more accurately
 - [x] move camera when player moves
-  - [ ] fix camera being slightly off when rotated enough times
+  - [x] fix camera being slightly off when rotated enough times
 - [ ] support secret tunnels
   - [ ] make blocks transparent
 - [x] get climbing to work now that we have voxel collision
-  - [ ] support a slight range when starting to climb
+  - [x] support a slight range when starting to climb
 - [x] extract collision-detection and physics
   - [x] get jump up to work
   - [x] get walk left/right (and change depth) to work
@@ -44,36 +45,17 @@ Level JSON:
   code_url: 'http://philschatz.com/game-lighthouse-level/code.js'
 
   palette_url: 'http://philschatz.com/game-palettes/nature.json'
-  palette: [
+  palette_urls: [
     'http://philschatz.com/game-palettes/nature/ladder-top.json'
     '/ladder-middle.json'
     './ladder-bottom.json'
-    { type: 'texture', top_url: './textures/ladder-top.png'}
+    { type: 'texture', top_href: './textures/ladder-top.png'}
   ]
 
   map: [{x, y, z, color, orient}]
   map_compressed: [dx,dy,dz,color,dorient, ...]
   map_url: 'http://philschatz.com/game-lighthouse-level/map.json' (contains is_compressed info in the JSON)
 }
-
-
-class Level
-  name:
-  defaultCoords: -> [x, y, z, orient]
-  constructor: (root_url) ->
-  load: -> promise({name, defaultCoords, palettePromise, mapPromise})
-  palette: -> promise
-  map: -> promise
-
-class Palette
-  constructor: (root_url) ->
-  loadColor: (color) -> promise({type, top_url, geometry, ...})
-
-class Map
-  constructor: (root_url, isCompressed) ->
-  load: -> promise(@)
-  getInfo: ([x, y, z]) -> promise({color, orient})
-
 
 
 
