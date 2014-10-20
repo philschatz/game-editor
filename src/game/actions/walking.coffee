@@ -21,10 +21,10 @@ module.exports = new class Walking
             ActionTypes.PUSHING, \
             ActionTypes.LOOKING_AROUND, \
             # ActionTypes.WALKING, \
-            ActionTypes.RUNNING, \
+            ActionTypes.RUNNING
             # ActionTypes.JUMPING, \
-            ActionTypes.FALLING
-        return PlayerManager.isGrounded() and MovementHelper.isWalking() and not MovementHelper.isJumping() and not PlayerManager.pushingInstance
+            # ActionTypes.FALLING
+        return PlayerManager.isGrounded() and MovementHelper.isWalking() and not PlayerManager.pushingInstance
 
   begin: (game, sprite) -> ANIMATION.start(sprite)
 

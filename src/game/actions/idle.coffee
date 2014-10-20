@@ -80,12 +80,13 @@ module.exports = new class Idle
   isAllowed: (PlayerManager, ActionTypes, game)->
     switch PlayerManager.currentAction()
       when @ then true
+      when ActionTypes.FALLING
+        return not MovementHelper.isFalling()
       when  null, \
-            ActionTypes.JUMPING, \
-            ActionTypes.FALLING, \
+            # ActionTypes.JUMPING, \
             ActionTypes.WALKING, \
             ActionTypes.RUNNING
-        return PlayerManager.isGrounded() and not MovementHelper.isWalking() and not PlayerManager.pushingInstance
+        return PlayerManager.isGrounded() and not MovementHelper.isWalking() and not MovementHelper.isFalling() and not PlayerManager.pushingInstance
 
   begin: (game, sprite) -> ANIMATION.start(sprite)
 
