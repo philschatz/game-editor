@@ -21,8 +21,10 @@ module.exports = new class HashManager
 
     disableUpdateHash: -> @_disableUpdateHash = true
 
-    updateHash: ->
+    updateHash: (level) ->
       return if @_disableUpdateHash
+
+
       currentFrame = 0
       animationFrames = []
       data = []
@@ -40,14 +42,22 @@ module.exports = new class HashManager
         z: 0
         c: 0
 
-      for i of SceneManager.scene.children
-        object = SceneManager.scene.children[i]
-        if object.isVoxel and object isnt SceneManager.plane and object isnt SceneManager.brush
-          current.x = (object.position.x - (16/16)/2) / (16/16)
-          current.y = (object.position.y - (16/16)/2) / (16/16)
-          current.z = (object.position.z - (16/16)/2) / (16/16)
+      level.getMap().forEach (x, y, z, color, orientation) ->
 
-          current.c = object.colorCode
+          current.x = x
+          current.y = y
+          current.z = z
+          current.c = color
+
+      # for i of SceneManager.scene.children
+      #   object = SceneManager.scene.children[i]
+      #   if object.isVoxel and object isnt SceneManager.plane and object isnt SceneManager.brush
+      #     current.x = (object.position.x - (16/16)/2) / (16/16)
+      #     current.y = (object.position.y - (16/16)/2) / (16/16)
+      #     current.z = (object.position.z - (16/16)/2) / (16/16)
+
+      #   current.c = object.colorCode
+
           # colorString = [
           #   'r'
           #   'g'

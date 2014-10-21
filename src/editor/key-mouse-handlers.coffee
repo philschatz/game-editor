@@ -108,27 +108,31 @@ module.exports = new class KeyMouseHandlers
             else
               obj = intersect.object
 
-            SceneManager.currentMap().removeVoxel(Math.floor(obj.position.x), Math.floor(obj.position.y), Math.floor(obj.position.z))
-            SceneManager.scene.remove(obj.wireMesh) if obj.wireMesh
-            SceneManager.scene.remove(obj)
+            SceneManager.removeVoxel(obj)
+
         else
           {x, y, z} = SceneManager.brush.position
           color = ColorManager.currentColor
           unless y is 2000
             SceneManager.currentMap().addVoxel(Math.floor(x), Math.floor(y), Math.floor(z), color)
-      HashManager.updateHash()
       SceneManager.render(0)
       Interactions.interact()
       return
 
 
     translateVoxels = (vector) ->
-      for child in SceneManager.scene.children
-        if child.isVoxel
-          child.position.addVectors(child.position, vector)
-          child.wireMesh?.position.addVectors(child.wireMesh.position, vector)
+      map = SceneManager.currentMap()
+      voxels = []
+      map.forEach (x, y, z, color, orientation) ->
+        voxels.push {x, y, z, color, orientation}
 
-      HashManager.updateHash()
+      for {x, y, z, color, orientation} in voxels
+        # map.removeVoxel(x, y, z)
+        # SceneManager.removeVoxel(threeObj)
+        x += vector.x
+        y += vector.y
+        z += vector.z
+        map.addVoxel(x, y, z, color, orientation)
 
 
     onDocumentKeyDown: (event) ->

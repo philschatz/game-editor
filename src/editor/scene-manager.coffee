@@ -108,6 +108,14 @@ module.exports = new class SceneManager
       # @scene.add directionalLight
 
 
+    removeVoxel: (obj) ->
+      # This calls Map.removeVoxel because there is no need to look up the voxel; we already have it
+
+      @scene.remove(obj.wireMesh) if obj.wireMesh
+      @scene.remove(obj)
+
+      @currentMap().removeVoxel(Math.floor(obj.position.x), Math.floor(obj.position.y), Math.floor(obj.position.z))
+
     _addVoxel: (x, y, z, color) ->
 
       x = Math.floor(x) + .5
@@ -196,6 +204,6 @@ module.exports = new class SceneManager
         @_addVoxel(x, y, z, color, orientation)
       map.on 'add', (x, y, z, color, orientation) =>
         @_addVoxel(x, y, z, color, orientation)
-      map.on 'remove', => console.error('Whoops! Not implemented yet')
+      # map.on 'remove', => console.error('Shouuld call SceneManager.removeVoxel directly')
 
     currentMap: -> @_currentLevel.getMap()

@@ -215,7 +215,22 @@ window.startEditor = ->
       SceneManager.init(container)
       container.appendChild(SceneManager.renderer.domElement)
       KeyMouse.attachEvents()
-      HashManager.updateHash()
+
+      isUpdatingHash = false
+      delayedUpdateHash = ->
+        foo = ->
+          HashManager.updateHash(level)
+          isUpdatingHash = false
+          
+        if isUpdatingHash is false
+          setTimeout(foo, 100)
+        isUpdatingHash = true
+
+      level.getMap().on('add', delayedUpdateHash)
+      level.getMap().on('remove', delayedUpdateHash)
+
+
+      HashManager.updateHash(level)
       return
 
     VoxelFactory.load(level) # Loads the textures
@@ -236,7 +251,7 @@ window.startEditor = ->
     idx = ColorManager.colors.length - 1
     ColorManager.currentColor = idx
     addColorToPalette idx
-    HashManager.updateHash()
+    # HashManager.updateHash()
     updateColor idx
     return
 
