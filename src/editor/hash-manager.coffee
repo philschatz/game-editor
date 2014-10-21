@@ -118,21 +118,7 @@ module.exports = new class HashManager
       voxels
 
 
-    buildFromHash: ->
-      hash = window.location.hash.substr(1)
-      @loadFromHash hash, (x, y, z, color) ->
-
-        # Center the voxels since they are 1x1x1
-        x = x * (16/16) + (16/16)/2
-        y = y * (16/16) + (16/16)/2
-        z = z * (16/16) + (16/16)/2
-
-        SceneManager.addVoxel(x, y, z, color)
-
-      @updateHash()
-
-
-    loadFromHash: (hash, addVoxel) ->
+    loadFromHash: (hash, levelMap) ->
       hashMask = null
       hashChunks = hash.split(':')
       chunks = {}
@@ -179,5 +165,5 @@ module.exports = new class HashManager
 
           if code.charAt(0) is '1'
             throw new Error('BUG: no negative colors') if current.c < 0
-            addVoxel(current.x, current.y, current.z, current.c)
+            levelMap.addVoxel(current.x, current.y, current.z, current.c)
       return

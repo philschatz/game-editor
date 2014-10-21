@@ -103,8 +103,7 @@ module.exports =
 
   loadHash: (paletteUrl) ->
     map = new Map()
-    HashManager.loadFromHash window.location.hash.substring(1), (x, y, z, color, orientation) ->
-      map.addVoxel(x, y, z, color, orientation)
+    HashManager.loadFromHash(window.location.hash.substring(1), map)
 
     promise = GenericLoader_parseObject '',
       name: 'loaded-from-hash'
