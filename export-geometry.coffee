@@ -1,5 +1,14 @@
 TextureCube = require './src/voxels/texture-cube'
 
+
+# From deprecated THREE.GeometryUtils.merge
+mergeHelper = (geometry1, geometry2, materialIndexOffset) ->
+  if geometry2 instanceof THREE.Mesh
+    geometry2.matrixAutoUpdate and geometry2.updateMatrix()
+    matrix = geometry2.matrix
+    geometry2 = geometry2.geometry
+  geometry1.merge(geometry2, matrix, materialIndexOffset)
+
 module.exports = (SceneManager) ->
   colorGeo = new THREE.Geometry()
   textureGeo = new THREE.Geometry()
@@ -16,7 +25,7 @@ module.exports = (SceneManager) ->
           for f in child.geometry.faces
             # f.vertexColors = [c, c, c]
             f.color = c
-          THREE.GeometryUtils.merge(colorGeo, child)
+          mergeHelper(colorGeo, child)
 
         else if child.material # Textured cube
 
@@ -25,14 +34,14 @@ module.exports = (SceneManager) ->
             face.color.set(face.materialIndex)
 
 
-          THREE.GeometryUtils.merge(textureGeo, child)
+          mergeHelper(textureGeo, child)
         else if child instanceof THREE.Object3D # Like a ladder
           # throw new Error('whoops, looks like this is not a ladder...') unless child.children.length is 2
           foo = child.children[0] # TODO:
           mesh = foo.clone()
           mesh.position.addVectors(mesh.position, child.position)
           mesh.rotation.y = foo.rotation.y
-          THREE.GeometryUtils.merge(colorGeo, mesh)
+          mergeHelper(colorGeo, mesh)
 
         else
           throw new Error('whoops!')

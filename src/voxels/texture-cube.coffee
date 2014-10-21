@@ -13,7 +13,7 @@ module.exports = new class TextureCubeBuilder
     meshFaceMaterial: -> @_meshMaterial
 
     freshCube: (textureSides) ->
-      geometry = new THREE.CubeGeometry((16/16), (16/16), (16/16))
+      geometry = new THREE.BoxGeometry((16/16), (16/16), (16/16))
 
       alreadyReindexedFaces = []
       # create textures array for all cube sides

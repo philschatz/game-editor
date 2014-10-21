@@ -115,6 +115,7 @@ module.exports = (SceneManager) ->
   # setup the game and add some trees
   game = createGame
     statsDisabled: true
+    materials: [] # To disable loading the defaults
     view: view
     generate: (x, y, z) -> mapConfig.getMap().getColor(x, y, z)
     chunkDistance: 2

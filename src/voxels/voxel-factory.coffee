@@ -26,8 +26,6 @@ geometryLoader = (config) ->
   wireMesh.myVoxel = group
   wireMesh.isWireMesh = true
 
-  group.add(group.wireMesh)
-
   {wireMesh, voxel: group, canRandomlyRotate: false}
 
 
