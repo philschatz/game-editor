@@ -108,7 +108,11 @@ module.exports = new class SceneManager
       # @scene.add directionalLight
 
 
-    addVoxel: (x, y, z, color) ->
+    _addVoxel: (x, y, z, color) ->
+
+      x = Math.floor(x) + .5
+      y = Math.floor(y) + .5
+      z = Math.floor(z) + .5
 
       wireframeCube = new THREE.BoxGeometry((16/16) + .5, (16/16) + .5 , (16/16) + .5)
       wireframeOptions =
@@ -183,3 +187,15 @@ module.exports = new class SceneManager
       @_target = mesh.position
       MainCamera.setTarget(@_target)
       AxisCamera.setTarget(@_target)
+
+    setLevel: (@_currentLevel) ->
+      # TODO: Clear current voxels
+      VoxelFactory.load(@_currentLevel)
+      map = @_currentLevel.getMap()
+      map.forEach (x, y, z, color, orientation) =>
+        @_addVoxel(x, y, z, color, orientation)
+      map.on 'add', (x, y, z, color, orientation) =>
+        @_addVoxel(x, y, z, color, orientation)
+      map.on 'remove', => console.error('Whoops! Not implemented yet')
+
+    currentMap: -> @_currentLevel.getMap()

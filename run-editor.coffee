@@ -42,7 +42,6 @@ window.startEditor = ->
     levelPromise = LevelLoader.load('/data/level-lighthouse.json')
 
   levelPromise.then (level) ->
-    VoxelFactory.load(level)
     alreadyCreatedGame = false
 
     $('.preview-level').on 'click', ->
@@ -209,23 +208,17 @@ window.startEditor = ->
       bindEventsAndPlugins()
       container = document.getElementById("editor-area")
       SceneManager.prepare(container)
+
       # build all the pallette pngs
       exportImage()
+      SceneManager.setLevel(level)
       SceneManager.init(container)
       container.appendChild(SceneManager.renderer.domElement)
       KeyMouse.attachEvents()
-      level.getMap().forEach (x, y, z, color, orientation) ->
-
-        # Center the voxels since they are 1x1x1
-        x = x * (16/16) + (16/16)/2
-        y = y * (16/16) + (16/16)/2
-        z = z * (16/16) + (16/16)/2
-
-        SceneManager.addVoxel(x, y, z, color, orientation)
-
       HashManager.updateHash()
       return
 
+    VoxelFactory.load(level) # Loads the textures
     setTimeout(initEditor, 2000) # Wait for all the textures to load first TODO: HACK
     requestAnimationFrame(window).on "data", (args...) -> SceneManager.render(args...)
 
@@ -304,7 +297,7 @@ window.startEditor = ->
       for x in [x1..x2] by (16/16)
         for y in [y1..y2] by (16/16)
           for z in [z1..z2] by (16/16)
-            SceneManager.addVoxel(x, y, z, idx)
+            SceneManager.currentMap().addVoxel(Math.floor(x), Math.floor(y), Math.floor(z), idx)
     return
 
 

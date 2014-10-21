@@ -15,15 +15,9 @@ container.appendChild(SceneManager.renderer.domElement)
 LevelLoader.load('/data/level-empty.json')
 .then (level) ->
 
-  VoxelFactory.load(level)
-
   # These steps are *only* to generate the exported geometries
-  level.getMap().forEach (x, y, z, color, orientation) ->
-    x += .5
-    y += .5
-    z += .5
-    SceneManager.addVoxel(x, y, z, color)
-
+  SceneManager.setLevel(level)
+  # VoxelFactory.load(level) Needs to be uncommented if SceneManager.setLevel is not used
   exportGeometry(SceneManager)
   # # Or, just remove everything except the skeleton
   # items = scene.children[..]

@@ -1,5 +1,6 @@
 $ = require 'jquery'
 URI = require 'uri-js'
+{EventEmitter} = require 'events'
 HashManager = require '../editor/hash-manager'
 
 ajax = (url) ->
@@ -56,7 +57,7 @@ class Palette
     @_config
 
 
-class Map
+class Map extends EventEmitter
   _map: {}
   constructor: (config=[]) ->
     # TODO: Uncompress if necessary
@@ -85,10 +86,18 @@ class Map
     @_map["#{x}|#{y}|#{z}"]?.orientation
 
   addVoxel: (x, y, z, color, orientation) ->
+    throw new Error('Only whole numbers please') unless x is Math.floor(x)
+    throw new Error('Only whole numbers please') unless y is Math.floor(y)
+    throw new Error('Only whole numbers please') unless z is Math.floor(z)
     @_map["#{x}|#{y}|#{z}"] = {color, orientation}
+    @emit('add', x, y, z, color, orientation)
 
   removeVoxel: (x, y, z) ->
+    throw new Error('Only whole numbers please') unless x is Math.floor(x)
+    throw new Error('Only whole numbers please') unless y is Math.floor(y)
+    throw new Error('Only whole numbers please') unless z is Math.floor(z)
     delete @_map["#{x}|#{y}|#{z}"]
+    @emit('remove', x, y, z)
 
 
 module.exports =
