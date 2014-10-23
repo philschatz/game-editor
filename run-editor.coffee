@@ -11,7 +11,7 @@ GAME = require './src/game'
 
 
 Input = require './src/editor/input-manager'
-SceneManager = require './src/editor/scene-manager'
+window.SceneManager = SceneManager = require './src/editor/scene-manager'
 
 ColorUtils = require './src/editor/color-utils'
 ColorManager = require './src/editor/color-manager'
@@ -27,10 +27,14 @@ VoxelFactory = require './src/voxels/voxel-factory'
 IconMaker = require './src/editor/icon-maker'
 TextureCube = require './src/voxels/texture-cube'
 
-exportGeometry = require './export-geometry'
+window.exportGeometry = exportGeometry = require './export-geometry'
 
 LevelLoader = require './src/loaders/level'
 
+
+
+$('.export-voxel-json').on 'click', ->
+  alert(JSON.stringify(exportGeometry.justExport(SceneManager)))
 
 window.startEditor = ->
   container = null
@@ -53,13 +57,12 @@ window.startEditor = ->
         HashManager.disableUpdateHash()
         window.CURRENT_LEVEL = level # Game uses this instead of parsing the hash
         fn = ->
-          exportGeometry(SceneManager)
+          exportGeometry.exportAndReplace(SceneManager)
           GAME(SceneManager)
           alreadyCreatedGame = true
           $preview.text('Loaded')
         setTimeout(fn, 10)
 
-    window.exportGeometry = -> exportGeometry(SceneManager)
     window.exportLevelMap = ->
       console.warn 'You have to refresh the page if you have made edits'
       foo = []
@@ -221,7 +224,7 @@ window.startEditor = ->
         foo = ->
           HashManager.updateHash(level)
           isUpdatingHash = false
-          
+
         if isUpdatingHash is false
           setTimeout(foo, 100)
         isUpdatingHash = true
