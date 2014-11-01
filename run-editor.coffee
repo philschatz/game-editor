@@ -303,6 +303,7 @@ window.startEditor = ->
 
 
   pickColor = (e) ->
+    e.preventDefault()
     targetEl = $(e.currentTarget)
     idx = +targetEl.find(".color").attr("data-color")
     ColorManager.currentColor = idx
