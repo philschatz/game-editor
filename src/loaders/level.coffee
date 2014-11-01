@@ -117,6 +117,19 @@ class Map extends EventEmitter
     @emit('remove', x, y, z)
 
 
+# Used by .toJSON() to include the url and skip the loaded object
+recStripThingsWithUrl = (obj) ->
+  if typeof obj is 'object'
+    for key, val of obj
+      if /_url$/.test(key)
+        key = key.substring(0, key.length - '_url'.length)
+        delete obj[key]
+      else if /_urls$/.test(key)
+        key = key.substring(0, key.length - '_urls'.length) + 's'
+        delete obj[key]
+      else
+        recStripThingsWithUrl(val)
+
 module.exports =
   load: (url) ->
     GenericLoader_fetchUrl(url, '')
@@ -137,6 +150,8 @@ module.exports =
 
         # Assume the Palette did not change (if it started as a URL)
         json.palette = palette.toJSON()
+        recStripThingsWithUrl(json)
+        json
 
       obj
 
@@ -166,6 +181,7 @@ module.exports =
         json.map = map.toJSON()
         # Assume the Palette did not change (if it started as a URL)
         json.palette = palette.toJSON()
+        recStripThingsWithUrl(json)
         json
 
       level

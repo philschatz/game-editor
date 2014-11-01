@@ -1,5 +1,6 @@
 TODO:
 
+- [ ] collision detector should test all voxels in the direction vector
 - [x] async fetch palette info
 - [x] async fetch level info (maybe from hash)
 - [x] generate JSON for level
