@@ -1,5 +1,4 @@
 THREE = require '../three'
-ColorManager = require './color-manager'
 MainCamera = require '../main-camera'
 
 Input = require './input-manager'

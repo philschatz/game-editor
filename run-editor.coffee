@@ -209,7 +209,7 @@ window.startEditor = ->
           return
 
         clone.on "contextmenu", changeColor
-      foo = ColorManager.colors[idx] or [0,0,0]
+      foo = [0,0,0] # ColorManager.colors[idx]
       colorBox.parent().attr "data-color", "#" + ColorUtils.rgb2hex(foo)
       colorBox.css "background", "#" + ColorUtils.rgb2hex(foo)
       SceneManager.brush.children[0].material.color.setRGB foo[0], foo[1], foo[2]  if ColorManager.currentColor is idx and SceneManager.brush
