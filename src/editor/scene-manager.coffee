@@ -116,7 +116,7 @@ module.exports = new class SceneManager
 
       @currentMap().removeVoxel(Math.floor(obj.position.x), Math.floor(obj.position.y), Math.floor(obj.position.z))
 
-    _addVoxel: (x, y, z, color) ->
+    _addVoxel: (x, y, z, color, orientation) ->
 
       x = Math.floor(x) + .5
       y = Math.floor(y) + .5
@@ -140,6 +140,10 @@ module.exports = new class SceneManager
       voxel.position.x += x
       voxel.position.y += y
       voxel.position.z += z
+
+      if orientation?
+        voxel.rotation.y = orientation * Math.PI / 2
+
       if voxel.wireMesh
         voxel.wireMesh.position.x = x
         voxel.wireMesh.position.y = y
