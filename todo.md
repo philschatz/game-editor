@@ -2,8 +2,8 @@ TODO:
 
 - [x] async fetch palette info
 - [x] async fetch level info (maybe from hash)
-- [ ] generate JSON for level
-- [ ] generate JSON for voxel
+- [x] generate JSON for level
+- [-] generate JSON for voxel
 - [ ] store color palette in localstorage
 - [ ] have voxel edit mode and level edit mode
 - [ ] orient voxels

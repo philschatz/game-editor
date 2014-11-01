@@ -34,7 +34,10 @@ LevelLoader = require './src/loaders/level'
 
 
 $('.export-voxel-json').on 'click', ->
-  alert(JSON.stringify(exportGeometry.justExport(SceneManager)))
+  str = JSON.stringify(exportGeometry.justExport(SceneManager))
+  console.log(str)
+  alert('Check the console for the JSON because it is too big for an alert')
+
 
 window.startEditor = ->
   container = null
@@ -47,6 +50,12 @@ window.startEditor = ->
 
   levelPromise.then (level) ->
     alreadyCreatedGame = false
+
+    $('.export-level-json').on 'click', ->
+      str = JSON.stringify(level.toJSON())
+      console.log(str)
+      alert('Check the console for the JSON because it is too big for an alert')
+
 
     $('.preview-level').on 'click', ->
       if not alreadyCreatedGame

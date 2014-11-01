@@ -1,4 +1,5 @@
 $ = require 'jquery'
+_ = require 'underscore'
 URI = require 'uri-js'
 {EventEmitter} = require 'events'
 HashManager = require '../editor/hash-manager'
@@ -50,6 +51,9 @@ class Palette
   constructor: (@_config) ->
     @size = @_config.length
 
+  toJSON: ->
+    _.extend({}, @_config)
+
   voxelInfo: (color) ->
     @_config[color]
 
@@ -64,6 +68,19 @@ class Map extends EventEmitter
     # Map structure is '1|2|3' -> {color, orient}
     for [x, y, z, color, orientation] in config
       @_map["#{x}|#{y}|#{z}"] = {color, orientation}
+
+  toJSON: ->
+    ret = for coordStr, info of @_map
+      [x, y, z] = coordStr.split('|')
+      x = parseInt(x)
+      y = parseInt(y)
+      z = parseInt(z)
+      {color, orientation} = info
+      foo = [x, y, z, color]
+      foo.push(orientation) if orientation?
+      foo
+    ret
+
 
   # boundingBox: ->
   #   {@x1, @y1, @z1, @x2, @y2, @z2}
@@ -108,6 +125,19 @@ module.exports =
       palette = new Palette(obj.palette)
       obj.getMap = -> map
       obj.getPalette = -> palette
+      obj.toJSON = ->
+        json = _.extend({}, obj)
+        delete json.getMap
+        delete json.getPalette
+        delete json.toJSON
+        # Assume the Map was changed. If so, no longer use the map_url
+        if json.map_url
+          delete json.map_url
+        json.map = map.toJSON()
+
+        # Assume the Palette did not change (if it started as a URL)
+        json.palette = palette.toJSON()
+
       obj
 
   loadHash: (paletteUrl) ->
@@ -125,4 +155,17 @@ module.exports =
 
       level.getPalette = -> palette
       level.getMap = -> map
+      level.toJSON = ->
+        json = _.extend({}, level)
+        delete json.getMap
+        delete json.getPalette
+        delete json.toJSON
+        # Assume the Map was changed. If so, no longer use the map_url
+        if json.map_url
+          delete json.map_url
+        json.map = map.toJSON()
+        # Assume the Palette did not change (if it started as a URL)
+        json.palette = palette.toJSON()
+        json
+
       level
