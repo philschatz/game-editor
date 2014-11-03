@@ -1,6 +1,15 @@
 GameManager = require './game-manager'
 
 module.exports = new class MovementHelper
+
+  getControlState: ->
+    window.game.controls.state
+
+  playerFlattenedBlock: ->
+    # Returns {wallDepth, wallType, collideStart, collideEnd}
+    playerBase = window.game.controlling.aabb().base
+    return GameManager.getFlattenedInfo(playerBase)
+
   isWalking: ->
     state = window.game.controls.state
     state.left or state.right
@@ -18,11 +27,7 @@ module.exports = new class MovementHelper
     window.game.controlling.velocity.y < -0.014152 # Whatever gravity is...
 
   isClimbing: ->
-    state = window.game.controls.state
-    playerBase = window.game.controlling.aabb().base
-    if state.forward
-      {wallDepth, wallType, collideStart, collideEnd} = GameManager.getFlattenedInfo(playerBase)
-      return wallType in ['ladder']
-    else if state.backward
-      {wallDepth, wallType, collideStart, collideEnd} = GameManager.getFlattenedInfo(playerBase)
+    state = @getControlState()
+    if state.forward or state.backward
+      {wallType} = @playerFlattenedBlock()
       return wallType in ['ladder']
