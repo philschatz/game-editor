@@ -142,7 +142,7 @@ module.exports = new class SceneManager
       voxel.position.z += z
 
       if orientation?
-        voxel.rotation.y = orientation * Math.PI / 2
+        voxel.rotateY(orientation * Math.PI / 2)
 
       if voxel.wireMesh
         voxel.wireMesh.position.x = x
