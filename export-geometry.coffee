@@ -79,7 +79,9 @@ module.exports =
             foo = child.children[0] # TODO:
             mesh = foo.clone()
             mesh.position.addVectors(mesh.position, child.position)
-            mesh.rotation.y = foo.rotation.y
+            # Make sure you rotate the ladder using the Object3D rotation
+            mesh.rotateY(child.rotation.y)
+            mesh.updateMatrix()
             mergeHelper(colorGeo, mesh)
 
           else
