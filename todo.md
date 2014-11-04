@@ -101,3 +101,78 @@ Player Movement:
 1. voxel-control : input = up/down/left/right   output = target.velocity, target.resting
 2. voxel-physical : input = velocity   calls collide, output = .position
 3. voxel-collide
+Editor Operation modes:
+
+- Add 1
+- Erase 1
+
+- Select
+  - Rotate
+  - Erase
+  - Replace
+  - Add in front
+
+Keyboard:
+- Enter: Perform currently selected action
+- Delete: Always erase
+
+Always able to click palette to change current voxel
+
+
+Workflow:
+
+To add a block:
+
+- change color in Palette
+- click (+) mode (Pencil)
+- click an existing face
+- click again to add another
+
+To remove a block:
+
+- click (-) mode (Eraser)
+- click on an existing face
+- click again to remove another
+
+To add multiple blocks (Fill): (??? Should Fill replace the existing blocks or leave them alone? Probably latter)
+
+- click (+) mode (Pencil)
+- mousedown on an existing face
+- mouseup on another face (The box will not contain the faces you clicked on)
+- (optionally) click Palette to change current color
+- click (+) mode (Pencil) or press Enter to fill
+
+To remove multiple blocks (Batch Erase):
+
+- click (o) mode (Pointer)   (??? Or, could (-) work as well?)
+- mousedown on an existing face
+- mouseup on another face (The box **will** contain the faces you clicked on)
+- click (-) mode (Eraser) or press Delete to Batch Erase
+
+To rotate a single block:
+
+- click (o) mode (Pointer)
+- click the block to rotate
+- click rotate-left/right/none
+
+To rotate multiple blocks:
+
+- click (o) mode (Pointer)
+- mousedown on an existing face
+- mouseup on another face (The box **will** contain the blocks you clicked on)
+- click rotate-left/right/none
+
+To replace multiple blocks (Different from FILL):
+
+- click (o) mode (Pointer)
+- mousedown on an existing face
+- mouseup on another face (The box **will** contain the blocks you clicked on)
+- (optionally) click Palette to change current color
+- click (+) mode (Pencil)
+
+To algorithmically fill (bricks, grass):
+
+- There's a special meta-palette color for that with JS logic
+
+Idea: Offer a XY or ZY Grid Plane for help in creating islands.
+  (mouse dragging only adjusts the Z/X axis)
