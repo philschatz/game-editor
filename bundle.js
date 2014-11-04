@@ -58573,9 +58573,15 @@ module.exports = new (SceneManager = (function() {
 
 
 },{"../main-camera":132,"../sprite-animation":133,"../three":134,"../voxels/palette-manager":135,"../voxels/voxel-factory":137,"./axis-camera":106,"./input-manager":111}],115:[function(require,module,exports){
-var Climbing, MovementHelper;
+var ANIMATION, Climbing, GameManager, MovementHelper, OrientedPositionAnimation;
 
 MovementHelper = require('./movement-helper');
+
+GameManager = require('./game-manager');
+
+OrientedPositionAnimation = require('../../sprite-animation').OrientedPositionAnimation;
+
+ANIMATION = new OrientedPositionAnimation(true, [[0, 3], [1, 3], [2, 3]]);
 
 module.exports = new (Climbing = (function() {
   function Climbing() {}
@@ -58595,13 +58601,17 @@ module.exports = new (Climbing = (function() {
 
   Climbing.prototype.begin = function(game, sprite) {
     sprite.position.x = Math.floor(sprite.position.x) + .5;
-    sprite.position.y = Math.floor(sprite.position.y) + .5;
-    return sprite.position.z = Math.floor(sprite.position.z) + .5;
+    sprite.position.z = Math.floor(sprite.position.z) + .5;
+    return ANIMATION.start(sprite);
   };
 
-  Climbing.prototype.end = function() {};
+  Climbing.prototype.end = function() {
+    return ANIMATION.stop();
+  };
 
-  Climbing.prototype.act = function(elapsedTime, ActionTypes, game) {};
+  Climbing.prototype.act = function(elapsedTime, ActionTypes, game) {
+    return this;
+  };
 
   Climbing.prototype.isAnimationLooping = function() {
     return false;
@@ -58621,7 +58631,7 @@ module.exports = new (Climbing = (function() {
 
 
 
-},{"./movement-helper":120}],116:[function(require,module,exports){
+},{"../../sprite-animation":133,"./game-manager":117,"./movement-helper":120}],116:[function(require,module,exports){
 var ANIMATION, Falling, MovementHelper, StillAnimation;
 
 MovementHelper = require('./movement-helper');
@@ -58652,7 +58662,10 @@ module.exports = new (Falling = (function() {
     return ANIMATION.stop();
   };
 
-  Falling.prototype.act = function() {};
+  Falling.prototype.act = function() {
+    MovementHelper.flipSpriteLeftRight();
+    return this;
+  };
 
   return Falling;
 
@@ -58678,12 +58691,9 @@ GameManager = new (GameManager = (function() {
     return window.game;
   };
 
-  GameManager.prototype._getBlock = function(coord) {
-    return this._getGame().getBlock(coord);
-  };
-
-  GameManager.prototype.load = function() {
-    var B, a, aboveColor, b, collideEnd, collideStart, dir, multiplier, myColor, pos, type, wallDepth, wallType, y, _i, _results;
+  GameManager.prototype.load = function(_map) {
+    var B, a, aboveColor, b, collideEnd, collideStart, color, dir, multiplier, myColor, orientation, pos, type, wallDepth, wallOrientation, wallType, y, _i, _results;
+    this._map = _map;
     this._sparseCollisionMap = [{}, {}, {}, {}];
     _results = [];
     for (dir = _i = 0; _i <= 3; dir = ++_i) {
@@ -58693,10 +58703,11 @@ GameManager = new (GameManager = (function() {
         _results1 = [];
         for (y = _j = 0, _ref = this._loadMax; 0 <= _ref ? _j <= _ref : _j >= _ref; y = 0 <= _ref ? ++_j : --_j) {
           _results1.push((function() {
-            var _k, _l, _ref1, _ref2, _ref3, _ref4, _ref5, _results2;
+            var _k, _l, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _results2;
             _results2 = [];
             for (a = _k = _ref1 = -this._loadMax, _ref2 = this._loadMax; _ref1 <= _ref2 ? _k <= _ref2 : _k >= _ref2; a = _ref1 <= _ref2 ? ++_k : --_k) {
               wallDepth = null;
+              wallOrientation = null;
               type = null;
               collideStart = null;
               collideEnd = null;
@@ -58708,13 +58719,15 @@ GameManager = new (GameManager = (function() {
                 if (dir % 2 === 1) {
                   pos = [B, y, a];
                 }
-                myColor = this._getBlock(pos);
+                _ref5 = this._map.getInfo(pos[0], pos[1], pos[2]), color = _ref5.color, orientation = _ref5.orientation;
+                myColor = color;
                 if ((wallDepth == null) && myColor) {
                   wallDepth = B;
                   wallType = PaletteManager.collisionFor(myColor);
+                  wallOrientation = orientation;
                 }
                 pos[1] = y + 1;
-                aboveColor = this._getBlock(pos);
+                aboveColor = this._map.getColor(pos[0], pos[1], pos[2]);
                 if (myColor && (collideStart == null) && !aboveColor) {
                   type = PaletteManager.collisionFor(myColor);
                   if (type === 'top' || type === 'all') {
@@ -58743,12 +58756,13 @@ GameManager = new (GameManager = (function() {
                 }
                 if (collideEnd != null) {
                   if (!(collideStart <= collideEnd)) {
-                    _ref5 = [collideEnd, collideStart], collideStart = _ref5[0], collideEnd = _ref5[1];
+                    _ref6 = [collideEnd, collideStart], collideStart = _ref6[0], collideEnd = _ref6[1];
                   }
                 }
                 _results2.push(this._sparseCollisionMap[dir]["" + y + "|" + a] = {
                   wallDepth: wallDepth,
                   wallType: wallType,
+                  wallOrientation: wallOrientation,
                   collideStart: collideStart,
                   collideEnd: collideEnd
                 });
@@ -58910,7 +58924,7 @@ GameManager = new (GameManager = (function() {
 
   GameManager.prototype.blockTypeAt = function(coords) {
     var color;
-    color = this._getBlock(coords);
+    color = this._map.getColor(coords[0], coords[1], coords[2]);
     if (color) {
       return PaletteManager.collisionFor(color);
     } else {
@@ -59019,7 +59033,10 @@ module.exports = new (Jumping = (function() {
     return ANIMATION.stop();
   };
 
-  Jumping.prototype.act = function() {};
+  Jumping.prototype.act = function() {
+    MovementHelper.flipSpriteLeftRight();
+    return this;
+  };
 
   return Jumping;
 
@@ -59043,6 +59060,23 @@ module.exports = new (MovementHelper = (function() {
     var playerBase;
     playerBase = window.game.controlling.aabb().base;
     return GameManager.getFlattenedInfo(playerBase);
+  };
+
+  MovementHelper.prototype.flipSpriteLeftRight = function(opts) {
+    var force, isReversed, state;
+    if (opts == null) {
+      opts = {
+        isReversed: false,
+        force: 0
+      };
+    }
+    isReversed = opts.isReversed, force = opts.force;
+    state = this.getControlState();
+    if (state.left || (state.right && isReversed) || force === -1) {
+      return window.game.controlling.avatar.children[0].rotation.y = Math.PI;
+    } else if (state.right || (state.left && isReversed) || force === 1) {
+      return window.game.controlling.avatar.children[0].rotation.y = 0;
+    }
   };
 
   MovementHelper.prototype.isWalking = function() {
@@ -59128,12 +59162,7 @@ module.exports = new (PlayerManager = (function() {
         this.changeAction(actionType, game);
       }
     }
-    this.changeAction((_ref = this.currentAction()) != null ? _ref.act(elapsedTime, ActionTypes, game) : void 0, game);
-    if (this._game.controls.state.left) {
-      return this._game.controlling.avatar.children[0].rotation.y = Math.PI;
-    } else if (this._game.controls.state.right) {
-      return this._game.controlling.avatar.children[0].rotation.y = 0;
-    }
+    return this.changeAction((_ref = this.currentAction()) != null ? _ref.act(elapsedTime, ActionTypes, game) : void 0, game);
   };
 
   PlayerManager.prototype.reset = function() {
@@ -59267,6 +59296,7 @@ module.exports = new (Walking = (function() {
   };
 
   Walking.prototype.act = function(elapsedTime, ActionTypes, game) {
+    MovementHelper.flipSpriteLeftRight();
     if (MovementHelper.isRunning()) {
       return ActionTypes.RUNNING;
     }
@@ -60163,7 +60193,7 @@ module.exports = function(SceneManager) {
       MainCamera.updateCamera();
     }
   });
-  return GameManager.load();
+  return GameManager.load(mapConfig.getMap());
 };
 
 
@@ -60485,10 +60515,12 @@ window.mainCamera = module.exports = new (MainCamera = (function(_super) {
 
 
 },{"./camera-manager":105}],133:[function(require,module,exports){
-var Animation, PositionAnimation, SpriteAnimationHandler, StillAnimation, TimeAnimation,
+var Animation, MovementHelper, OrientedPositionAnimation, PositionAnimation, SpriteAnimationHandler, StillAnimation, TimeAnimation,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   __slice = [].slice;
+
+MovementHelper = require('./game/actions/movement-helper');
 
 SpriteAnimationHandler = new (SpriteAnimationHandler = (function() {
   function SpriteAnimationHandler() {}
@@ -60653,16 +60685,92 @@ PositionAnimation = (function(_super) {
 
 })(Animation);
 
+OrientedPositionAnimation = (function(_super) {
+  __extends(OrientedPositionAnimation, _super);
+
+  function OrientedPositionAnimation(_isVertical, offsets) {
+    this._isVertical = _isVertical;
+    OrientedPositionAnimation.__super__.constructor.call(this, offsets);
+  }
+
+  OrientedPositionAnimation.prototype.start = function() {
+    OrientedPositionAnimation.__super__.start.apply(this, arguments);
+    return this._startPosition = this._sprite.position.clone();
+  };
+
+  OrientedPositionAnimation.prototype.newOffset = function(deltaTimeMs) {
+    var cameraAxis, cameraDir, cameraPerpendicAxis, cameraType, delta, isReversed, newOffset, orientDiff, position, wallOrientation, x, y, z;
+    position = this._sprite.position;
+    if (this._isVertical) {
+      delta = position.y - this._startPosition.y;
+    } else {
+      delta = position.x - this._startPosition.x;
+      if (delta === 0) {
+        delta = position.z - this._startPosition.z;
+      }
+    }
+    cameraType = window.game.controlling.rotation.y / Math.PI * 2;
+    cameraType = Math.round(cameraType).mod(4);
+    cameraDir = 1;
+    if (cameraType >= 2) {
+      cameraDir = -1;
+    }
+    if (cameraType.mod(2) === 0) {
+      cameraAxis = 0;
+      cameraPerpendicAxis = 2;
+    } else {
+      cameraAxis = 2;
+      cameraPerpendicAxis = 0;
+    }
+    isReversed = false;
+    x = position.x, y = position.y, z = position.z;
+    wallOrientation = GameManager.getFlattenedInfoCoords(x, y, z, isReversed).wallOrientation;
+    if (wallOrientation == null) {
+      wallOrientation = 0;
+    }
+    orientDiff = (wallOrientation - cameraType + 4) % 4;
+    newOffset = (function() {
+      switch (orientDiff) {
+        case 0:
+          MovementHelper.flipSpriteLeftRight({
+            isReversed: true
+          });
+          return 0;
+        case 1:
+          MovementHelper.flipSpriteLeftRight({
+            force: 1
+          });
+          return 1;
+        case 2:
+          MovementHelper.flipSpriteLeftRight({
+            isReversed: false
+          });
+          return 0;
+        case 3:
+          MovementHelper.flipSpriteLeftRight({
+            force: 1
+          });
+          return 2;
+      }
+    })();
+    return newOffset;
+  };
+
+  return OrientedPositionAnimation;
+
+})(Animation);
+
 module.exports = {
   SpriteAnimationHandler: SpriteAnimationHandler,
   StillAnimation: StillAnimation,
   TimeAnimation: TimeAnimation,
-  PositionAnimation: PositionAnimation
+  PositionAnimation: PositionAnimation,
+  OrientedPositionAnimation: OrientedPositionAnimation
 };
 
 
 
-},{}],134:[function(require,module,exports){
+},{"./game/actions/movement-helper":120}],134:[function(require,module,exports){
 var THREE;
 
 require('../js/exporters/BufferGeometryExporter');
