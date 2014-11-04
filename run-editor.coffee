@@ -60,7 +60,9 @@ window.startEditor = ->
     $('.preview-level').on 'click', ->
       if not alreadyCreatedGame
         $preview = $('.preview-level')
-        $preview.text('Loading...')
+        $preview.text('Loading Preview...')
+        if $preview.parent('li')
+          $preview.parent('li').addClass('disabled')
         $preview.addClass('disabled')
         $preview.attr('alt', 'This may take a minute')
         HashManager.disableUpdateHash()
@@ -69,7 +71,7 @@ window.startEditor = ->
           exportGeometry.exportAndReplace(SceneManager)
           GAME(SceneManager)
           alreadyCreatedGame = true
-          $preview.text('Loaded')
+          $preview.text('Preview Loaded')
         setTimeout(fn, 10)
 
     window.exportLevelMap = ->
@@ -307,7 +309,7 @@ window.startEditor = ->
     targetEl = $(e.currentTarget)
     idx = +targetEl.find(".color").attr("data-color")
     ColorManager.currentColor = idx
-    SceneManager.brush.children[0].material.color.setRGB(ColorManager.colors[idx][0], ColorManager.colors[idx][1], ColorManager.colors[idx][2])
+    # SceneManager.brush.children[0].material.color.setRGB(ColorManager.colors[idx][0], ColorManager.colors[idx][1], ColorManager.colors[idx][2])
     if Input.startPosition and Input.endPosition
       # Fill in with voxels
       sort = (a, b) ->
@@ -351,25 +353,12 @@ window.startEditor = ->
       ), 0
       return
 
-    actionsMenu = $(".actionsMenu")
-    actionsMenu.dropkick change: (value, label) ->
-      return  if value is "noop"
-      exports[value]()  if value of exports
-      setTimeout (->
-        actionsMenu.dropkick "reset"
-        return
-      ), 0
-      return
 
 
     # Init tooltips
     $("[data-toggle=tooltip]").tooltip "show"
 
-    # Init tags input
-    $("#tagsinput").tagsInput()
 
-    # JS input/textarea placeholder
-    $("input, textarea").placeholder()
     $(".btn-group").on "click", "a", ->
       $(this).siblings().removeClass "active"
       $(this).addClass "active"

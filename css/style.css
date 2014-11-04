@@ -1,6 +1,3 @@
-#player-boxes {
-  font-family: monospace;
-}
 /* ------------------------ */
 
 #editor-area {
@@ -66,7 +63,6 @@ body {
 .voxel-share img { height: 200px; }
 .voxel-share textarea { display: none; }
 .dk_options_inner, .dk_touch .dk_options { max-height: 300px !important; }
-.color-container { margin: 5px 0 5px -20px; }
 .modal-body .control-group .login-field { width: 248px !important; }
 .modal-body .control-group { display: inline-block; }
 #paperstackExport canvas {width: 700px;}

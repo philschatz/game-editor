@@ -4,8 +4,7 @@
     <title>Map Creator</title>
     <meta charset="utf-8">
     <link rel"shortcut icon" href="favicon.ico">
-    <link href="flatui/css/bootstrap.css" rel="stylesheet">
-    <link href="flatui/css/flat-ui.css" rel="stylesheet">
+    <link href="style/bootstrap.css" rel="stylesheet">
     <link href="colorpicker/css/colorpicker.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
 
@@ -15,26 +14,26 @@
 
     <div id="main-camera-controls">
       <div>
-        <button class="btn rotate-left" title="rotate left">&lt;</button>
-        <button class="btn axis-label"></button>
-        <button class="btn rotate-right" title="rotate right">&gt;</button>
+        <button class="btn btn-xs rotate-left" title="rotate left">&lt;</button>
+        <button class="btn btn-xs axis-label"></button>
+        <button class="btn btn-xs rotate-right" title="rotate right">&gt;</button>
       </div>
       <div>
-        <button class="btn zoom-in" title="zoom in">+</button>
-        <button class="btn zoom-out" title="zoom out">-</button>
+        <button class="btn btn-xs zoom-in" title="zoom in">+</button>
+        <button class="btn btn-xs zoom-out" title="zoom out">-</button>
       </div>
     </div>
 
     <div id="axis-camera-controls">
       <div>
-        <button class="btn rotate-left" title="rotate left">&lt;</button>
-        <button class="btn axis-label"></button>
-        <button class="btn rotate-right" title="rotate right">&gt;</button>
+        <button class="btn btn-xs rotate-left" title="rotate left">&lt;</button>
+        <button class="btn btn-xs axis-label"></button>
+        <button class="btn btn-xs rotate-right" title="rotate right">&gt;</button>
       </div>
       <div>
-        <button class="btn zoom-in" title="zoom in">+</button>
-        <button class="btn zoom-out" title="zoom out">-</button>
-        <button class="btn rotate-main" title="rotate main area">[]</button>
+        <button class="btn btn-xs zoom-in" title="zoom in">+</button>
+        <button class="btn btn-xs zoom-out" title="zoom out">-</button>
+        <button class="btn btn-xs rotate-main" title="rotate main area">[]</button>
       </div>
     </div>
 
@@ -43,12 +42,6 @@
 
       <div id="player-boxes"></div>
 
-      <select class="actionsMenu" value="Actions" tabindex="1">
-        <option value="noop" selected="selected">Actions</option>
-        <option value="viewInstructions">View Instructions</option>
-        <option value="reset">Reset</option>
-        <option value="about">About</option>
-      </select>
 
       <!-- <div class="share mrl">
         <ul>
@@ -64,73 +57,77 @@
         </ul>
       </div>  -->
 
+      <h4>Current Palette:</h4>
+
       <div class="row color-container">
         <div class="span3">
             <div class="btn-group color-picker">
-              <a class="btn btn-primary colorPickButton active" href="#"><i data-color="0" class="color"></i></a>
-              <a class="btn btn-primary colorPickButton" href="#"><i data-color="1" class="color"></i></a>
-              <a class="btn btn-primary colorPickButton" href="#"><i data-color="2" class="color"></i></a>
-              <a class="btn btn-primary colorPickButton" href="#"><i data-color="3" class="color"></i></a>
-              <a class="btn btn-primary colorPickButton" href="#"><i data-color="4" class="color"></i></a>
-              <a class="btn btn-primary colorAddButton" data-color="#000000" href="#"><i data-color="-1" class="colorAdd">++</i></a>
+              <a class="btn btn-default colorPickButton active" href="#"><i data-color="0" class="color"></i></a>
+              <a class="btn btn-default colorPickButton" href="#"><i data-color="1" class="color"></i></a>
+              <a class="btn btn-default colorPickButton" href="#"><i data-color="2" class="color"></i></a>
+              <a class="btn btn-default colorPickButton" href="#"><i data-color="3" class="color"></i></a>
+              <a class="btn btn-default colorPickButton" href="#"><i data-color="4" class="color"></i></a>
+              <a class="btn btn-default colorAddButton" data-color="#000000" href="#"><i data-color="-1" class="colorAdd">++</i></a>
             </div>
         </div>
       </div>
 
 
       <div>
-        <button class="preview-level btn btn-default">Preview Level</button>
+        <button class="preview-level btn btn-primary">Preview Level</button>
       </div>
 
-      <div>
-        <button class="export-voxel-json btn btn-primary">Export Voxel Data (JSON)</button>
-      </div>
-
-      <div>
-        <button class="export-level-json btn btn-primary">Export Level Data (JSON)</button>
-      </div>
-
-      <div>
-        <a class="play-level btn btn-primary" target="_blank">Play This Level!</a>
+      <div class="btn-group">
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+          Actions <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" role="menu">
+          <li><a href="#" class="preview-level">Preview Level</a></li>
+          <li><a href="#" class="export-voxel-json">Export Voxel Data (JSON)</a></li>
+          <li><a href="#" class="export-level-json">Export Level Data (JSON)</a></li>
+          <li class="divider"></li>
+          <li><a href="#" class="play-level" target="_blank">Play this Level!</a></li>
+          <li><a href="#" data-toggle="modal" data-target="#welcome">View Instructions</a></li>
+        </ul>
       </div>
 
      <div id="output"></div>
     </div>
 
 
-    <div id="welcome" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3 id="myModalLabel">Welcome to the Level Editor</h3>
-      </div>
-      <div class="modal-body">
-        <div class="span3 hello">
-          <p><h4>Create your own level!</h4></p>
-          <p>Use your mouse to place blocks. When you are done designing your level you can play and share it!</p>
-          <p><img src="img/critter.png"></p>
-        </div>
-        <div class="span3">
-          <div class="tile controls">
-            <p><h4>Controls</h4></p>
-            <p><strong>click + drag</strong> to adjust angle.</p>
-            <p><strong>click</strong> to place a voxel.</p>
-            <p><strong>shift</strong> to delete a voxel.</p>
-            <p><strong>alt</strong> to bulk edit voxels.</p>
-            <p><strong>1-5</strong> to change color.</p>
-            <p><strong>+/-</strong> or <strong>scroll</strong> to zoom.</p>
-            <p><strong>A</strong> to rotate the view</p>
-            <p><strong>drop</strong> an creature .png image to load it in</p>
-          </div>
-        </div>
+    <div id="welcome" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
 
-        <div class="span3 hello">
-          <p><h4>Play it!</h4></p>
-          <p>Copy the hash in the URL and paste it to the end of <a href="http://philschatz.com/game/">http://philschatz.com/game/</a></p>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn" data-dismiss="modal" aria-hidden="true">Okay!</button>
-      </div>
+          <div class="modal-header">
+
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+            <h3 class="modal-title" id="myModalLabel">Welcome to the Level Editor</h3>
+
+          </div>
+          <div class="modal-body">
+            <div class="span3 hello">
+              <p><h4>Create your own level!</h4></p>
+              <p>Use your mouse to place blocks. When you are done designing your level you can play and share it!</p>
+
+            </div>
+              <div class="tile controls">
+                <p><h4>Controls</h4></p>
+                <p><strong>click + drag</strong> to adjust angle.</p>
+                <p><strong>click</strong> to place a voxel.</p>
+                <p><strong>shift</strong> to delete a voxel.</p>
+                <p><strong>alt</strong> to bulk edit voxels.</p>
+                <p><strong>1-5</strong> to change color.</p>
+                <p><strong>+/-</strong> or <strong>scroll</strong> to zoom.</p>
+                <p><strong>A</strong> to rotate the view</p>
+              </div>
+
+          </div>
+          <div class="modal-footer">
+            <button class="btn" data-dismiss="modal" aria-hidden="true">Okay!</button>
+          </div>
+        </div><!-- /modal-content -->
+      </div><!-- /modal-dialog -->
     </div>
 
 
@@ -151,7 +148,8 @@
 
 
 
-    <script type="text/javascript" src="js/flatui-deps.js"></script>
+    <script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="style/bootstrap.js"></script>
     <script type="text/javascript" src="colorpicker/js/bootstrap-colorpicker.js"></script>
     <script type="text/javascript" src="js/three-r68.min.js"></script>
     <script type="text/javascript" src="bundle.js"></script>
