@@ -27,35 +27,14 @@
   right: 0;
 }
 
-@font-face {
-  font-family: 'Lato';
-  font-style: normal;
-  font-weight: 400;
-  src: local('Lato Regular'), local('Lato-Regular'), url(../fonts/lato-regular.woff) format('woff');
-}
 
 @font-face {
-  font-family: 'Lato';
-  font-style: normal;
-  font-weight: 700;
-  src: local('Lato Bold'), local('Lato-Bold'), url(../fonts/lato-bold.woff) format('woff');
-}
-
-@font-face {
-  font-family: 'Lato';
-  font-style: normal;
-  font-weight: 900;
-  src: local('Lato Black'), local('Lato-Black'), url(../fonts/lato-black.woff) format('woff');
-}
-
-@font-face {
-  font-family: 'Lato';
-  font-style: italic;
-  font-weight: 400;
-  src: local('Lato Italic'), local('Lato-Italic'), url(../fonts/lato-italic.woff) format('woff');
+  font-family: 'monospace-8bit';
+  src: url('../fonts/Volter__28Goldfish_29.ttf') format('truetype');
 }
 
 body {
+  font-family: 'monospace-8bit';
   margin: 0px;
   overflow: hidden;
 }
@@ -99,3 +78,7 @@ body {
 
 .btn-group > .btn {border-radius:4px; margin-right:2px; margin-left:0; margin-top:1px;}
 .btn-group > .btn + .btn {margin-left:0;}
+
+
+button .btn,
+button, .btn { font-family: 'monospace-8bit'; font-size: 14px; }
