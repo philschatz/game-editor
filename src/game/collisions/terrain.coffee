@@ -72,7 +72,8 @@ module.exports = (other, bbox, desired_vector, resting) ->
       if PlayerManager.isClimbing()
         # Only allow movement to other ladders (adjusting the depth)
 
-        if playerBase[collisionAxis] isnt coords[collisionAxis]
+        # Commented to support pressing down to start climbing
+        # if playerBase[collisionAxis] isnt coords[collisionAxis]
 
           # Valid movements are:
           # - Up
