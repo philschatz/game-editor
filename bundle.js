@@ -57223,7 +57223,10 @@ window.startEditor = function() {
       var $preview, fn;
       if (!alreadyCreatedGame) {
         $preview = $('.preview-level');
-        $preview.text('Loading...');
+        $preview.text('Loading Preview...');
+        if ($preview.parent('li')) {
+          $preview.parent('li').addClass('disabled');
+        }
         $preview.addClass('disabled');
         $preview.attr('alt', 'This may take a minute');
         HashManager.disableUpdateHash();
@@ -57232,7 +57235,7 @@ window.startEditor = function() {
           exportGeometry.exportAndReplace(SceneManager);
           GAME(SceneManager);
           alreadyCreatedGame = true;
-          return $preview.text('Loaded');
+          return $preview.text('Preview Loaded');
         };
         return setTimeout(fn, 10);
       }
@@ -57438,7 +57441,6 @@ window.startEditor = function() {
     targetEl = $(e.currentTarget);
     idx = +targetEl.find(".color").attr("data-color");
     ColorManager.currentColor = idx;
-    SceneManager.brush.children[0].material.color.setRGB(ColorManager.colors[idx][0], ColorManager.colors[idx][1], ColorManager.colors[idx][2]);
     if (Input.startPosition && Input.endPosition) {
       sort = function(a, b) {
         if (a < b) {
@@ -57464,7 +57466,6 @@ window.startEditor = function() {
     }
   };
   bindEventsAndPlugins = function() {
-    var actionsMenu;
     $(window).on("hashchange", function() {
       if (updatingHash) {
         return localStorage.setItem("seenWelcome", true);
@@ -57482,23 +57483,7 @@ window.startEditor = function() {
         exports[el.attr("data-action")](state);
       }), 0);
     });
-    actionsMenu = $(".actionsMenu");
-    actionsMenu.dropkick({
-      change: function(value, label) {
-        if (value === "noop") {
-          return;
-        }
-        if (value in exports) {
-          exports[value]();
-        }
-        setTimeout((function() {
-          actionsMenu.dropkick("reset");
-        }), 0);
-      }
-    });
     $("[data-toggle=tooltip]").tooltip("show");
-    $("#tagsinput").tagsInput();
-    $("input, textarea").placeholder();
     $(".btn-group").on("click", "a", function() {
       $(this).siblings().removeClass("active");
       $(this).addClass("active");
