@@ -34,6 +34,7 @@ module.exports = new class Walking
     # Transform input to physics impulses in a helper class
     # MovementHelper.update(elapsedTime)
 
+    MovementHelper.flipSpriteLeftRight()
     return ActionTypes.RUNNING if MovementHelper.isRunning()
     @
 

@@ -10,6 +10,16 @@ module.exports = new class MovementHelper
     playerBase = window.game.controlling.aabb().base
     return GameManager.getFlattenedInfo(playerBase)
 
+  flipSpriteLeftRight: (opts={isReversed:false, force:0}) ->
+    {isReversed, force} = opts
+    # Rotate the sprite depending on if the left or right key were pressed last
+    state = @getControlState()
+    if state.left or (state.right and isReversed) or force is -1
+      window.game.controlling.avatar.children[0].rotation.y = Math.PI
+    else if state.right or (state.left and isReversed) or force is 1
+      window.game.controlling.avatar.children[0].rotation.y = 0
+
+
   isWalking: ->
     state = window.game.controls.state
     state.left or state.right

@@ -273,4 +273,4 @@ module.exports = (SceneManager) ->
 
     return
 
-  GameManager.load()
+  GameManager.load(mapConfig.getMap())

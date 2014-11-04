@@ -8,9 +8,8 @@ GameManager = new class GameManager
   _cachedInfo: null
 
   _getGame: -> window.game
-  _getBlock: (coord) -> @_getGame().getBlock(coord)
 
-  load: ->
+  load: (@_map) ->
     @_sparseCollisionMap = [{}, {}, {}, {}]
 
     for dir in [0..3]
@@ -18,6 +17,7 @@ GameManager = new class GameManager
       for y in [0..@_loadMax]
         for a in [-@_loadMax..@_loadMax]
           wallDepth = null
+          wallOrientation = null
           type = null
           collideStart = null
           collideEnd = null
@@ -28,15 +28,17 @@ GameManager = new class GameManager
             if dir % 2 is 1
               pos = [B, y, a]
 
-            myColor = @_getBlock(pos)
+            {color, orientation} = @_map.getInfo(pos[0], pos[1], pos[2])
+            myColor = color
             if not wallDepth? and myColor
               wallDepth = B
               wallType = PaletteManager.collisionFor(myColor)
+              wallOrientation = orientation
 
 
             # belowCollidables are only valid if nothing is above them (`not myColor`)
             pos[1] = y + 1
-            aboveColor = @_getBlock(pos)
+            aboveColor = @_map.getColor(pos[0], pos[1], pos[2])
 
             if myColor and not collideStart? and not aboveColor
               type = PaletteManager.collisionFor(myColor)
@@ -77,6 +79,7 @@ GameManager = new class GameManager
             @_sparseCollisionMap[dir]["#{y}|#{a}"] = {
               wallDepth
               wallType
+              wallOrientation
               collideStart
               collideEnd
             }
@@ -179,7 +182,7 @@ GameManager = new class GameManager
 
 
   blockTypeAt: (coords) ->
-    color = @_getBlock(coords)
+    color = @_map.getColor(coords[0], coords[1], coords[2])
     if color
       PaletteManager.collisionFor(color)
     else

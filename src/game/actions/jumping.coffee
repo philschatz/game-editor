@@ -23,3 +23,5 @@ module.exports = new class Jumping
   begin: (game, sprite) -> ANIMATION.start(sprite)
   end: -> ANIMATION.stop()
   act: ->
+    MovementHelper.flipSpriteLeftRight()
+    @

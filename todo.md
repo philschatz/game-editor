@@ -10,7 +10,7 @@ TODO:
 - [ ] orient voxels
   - [x] update level format to store orientation
   - [x] randomize orientation for textures (if none is set) in game
-  - [ ] change sprites based on ladder orientation
+  - [x] change sprites based on ladder orientation
 - [ ] add a skymap http://jeromeetienne.github.io/threex.skymap/examples/basic.html
 
 - [x] pause game when rotating

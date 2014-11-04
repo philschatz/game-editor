@@ -16,3 +16,5 @@ module.exports = new class Falling
   begin: (game, sprite) -> ANIMATION.start(sprite)
   end: -> ANIMATION.stop()
   act: ->
+    MovementHelper.flipSpriteLeftRight()
+    @
