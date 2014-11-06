@@ -57206,9 +57206,9 @@ window.startEditor = function() {
   var addColor, bindEventsAndPlugins, changeColor, container, exportFunction, getDimensions, levelPromise, pickColor, showWelcome, updateColor;
   container = null;
   if (window.location.hash) {
-    levelPromise = LevelLoader.loadHash('/data/palette-nature.json');
+    levelPromise = LevelLoader.loadHash('./data/palette-nature.json');
   } else {
-    levelPromise = LevelLoader.load('/data/level-lighthouse.json');
+    levelPromise = LevelLoader.load('./data/level-lighthouse.json');
   }
   levelPromise.then(function(level) {
     var addColorToPalette, alreadyCreatedGame, cameraHandlers, initEditor;
@@ -58672,6 +58672,8 @@ GameManager = new (GameManager = (function() {
 
   GameManager.prototype._cachedInfo = null;
 
+  GameManager.prototype._playerRotatedBehindWall = false;
+
   GameManager.prototype._getGame = function() {
     return window.game;
   };
@@ -58883,6 +58885,43 @@ GameManager = new (GameManager = (function() {
       }
     }
     return this._cachedInfo;
+  };
+
+  GameManager.prototype.isPlayerBehind = function(depth, playerDepth) {
+    var axis, multiplier, playerPosition, wallDepth, x, y, z, _ref, _ref1;
+    if (depth == null) {
+      depth = null;
+    }
+    if (playerDepth == null) {
+      playerDepth = null;
+    }
+    _ref = this.get2DInfo(), multiplier = _ref.multiplier, axis = _ref.axis;
+    if (depth == null) {
+      _ref1 = this._getGame().controlling.position, x = _ref1.x, y = _ref1.y, z = _ref1.z;
+      wallDepth = this.getFlattenedInfoCoords(x, y, z, false).wallDepth;
+      depth = wallDepth;
+    }
+    if (playerDepth == null) {
+      playerPosition = this._getGame().controlling.position;
+      switch (axis) {
+        case 0:
+          playerDepth = playerPosition.x;
+          break;
+        case 2:
+          playerDepth = playerPosition.z;
+          break;
+        default:
+          throw new Error('BUG: Invalid axis');
+      }
+    }
+    if (depth == null) {
+      return false;
+    }
+    return multiplier * (playerDepth - depth) <= 0;
+  };
+
+  GameManager.prototype.setPlayerRotatedBehindWall = function(_playerRotatedBehindWall) {
+    this._playerRotatedBehindWall = _playerRotatedBehindWall;
   };
 
   GameManager.prototype.getFlattenedInfo = function(coords, isReversed) {
@@ -59417,7 +59456,7 @@ module.exports = function(other, bbox, desired_vector, resting) {
   desiredVectorCoords[1] = desired_vector.y;
   desiredVectorCoords[2] = desired_vector.z;
   hit = function(collisionAxis, tile, coords, dir, edge) {
-    var axis, collideEnd, collideStart, isBehindWall, isBehindWallMultiplier, isCameraAxis, isHit, isVelocityAxis, ladderDepth, multiplier, newCoords, newDepth, perpendicAxis, playerBase, playerDepth, scaleJustToBeSafe, setNewDepth, wallDepth, wallType, y, _ref, _ref1, _ref2, _ref3, _ref4;
+    var axis, collideEnd, collideStart, isBehindWall, isBehindWallMultiplier, isCameraAxis, isHit, isVelocityAxis, ladderDepth, multiplier, newDepth, perpendicAxis, playerBase, playerDepth, scaleJustToBeSafe, wallDepth, wallType, y, _ref, _ref1, _ref2, _ref3;
     if (coords[1] < -2) {
       console.warn('You died by falling too much');
       return true;
@@ -59431,7 +59470,6 @@ module.exports = function(other, bbox, desired_vector, resting) {
     playerDepth = Math.floor(playerBase[perpendicAxis]);
     newDepth = playerDepth;
     scaleJustToBeSafe = 1.5;
-    setNewDepth = function(depth, msg) {};
     if (isVelocityAxis) {
       wallDepth = GameManager.getFlattenedInfo(playerBase).wallDepth;
       isBehindWall = isPlayerBehind(multiplier, playerDepth, wallDepth) && !isPlayerBehind(-1 * multiplier, playerDepth, (_ref1 = GameManager.getFlattenedInfo(playerBase, true)) != null ? _ref1.wallDepth : void 0);
@@ -59439,9 +59477,7 @@ module.exports = function(other, bbox, desired_vector, resting) {
       _ref2 = GameManager.getFlattenedInfo(coords, isBehindWall), wallDepth = _ref2.wallDepth, wallType = _ref2.wallType, collideStart = _ref2.collideStart, collideEnd = _ref2.collideEnd;
       if (PlayerManager.isClimbing()) {
         _ref3 = GameManager.getFlattenedInfoCoords(coords[0], coords[1], coords[2], isBehindWall), wallType = _ref3.wallType, wallDepth = _ref3.wallDepth, ladderDepth = _ref3.ladderDepth;
-        if (ladderDepth != null) {
-          setNewDepth(ladderDepth, 'because-is-ladder-and-climbing');
-        } else {
+        if (ladderDepth == null) {
           isHit = true;
           desiredVectorCoords[collisionAxis] = desired_vector[axes[collisionAxis]] = 0;
           other.velocity[axes[collisionAxis]] = 0;
@@ -59456,40 +59492,13 @@ module.exports = function(other, bbox, desired_vector, resting) {
         } else if (collisionAxis === 1 && dir === -1 && coords[1] <= playerBase[1] + dir) {
           if (collideStart != null) {
             isHit = true;
-            if ((collideStart <= playerDepth && playerDepth <= collideEnd)) {
-              setNewDepth(playerDepth, 'because-falling-onto-collide-range1. keeping depth same');
-            } else if (playerDepth < collideStart) {
-              setNewDepth(collideStart, 'because-falling-onto-collide-range1. moving to start');
-            } else if (playerDepth > collideEnd) {
-              setNewDepth(collideEnd, 'because-falling-onto-collide-range1. moving to end');
-            }
           } else if (wallType === 'top' || wallType === 'all') {
             if (Math.floor(coords[1]) < Math.floor(playerBase[1])) {
               isHit = true;
             }
-            setNewDepth(wallDepth, 'because-falling-onto-top/all');
-          }
-        } else if (isCameraAxis) {
-          _ref4 = GameManager.getFlattenedInfoCoords(coords[0], y - 1, coords[2], isBehindWall), collideStart = _ref4.collideStart, collideEnd = _ref4.collideEnd;
-          if (collideStart != null) {
-            if ((collideStart <= playerDepth && playerDepth <= collideEnd)) {
-              setNewDepth(playerDepth, 'because-falling-onto-collide-range2. keeping depth same');
-            } else if (playerDepth < collideStart) {
-              setNewDepth(collideStart, 'because-falling-onto-collide-range2. moving to start');
-            } else if (playerDepth > collideEnd) {
-              setNewDepth(collideEnd, 'because-falling-onto-collide-range2. moving to end');
-            }
-          }
-          if ((wallDepth != null) && (collideStart == null)) {
-            setNewDepth(wallDepth + multiplier * isBehindWallMultiplier, 'because-walking-into-wall');
           }
         }
       }
-    }
-    if ((newDepth != null) && Math.floor(newDepth) !== Math.floor(playerDepth)) {
-      newCoords = playerBase;
-      newCoords[perpendicAxis] = Math.floor(newDepth) + .5;
-      this.controlling.moveTo(newCoords[0], newCoords[1], newCoords[2]);
     }
     if (!isHit) {
       return;
@@ -60274,7 +60283,7 @@ module.exports = function(SceneManager) {
     return MainCamera.rotateCameraTo(theta, phi);
   };
   game.on('tick', function() {
-    var boxes, cameraAxis, cameraDir, cameraPerpendicAxis, cameraType, isDoneRotating, playerX, playerY, y;
+    var boxes, cameraAxis, cameraDir, cameraPerpendicAxis, cameraType, isDoneRotating, isPlayerBehind, playerX, playerY, y;
     if (!rotatingCameraDir && game.controls.state.rotate_clockwise) {
       y = game.controlling.rotation.y;
       y = Math.round(y * 2 / Math.PI);
@@ -60333,6 +60342,8 @@ module.exports = function(SceneManager) {
         rotatingCameraDir = 0;
         GameManager.invalidateCache();
         game.pausedPhysics = false;
+        isPlayerBehind = GameManager.isPlayerBehind();
+        GameManager.setPlayerRotatedBehindWall(isPlayerBehind);
       }
       rotateCamera();
     } else {
