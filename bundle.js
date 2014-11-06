@@ -57202,6 +57202,10 @@ $('.export-voxel-json').on('click', function() {
   return alert('Check the console for the JSON because it is too big for an alert');
 });
 
+$('.mobile-keyboard').on('keyup', function(evt) {
+  return evt.target.value = '';
+});
+
 window.startEditor = function() {
   var addColor, bindEventsAndPlugins, changeColor, container, exportFunction, getDimensions, levelPromise, pickColor, showWelcome, updateColor;
   container = null;
@@ -60249,6 +60253,10 @@ module.exports = function(SceneManager) {
       '<left>': 'left',
       '<down>': 'backward',
       '<right>': 'right',
+      I: 'forward',
+      J: 'left',
+      K: 'backward',
+      L: 'right',
       '<mouse 1>': 'fire',
       '<mouse 2>': 'firealt',
       '<space>': 'jump',
