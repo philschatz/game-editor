@@ -44,9 +44,9 @@ window.startEditor = ->
 
 
   if window.location.hash
-    levelPromise = LevelLoader.loadHash('/data/palette-nature.json')
+    levelPromise = LevelLoader.loadHash('./data/palette-nature.json')
   else
-    levelPromise = LevelLoader.load('/data/level-lighthouse.json')
+    levelPromise = LevelLoader.load('./data/level-lighthouse.json')
 
   levelPromise.then (level) ->
     alreadyCreatedGame = false

@@ -12,7 +12,7 @@ SceneManager.prepare(container)
 SceneManager.init(container)
 container.appendChild(SceneManager.renderer.domElement)
 
-LevelLoader.load('/data/level-empty.json')
+LevelLoader.load('./data/level-empty.json')
 .then (level) ->
 
   # These steps are *only* to generate the exported geometries
