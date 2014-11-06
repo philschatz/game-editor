@@ -47,12 +47,6 @@ module.exports = (other, bbox, desired_vector, resting) ->
     newDepth = playerDepth
     scaleJustToBeSafe = 1.5
 
-    setNewDepth = (depth, msg) ->
-      # if Math.floor(depth) isnt Math.floor(newDepth)
-      #   newDepth = Math.floor(depth)
-      #   console.log "Setting new depth #{msg}"
-
-
     if isVelocityAxis
 
       # If the player is behind a wall then operate as if the level was rotated 180 degrees.
@@ -82,9 +76,7 @@ module.exports = (other, bbox, desired_vector, resting) ->
           # - Left
           # - Right
           {wallType, wallDepth, ladderDepth} = GameManager.getFlattenedInfoCoords(coords[0], coords[1], coords[2], isBehindWall)
-          if ladderDepth?
-            setNewDepth(ladderDepth, 'because-is-ladder-and-climbing')
-          else
+          unless ladderDepth?
             isHit = true
 
             desiredVectorCoords[collisionAxis] = desired_vector[axes[collisionAxis]] = 0
@@ -106,52 +98,11 @@ module.exports = (other, bbox, desired_vector, resting) ->
           # This is inlined several times
           if collideStart?
             isHit = true # Hit!
-            if collideStart <= playerDepth <= collideEnd
-              # depth is fine. May have been set by above code (icky but I'm lazy)
-              setNewDepth(playerDepth, 'because-falling-onto-collide-range1. keeping depth same')
-            else if playerDepth < collideStart
-              setNewDepth(collideStart, 'because-falling-onto-collide-range1. moving to start')
-            else if playerDepth > collideEnd
-              setNewDepth(collideEnd, 'because-falling-onto-collide-range1. moving to end')
 
           else if wallType in ['top', 'all']
             if Math.floor(coords[1]) < Math.floor(playerBase[1])
               isHit = true # Hit!
-            setNewDepth(wallDepth, 'because-falling-onto-top/all')
 
-
-        else if isCameraAxis
-
-          {collideStart, collideEnd} = GameManager.getFlattenedInfoCoords(coords[0], y - 1, coords[2], isBehindWall)
-
-          # This is inlined several times
-          if collideStart?
-            if collideStart <= playerDepth <= collideEnd
-              # depth is fine. May have been set by above code (icky but I'm lazy)
-              setNewDepth(playerDepth, 'because-falling-onto-collide-range2. keeping depth same')
-            else if playerDepth < collideStart
-              setNewDepth(collideStart, 'because-falling-onto-collide-range2. moving to start')
-            else if playerDepth > collideEnd
-              setNewDepth(collideEnd, 'because-falling-onto-collide-range2. moving to end')
-
-
-          # If I am walking into a wall
-          if wallDepth? and not collideStart?
-            # If there was a collideStart it already shifted me to that position.
-            # But there isn't so just shift me in front of the wall and I will start falling
-            setNewDepth(wallDepth + multiplier * isBehindWallMultiplier, 'because-walking-into-wall')
-
-
-    if newDepth? and Math.floor(newDepth) isnt Math.floor(playerDepth)
-
-      # Moving back is only necessary when the block below is a hole or if there is a wall on or in front of it
-      # Without this, the player "snaps" in front of a wall
-      # when they don't really need to.
-      newCoords = playerBase
-      # console.log 'moving from:', playerBase
-      newCoords[perpendicAxis] = Math.floor(newDepth) + .5 # to center the player
-      # console.log 'moving to  :', newCoords
-      @controlling.moveTo(newCoords[0], newCoords[1], newCoords[2])
 
     return unless isHit
 
