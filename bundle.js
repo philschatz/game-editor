@@ -106,7 +106,7 @@ module.exports = {
 
 
 
-},{"./src/voxels/texture-cube":136}],2:[function(require,module,exports){
+},{"./src/voxels/texture-cube":137}],2:[function(require,module,exports){
 var RendererStats, SceneManager, Stats, requestAnimationFrame, rstats, stats;
 
 Number.prototype.mod = function(n) {
@@ -57575,7 +57575,7 @@ window.startEditor = function() {
 
 
 
-},{"./export-geometry":1,"./src/editor/axis-camera":106,"./src/editor/color-manager":107,"./src/editor/color-utils":108,"./src/editor/hash-manager":109,"./src/editor/icon-maker":110,"./src/editor/input-manager":111,"./src/editor/interactions":112,"./src/editor/key-mouse-handlers":113,"./src/editor/scene-manager":114,"./src/game":130,"./src/loaders/level":131,"./src/main-camera":132,"./src/voxels/palette-manager":135,"./src/voxels/texture-cube":136,"./src/voxels/voxel-factory":137,"raf":40}],105:[function(require,module,exports){
+},{"./export-geometry":1,"./src/editor/axis-camera":106,"./src/editor/color-manager":107,"./src/editor/color-utils":108,"./src/editor/hash-manager":109,"./src/editor/icon-maker":110,"./src/editor/input-manager":111,"./src/editor/interactions":112,"./src/editor/key-mouse-handlers":113,"./src/editor/scene-manager":114,"./src/game":131,"./src/loaders/level":132,"./src/main-camera":133,"./src/voxels/palette-manager":136,"./src/voxels/texture-cube":137,"./src/voxels/voxel-factory":138,"raf":40}],105:[function(require,module,exports){
 var MainCamera;
 
 module.exports = MainCamera = (function() {
@@ -57959,7 +57959,7 @@ module.exports = IconMaker = (function() {
 
 
 
-},{"../three":134}],111:[function(require,module,exports){
+},{"../three":135}],111:[function(require,module,exports){
 var THREE;
 
 THREE = require('../three');
@@ -57980,7 +57980,7 @@ module.exports = {
 
 
 
-},{"../three":134}],112:[function(require,module,exports){
+},{"../three":135}],112:[function(require,module,exports){
 var Input, Interactions, MainCamera, SceneManager, THREE;
 
 THREE = require('../three');
@@ -58083,7 +58083,7 @@ module.exports = new (Interactions = (function() {
 
 
 
-},{"../main-camera":132,"../three":134,"./input-manager":111,"./scene-manager":114}],113:[function(require,module,exports){
+},{"../main-camera":133,"../three":135,"./input-manager":111,"./scene-manager":114}],113:[function(require,module,exports){
 var ColorManager, HashManager, Input, Interactions, KeyMouseHandlers, MainCamera, SceneManager, setIsometricAngle;
 
 ColorManager = require('./color-manager');
@@ -58310,7 +58310,7 @@ module.exports = new (KeyMouseHandlers = (function() {
 
 
 
-},{"../main-camera":132,"./color-manager":107,"./hash-manager":109,"./input-manager":111,"./interactions":112,"./scene-manager":114}],114:[function(require,module,exports){
+},{"../main-camera":133,"./color-manager":107,"./hash-manager":109,"./input-manager":111,"./interactions":112,"./scene-manager":114}],114:[function(require,module,exports){
 var AxisCamera, InputManager, MainCamera, PaletteManager, SceneManager, SpriteAnimationHandler, THREE, VoxelFactory;
 
 SpriteAnimationHandler = require('../sprite-animation').SpriteAnimationHandler;
@@ -58557,7 +58557,7 @@ module.exports = new (SceneManager = (function() {
 
 
 
-},{"../main-camera":132,"../sprite-animation":133,"../three":134,"../voxels/palette-manager":135,"../voxels/voxel-factory":137,"./axis-camera":106,"./input-manager":111}],115:[function(require,module,exports){
+},{"../main-camera":133,"../sprite-animation":134,"../three":135,"../voxels/palette-manager":136,"../voxels/voxel-factory":138,"./axis-camera":106,"./input-manager":111}],115:[function(require,module,exports){
 var ANIMATION, Climbing, GameManager, MovementHelper, OrientedPositionAnimation;
 
 MovementHelper = require('./movement-helper');
@@ -58616,7 +58616,7 @@ module.exports = new (Climbing = (function() {
 
 
 
-},{"../../sprite-animation":133,"./game-manager":117,"./movement-helper":120}],116:[function(require,module,exports){
+},{"../../sprite-animation":134,"./game-manager":117,"./movement-helper":120}],116:[function(require,module,exports){
 var ANIMATION, Falling, MovementHelper, StillAnimation;
 
 MovementHelper = require('./movement-helper');
@@ -58658,7 +58658,7 @@ module.exports = new (Falling = (function() {
 
 
 
-},{"../../sprite-animation":133,"./movement-helper":120}],117:[function(require,module,exports){
+},{"../../sprite-animation":134,"./movement-helper":120}],117:[function(require,module,exports){
 var GameManager, PaletteManager;
 
 PaletteManager = require('../../voxels/palette-manager');
@@ -58677,7 +58677,7 @@ GameManager = new (GameManager = (function() {
   };
 
   GameManager.prototype.load = function(_map) {
-    var B, a, aboveColor, b, collideEnd, collideStart, color, dir, multiplier, myColor, orientation, pos, type, wallDepth, wallOrientation, wallType, y, _i, _results;
+    var B, a, aboveColor, b, collideEnd, collideStart, color, dir, ladderDepth, multiplier, myColor, orientation, pos, type, wallDepth, wallOrientation, wallType, y, _i, _results;
     this._map = _map;
     this._sparseCollisionMap = [{}, {}, {}, {}];
     _results = [];
@@ -58693,6 +58693,7 @@ GameManager = new (GameManager = (function() {
             for (a = _k = _ref1 = -this._loadMax, _ref2 = this._loadMax; _ref1 <= _ref2 ? _k <= _ref2 : _k >= _ref2; a = _ref1 <= _ref2 ? ++_k : --_k) {
               wallDepth = null;
               wallOrientation = null;
+              ladderDepth = null;
               type = null;
               collideStart = null;
               collideEnd = null;
@@ -58706,7 +58707,11 @@ GameManager = new (GameManager = (function() {
                 }
                 _ref5 = this._map.getInfo(pos[0], pos[1], pos[2]), color = _ref5.color, orientation = _ref5.orientation;
                 myColor = color;
-                if ((wallDepth == null) && myColor) {
+                type = PaletteManager.collisionFor(myColor);
+                if ((ladderDepth == null) && (type === 'ladder') && (wallDepth == null)) {
+                  ladderDepth = B;
+                }
+                if ((wallDepth == null) && myColor && (type !== 'ladder' && type !== 'none')) {
                   wallDepth = B;
                   wallType = PaletteManager.collisionFor(myColor);
                   wallOrientation = orientation;
@@ -58714,7 +58719,6 @@ GameManager = new (GameManager = (function() {
                 pos[1] = y + 1;
                 aboveColor = this._map.getColor(pos[0], pos[1], pos[2]);
                 if (myColor && (collideStart == null) && !aboveColor) {
-                  type = PaletteManager.collisionFor(myColor);
                   if (type === 'top' || type === 'all') {
                     collideStart = B;
                   }
@@ -58735,7 +58739,7 @@ GameManager = new (GameManager = (function() {
                   }
                 }
               }
-              if (wallDepth != null) {
+              if ((wallDepth != null) || (ladderDepth != null)) {
                 if (!(((collideStart != null) && (collideEnd != null)) || ((collideStart == null) && (collideEnd == null)))) {
                   throw new Error('BUG: collideStart should always have a matching collideEnd');
                 }
@@ -58748,6 +58752,7 @@ GameManager = new (GameManager = (function() {
                   wallDepth: wallDepth,
                   wallType: wallType,
                   wallOrientation: wallOrientation,
+                  ladderDepth: ladderDepth,
                   collideStart: collideStart,
                   collideEnd: collideEnd
                 });
@@ -58925,7 +58930,7 @@ module.exports = window.GameManager = GameManager;
 
 
 
-},{"../../voxels/palette-manager":135}],118:[function(require,module,exports){
+},{"../../voxels/palette-manager":136}],118:[function(require,module,exports){
 var ANIMATION, Idle, MovementHelper, THREE, TimeAnimation;
 
 MovementHelper = require('./movement-helper');
@@ -58980,7 +58985,7 @@ module.exports = new (Idle = (function() {
 
 
 
-},{"../../sprite-animation":133,"../../three":134,"./movement-helper":120}],119:[function(require,module,exports){
+},{"../../sprite-animation":134,"../../three":135,"./movement-helper":120}],119:[function(require,module,exports){
 var ANIMATION, Jumping, MovementHelper, StillAnimation;
 
 MovementHelper = require('./movement-helper');
@@ -59029,7 +59034,7 @@ module.exports = new (Jumping = (function() {
 
 
 
-},{"../../sprite-animation":133,"./movement-helper":120}],120:[function(require,module,exports){
+},{"../../sprite-animation":134,"./movement-helper":120}],120:[function(require,module,exports){
 var GameManager, MovementHelper;
 
 GameManager = require('./game-manager');
@@ -59085,11 +59090,11 @@ module.exports = new (MovementHelper = (function() {
   };
 
   MovementHelper.prototype.isClimbing = function() {
-    var state, wallType;
+    var ladderDepth, state;
     state = this.getControlState();
     if (state.forward || state.backward) {
-      wallType = this.playerFlattenedBlock().wallType;
-      return wallType === 'ladder';
+      ladderDepth = this.playerFlattenedBlock().ladderDepth;
+      return ladderDepth != null;
     }
   };
 
@@ -59306,7 +59311,84 @@ module.exports = new (Walking = (function() {
 
 
 
-},{"../../sprite-animation":133,"../../three":134,"./movement-helper":120}],125:[function(require,module,exports){
+},{"../../sprite-animation":134,"../../three":135,"./movement-helper":120}],125:[function(require,module,exports){
+var DEST_VECTOR, GameManager, THREE, depthAdjuster, isPlayerBehind;
+
+THREE = require('../../three');
+
+GameManager = require('../actions/game-manager');
+
+isPlayerBehind = function(multiplier, playerDepth, depth) {
+  if (depth == null) {
+    return false;
+  }
+  return multiplier * (playerDepth - depth) <= 0;
+};
+
+DEST_VECTOR = new THREE.Vector3();
+
+module.exports = depthAdjuster = function(physical, aabb, vec, stationary) {
+  var axis, collideEnd, collideStart, dirDownAndBelowIsntTop, isReversed, ladderDepth, multiplier, newDepth, perpendicAxis, playerBase, playerDepth, setNewDepth, wallDepth, wallType, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
+  _ref = aabb.base, DEST_VECTOR.x = _ref[0], DEST_VECTOR.y = _ref[1], DEST_VECTOR.z = _ref[2];
+  if (vec.y < -1) {
+    vec.y = -1;
+  }
+  DEST_VECTOR.addVectors(DEST_VECTOR, vec);
+  isReversed = false;
+  _ref1 = GameManager.get2DInfo(), perpendicAxis = _ref1.perpendicAxis, multiplier = _ref1.multiplier, axis = _ref1.axis;
+  playerBase = aabb.base;
+  playerDepth = Math.floor(playerBase[perpendicAxis]);
+  newDepth = playerDepth;
+  setNewDepth = function(depth, msg) {
+    if (Math.floor(depth) !== Math.floor(newDepth)) {
+      newDepth = Math.floor(depth);
+      return console.log("Setting new depth depthAdjuster " + msg);
+    }
+  };
+  _ref2 = GameManager.getFlattenedInfoCoords(DEST_VECTOR.x, DEST_VECTOR.y, DEST_VECTOR.z, isReversed), wallType = _ref2.wallType, wallDepth = _ref2.wallDepth;
+  dirDownAndBelowIsntTop = Math.floor(DEST_VECTOR.y) < Math.floor(aabb.base[1]) && GameManager.getFlattenedInfoCoords(DEST_VECTOR.x, DEST_VECTOR.y, DEST_VECTOR.z, isReversed).wallType !== 'top';
+  if ((Math.floor(DEST_VECTOR.y) === Math.floor(aabb.base[1]) || dirDownAndBelowIsntTop) && isPlayerBehind(multiplier, playerDepth, wallDepth)) {
+    _ref3 = GameManager.getFlattenedInfoCoords(DEST_VECTOR.x, DEST_VECTOR.y - 1, DEST_VECTOR.z, isReversed), collideStart = _ref3.collideStart, collideEnd = _ref3.collideEnd;
+    if (collideStart) {
+      if (playerDepth < collideStart) {
+        setNewDepth(collideStart, 'depthAdjuster. walking. moving to start');
+      } else if (playerDepth > collideEnd) {
+        setNewDepth(collideEnd, 'depthAdjuster. walking. moving to end');
+      }
+    } else {
+      setNewDepth(wallDepth + multiplier, 'because-would-be-inside-wall');
+    }
+  }
+  if (PlayerManager.isClimbing()) {
+    _ref4 = GameManager.getFlattenedInfoCoords(DEST_VECTOR.x, DEST_VECTOR.y, DEST_VECTOR.z, isReversed), wallType = _ref4.wallType, wallDepth = _ref4.wallDepth, ladderDepth = _ref4.ladderDepth;
+    if (ladderDepth != null) {
+      setNewDepth(ladderDepth, 'because-is-ladder-and-climbing2');
+    }
+  } else {
+    _ref5 = GameManager.getFlattenedInfoCoords(DEST_VECTOR.x, aabb.base[1] - 1, DEST_VECTOR.z, isReversed), collideStart = _ref5.collideStart, collideEnd = _ref5.collideEnd;
+    if (collideStart) {
+      if (playerDepth < collideStart) {
+        setNewDepth(collideStart, 'depthAdjuster. moving to start');
+      } else if (playerDepth > collideEnd) {
+        setNewDepth(collideEnd, 'depthAdjuster. moving to end');
+      }
+    }
+  }
+  if (newDepth !== playerDepth) {
+    switch (perpendicAxis) {
+      case 0:
+        return this.controlling.position.setX(newDepth + .5);
+      case 2:
+        return this.controlling.position.setZ(newDepth + .5);
+      default:
+        throw new Error('BUG: Invalid perpendicAxis');
+    }
+  }
+};
+
+
+
+},{"../../three":135,"../actions/game-manager":117}],126:[function(require,module,exports){
 var GameManager, PlayerManager, axes, desiredVectorCoords, isPlayerBehind, tmpCoord, _;
 
 _ = require('underscore');
@@ -59335,7 +59417,7 @@ module.exports = function(other, bbox, desired_vector, resting) {
   desiredVectorCoords[1] = desired_vector.y;
   desiredVectorCoords[2] = desired_vector.z;
   hit = function(collisionAxis, tile, coords, dir, edge) {
-    var axis, collideEnd, collideStart, isBehindWall, isBehindWallMultiplier, isCameraAxis, isHit, isVelocityAxis, multiplier, newCoords, newDepth, perpendicAxis, playerBase, playerDepth, scaleJustToBeSafe, setNewDepth, wallDepth, wallType, y, _ref, _ref1, _ref2, _ref3, _ref4;
+    var axis, collideEnd, collideStart, isBehindWall, isBehindWallMultiplier, isCameraAxis, isHit, isVelocityAxis, ladderDepth, multiplier, newCoords, newDepth, perpendicAxis, playerBase, playerDepth, scaleJustToBeSafe, setNewDepth, wallDepth, wallType, y, _ref, _ref1, _ref2, _ref3, _ref4;
     if (coords[1] < -2) {
       console.warn('You died by falling too much');
       return true;
@@ -59349,30 +59431,24 @@ module.exports = function(other, bbox, desired_vector, resting) {
     playerDepth = Math.floor(playerBase[perpendicAxis]);
     newDepth = playerDepth;
     scaleJustToBeSafe = 1.5;
-    setNewDepth = function(depth) {
-      if (Math.floor(depth) !== Math.floor(newDepth)) {
-        return newDepth = Math.floor(depth);
-      }
-    };
+    setNewDepth = function(depth, msg) {};
     if (isVelocityAxis) {
       wallDepth = GameManager.getFlattenedInfo(playerBase).wallDepth;
       isBehindWall = isPlayerBehind(multiplier, playerDepth, wallDepth) && !isPlayerBehind(-1 * multiplier, playerDepth, (_ref1 = GameManager.getFlattenedInfo(playerBase, true)) != null ? _ref1.wallDepth : void 0);
       isBehindWallMultiplier = isBehindWall ? -1 : 1;
       _ref2 = GameManager.getFlattenedInfo(coords, isBehindWall), wallDepth = _ref2.wallDepth, wallType = _ref2.wallType, collideStart = _ref2.collideStart, collideEnd = _ref2.collideEnd;
       if (PlayerManager.isClimbing()) {
-        if (playerBase[collisionAxis] !== coords[collisionAxis]) {
-          _ref3 = GameManager.getFlattenedInfoCoords(coords[0], coords[1], coords[2], isBehindWall), wallType = _ref3.wallType, wallDepth = _ref3.wallDepth;
-          if (wallType === 'ladder') {
-            setNewDepth(wallDepth);
-          } else {
-            isHit = true;
-            desiredVectorCoords[collisionAxis] = desired_vector[axes[collisionAxis]] = 0;
-            other.velocity[axes[collisionAxis]] = 0;
-            other.acceleration[axes[collisionAxis]] = 0;
-            resting[axes[collisionAxis]] = 1;
-            other.friction[axes[(collisionAxis + 1) % 3]] = other.friction[axes[(collisionAxis + 2) % 3]] = 1;
-            return true;
-          }
+        _ref3 = GameManager.getFlattenedInfoCoords(coords[0], coords[1], coords[2], isBehindWall), wallType = _ref3.wallType, wallDepth = _ref3.wallDepth, ladderDepth = _ref3.ladderDepth;
+        if (ladderDepth != null) {
+          setNewDepth(ladderDepth, 'because-is-ladder-and-climbing');
+        } else {
+          isHit = true;
+          desiredVectorCoords[collisionAxis] = desired_vector[axes[collisionAxis]] = 0;
+          other.velocity[axes[collisionAxis]] = 0;
+          other.acceleration[axes[collisionAxis]] = 0;
+          resting[axes[collisionAxis]] = 1;
+          other.friction[axes[(collisionAxis + 1) % 3]] = other.friction[axes[(collisionAxis + 2) % 3]] = 1;
+          return true;
         }
       } else {
         if (collisionAxis === 1 && dir === 1) {
@@ -59381,39 +59457,95 @@ module.exports = function(other, bbox, desired_vector, resting) {
           if (collideStart != null) {
             isHit = true;
             if ((collideStart <= playerDepth && playerDepth <= collideEnd)) {
-              setNewDepth(playerDepth);
+              setNewDepth(playerDepth, 'because-falling-onto-collide-range1. keeping depth same');
             } else if (playerDepth < collideStart) {
-              setNewDepth(collideStart);
+              setNewDepth(collideStart, 'because-falling-onto-collide-range1. moving to start');
             } else if (playerDepth > collideEnd) {
-              setNewDepth(collideEnd);
+              setNewDepth(collideEnd, 'because-falling-onto-collide-range1. moving to end');
             }
           } else if (wallType === 'top' || wallType === 'all') {
-            isHit = true;
-            setNewDepth(wallDepth);
+            if (Math.floor(coords[1]) < Math.floor(playerBase[1])) {
+              isHit = true;
+            }
+            setNewDepth(wallDepth, 'because-falling-onto-top/all');
           }
         } else if (isCameraAxis) {
           _ref4 = GameManager.getFlattenedInfoCoords(coords[0], y - 1, coords[2], isBehindWall), collideStart = _ref4.collideStart, collideEnd = _ref4.collideEnd;
           if (collideStart != null) {
             if ((collideStart <= playerDepth && playerDepth <= collideEnd)) {
-              setNewDepth(playerDepth);
+              setNewDepth(playerDepth, 'because-falling-onto-collide-range2. keeping depth same');
             } else if (playerDepth < collideStart) {
-              setNewDepth(collideStart);
+              setNewDepth(collideStart, 'because-falling-onto-collide-range2. moving to start');
             } else if (playerDepth > collideEnd) {
-              setNewDepth(collideEnd);
+              setNewDepth(collideEnd, 'because-falling-onto-collide-range2. moving to end');
             }
           }
           if ((wallDepth != null) && (collideStart == null)) {
-            setNewDepth(wallDepth + multiplier * isBehindWallMultiplier);
+            setNewDepth(wallDepth + multiplier * isBehindWallMultiplier, 'because-walking-into-wall');
           }
         }
       }
     }
     if ((newDepth != null) && Math.floor(newDepth) !== Math.floor(playerDepth)) {
       newCoords = playerBase;
-      console.log('moving from:', playerBase);
       newCoords[perpendicAxis] = Math.floor(newDepth) + .5;
-      console.log('moving to  :', newCoords);
       this.controlling.moveTo(newCoords[0], newCoords[1], newCoords[2]);
+    }
+    if (!isHit) {
+      return;
+    }
+    if (Math.abs(desiredVectorCoords[collisionAxis]) < Math.abs(edge)) {
+      return;
+    }
+    desiredVectorCoords[collisionAxis] = desired_vector[axes[collisionAxis]] = edge;
+    other.acceleration[axes[collisionAxis]] = 0;
+    resting[axes[collisionAxis]] = dir;
+    other.friction[axes[(collisionAxis + 1) % 3]] = other.friction[axes[(collisionAxis + 2) % 3]] = (collisionAxis === 1 ? self.friction : 1);
+    return true;
+  };
+  this.collideVoxels(bbox, desiredVectorCoords, hit.bind(this));
+};
+
+module.exports = function(other, bbox, desired_vector, resting) {
+  var hit, self;
+  self = this;
+  desiredVectorCoords[0] = desired_vector.x;
+  desiredVectorCoords[1] = desired_vector.y;
+  desiredVectorCoords[2] = desired_vector.z;
+  hit = function(collisionAxis, tile, coords, dir, edge) {
+    var axis, collideEnd, collideStart, isBehindWall, isBehindWallMultiplier, isCameraAxis, isHit, isVelocityAxis, ladderDepth, multiplier, perpendicAxis, playerBase, playerDepth, wallDepth, wallType, y, _ref, _ref1, _ref2, _ref3;
+    if (coords[1] < -2) {
+      console.warn('You died by falling too much');
+      return true;
+    }
+    isHit = false;
+    y = coords[1];
+    _ref = GameManager.get2DInfo(), perpendicAxis = _ref.perpendicAxis, multiplier = _ref.multiplier, axis = _ref.axis;
+    isCameraAxis = axis === collisionAxis;
+    isVelocityAxis = desiredVectorCoords[collisionAxis] !== 0;
+    playerBase = this.controlling.aabb().base;
+    if (PlayerManager.isClimbing()) {
+      _ref1 = GameManager.getFlattenedInfoCoords(coords[0], coords[1], coords[2], isBehindWall), wallType = _ref1.wallType, wallDepth = _ref1.wallDepth, ladderDepth = _ref1.ladderDepth;
+      if (ladderDepth != null) {
+
+      } else {
+        isHit = true;
+        desiredVectorCoords[collisionAxis] = desired_vector[axes[collisionAxis]] = 0;
+        other.velocity[axes[collisionAxis]] = 0;
+        other.acceleration[axes[collisionAxis]] = 0;
+        resting[axes[collisionAxis]] = 1;
+        other.friction[axes[(collisionAxis + 1) % 3]] = other.friction[axes[(collisionAxis + 2) % 3]] = 1;
+        return true;
+      }
+    } else if (collisionAxis === 1 && dir === -1 && Math.floor(coords[1]) < Math.floor(playerBase[1])) {
+      playerDepth = Math.floor(playerBase[perpendicAxis]);
+      wallDepth = GameManager.getFlattenedInfo(playerBase).wallDepth;
+      isBehindWall = isPlayerBehind(multiplier, playerDepth, wallDepth) && !isPlayerBehind(-1 * multiplier, playerDepth, (_ref2 = GameManager.getFlattenedInfo(playerBase, true)) != null ? _ref2.wallDepth : void 0);
+      isBehindWallMultiplier = isBehindWall ? -1 : 1;
+      _ref3 = GameManager.getFlattenedInfoCoords(coords[0], coords[1], coords[2], isBehindWall), collideStart = _ref3.collideStart, collideEnd = _ref3.collideEnd;
+      if (collideStart != null) {
+        isHit = true;
+      }
     }
     if (!isHit) {
       return;
@@ -59432,7 +59564,7 @@ module.exports = function(other, bbox, desired_vector, resting) {
 
 
 
-},{"../actions/game-manager":117,"../actions/player-manager":121,"underscore":41}],126:[function(require,module,exports){
+},{"../actions/game-manager":117,"../actions/player-manager":121,"underscore":41}],127:[function(require,module,exports){
 module.exports = function(field, tilesize, dimensions, offset) {
   var collide, coords;
   collide = function(box, vec, oncollision) {
@@ -59509,7 +59641,7 @@ module.exports = function(field, tilesize, dimensions, offset) {
 
 
 
-},{}],127:[function(require,module,exports){
+},{}],128:[function(require,module,exports){
 var ActionTypes, PI, PlayerManager, abs, clamp, floor, max, min, sin, tick;
 
 PlayerManager = require('../actions/player-manager');
@@ -59645,7 +59777,7 @@ module.exports = tick = function(dt) {
 
 
 
-},{"../actions/player-manager":121,"../actions/types":123}],128:[function(require,module,exports){
+},{"../actions/player-manager":121,"../actions/types":123}],129:[function(require,module,exports){
 var DESIRED, DIRECTION, END, LOCAL_ATTRACTOR, Physical, PlayerManager, START, THREE, TOTAL_FORCES, WORLD_DESIRED, aabb, abs, applyTo, axes, cons, physical, proto;
 
 THREE = require('../../three');
@@ -59793,6 +59925,24 @@ proto.tick = function(dt) {
   } else {
     acceleration.z = velocity.z = 0;
   }
+  if (desired.x > 1) {
+    desired.x = 1;
+  }
+  if (desired.x < -1) {
+    desired.x = -1;
+  }
+  if (desired.y > 1) {
+    desired.y = 1;
+  }
+  if (desired.y < -1) {
+    desired.y = -1;
+  }
+  if (desired.z > 1) {
+    desired.z = 1;
+  }
+  if (desired.z < -1) {
+    desired.z = -1;
+  }
   START.copy(this.avatar.position);
   this.avatar.translateX(desired.x);
   this.avatar.translateY(desired.y);
@@ -59851,7 +60001,7 @@ proto.atRestZ = function() {
 
 
 
-},{"../../three":134,"../actions/player-manager":121,"aabb-3d":10}],129:[function(require,module,exports){
+},{"../../three":135,"../actions/player-manager":121,"aabb-3d":10}],130:[function(require,module,exports){
 var THREE, parseXYZ, skin;
 
 THREE = require('../../three');
@@ -59958,8 +60108,8 @@ module.exports = function(game) {
 
 
 
-},{"../../three":134}],130:[function(require,module,exports){
-var ActionTypes, CollideTerrain, Collision3DTilemap, GameManager, LinearSpriteAnimation, MainCamera, PLAYER_SIZE, VoxelControlTick, VoxelPhysical, createGame, kbControls, player, skin, voxel, voxelView;
+},{"../../three":135}],131:[function(require,module,exports){
+var ActionTypes, CollideTerrain, Collision3DTilemap, GameManager, LinearSpriteAnimation, MainCamera, PLAYER_SIZE, VoxelControlTick, VoxelPhysical, createGame, depthAdjuster, kbControls, player, skin, voxel, voxelView;
 
 ActionTypes = require('./actions/types');
 
@@ -59986,6 +60136,8 @@ Collision3DTilemap = require('./customized/collision-3d-tilemap');
 VoxelControlTick = require('./customized/voxel-control-tick');
 
 CollideTerrain = require('./collisions/terrain');
+
+depthAdjuster = require('./collisions/depth-adjuster');
 
 GameManager = require('./actions/game-manager');
 
@@ -60024,6 +60176,15 @@ module.exports = function(SceneManager) {
     }
     playerPos = this.playerPosition();
     this.spatial.emit("position", playerPos, playerPos);
+  };
+  createGame.prototype.potentialCollisionSet = function() {
+    return [
+      {
+        collide: depthAdjuster.bind(this)
+      }, {
+        collide: this.collideTerrain.bind(this)
+      }
+    ];
   };
   THREE = createGame.THREE;
   view = new voxelView(THREE, {
@@ -60183,7 +60344,7 @@ module.exports = function(SceneManager) {
 
 
 
-},{"../main-camera":132,"../sprite-animation":133,"./actions/game-manager":117,"./actions/player-manager":121,"./actions/types":123,"./collisions/terrain":125,"./customized/collision-3d-tilemap":126,"./customized/voxel-control-tick":127,"./customized/voxel-physical":128,"./customized/voxel-player":129,"kb-controls":34,"minecraft-skin":39,"voxel":97,"voxel-engine":46,"voxel-view":95}],131:[function(require,module,exports){
+},{"../main-camera":133,"../sprite-animation":134,"./actions/game-manager":117,"./actions/player-manager":121,"./actions/types":123,"./collisions/depth-adjuster":125,"./collisions/terrain":126,"./customized/collision-3d-tilemap":127,"./customized/voxel-control-tick":128,"./customized/voxel-physical":129,"./customized/voxel-player":130,"kb-controls":34,"minecraft-skin":39,"voxel":97,"voxel-engine":46,"voxel-view":95}],132:[function(require,module,exports){
 var $, EventEmitter, GenericLoader_fetchUrl, GenericLoader_parseObject, HashManager, Map, Palette, URI, ajax, recStripThingsWithUrl, _,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -60475,7 +60636,7 @@ module.exports = {
 
 
 
-},{"../editor/hash-manager":109,"events":16,"jquery":138,"underscore":41,"uri-js":45}],132:[function(require,module,exports){
+},{"../editor/hash-manager":109,"events":16,"jquery":139,"underscore":41,"uri-js":45}],133:[function(require,module,exports){
 var CameraManager, MainCamera,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -60499,7 +60660,7 @@ window.mainCamera = module.exports = new (MainCamera = (function(_super) {
 
 
 
-},{"./camera-manager":105}],133:[function(require,module,exports){
+},{"./camera-manager":105}],134:[function(require,module,exports){
 var Animation, MovementHelper, OrientedPositionAnimation, PositionAnimation, SpriteAnimationHandler, StillAnimation, TimeAnimation,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -60755,7 +60916,7 @@ module.exports = {
 
 
 
-},{"./game/actions/movement-helper":120}],134:[function(require,module,exports){
+},{"./game/actions/movement-helper":120}],135:[function(require,module,exports){
 var THREE;
 
 require('../js/exporters/BufferGeometryExporter');
@@ -60774,7 +60935,7 @@ module.exports = THREE;
 
 
 
-},{"../js/exporters/BufferGeometryExporter":3,"../js/exporters/GeometryExporter":4,"../js/exporters/MaterialExporter":5,"../js/exporters/ObjectExporter":6,"../js/loaders/ObjectLoader":7}],135:[function(require,module,exports){
+},{"../js/exporters/BufferGeometryExporter":3,"../js/exporters/GeometryExporter":4,"../js/exporters/MaterialExporter":5,"../js/exporters/ObjectExporter":6,"../js/loaders/ObjectLoader":7}],136:[function(require,module,exports){
 
 /* Example JSON format:
 {
@@ -60828,7 +60989,7 @@ module.exports = new (PaletteManager = (function() {
 
 
 
-},{}],136:[function(require,module,exports){
+},{}],137:[function(require,module,exports){
 var THREE, TextureCubeBuilder;
 
 THREE = require('../three');
@@ -60894,7 +61055,7 @@ module.exports = new (TextureCubeBuilder = (function() {
 
 
 
-},{"../three":134}],137:[function(require,module,exports){
+},{"../three":135}],138:[function(require,module,exports){
 var PaletteManager, THREE, TextureCube, VOXEL_TEMPLATE_MAP, VoxelFactory, colorCube, colorLoader, geometryLoader, textureLoader;
 
 THREE = require('../three');
@@ -61024,7 +61185,7 @@ module.exports = new (VoxelFactory = (function() {
 
 
 
-},{"../three":134,"./palette-manager":135,"./texture-cube":136}],138:[function(require,module,exports){
+},{"../three":135,"./palette-manager":136,"./texture-cube":137}],139:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.1
  * http://jquery.com/
