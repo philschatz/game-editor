@@ -39,6 +39,8 @@ $('.export-voxel-json').on 'click', ->
   alert('Check the console for the JSON because it is too big for an alert')
 
 
+$('.mobile-keyboard').on 'keyup', (evt) -> evt.target.value = ''
+
 window.startEditor = ->
   container = null
 

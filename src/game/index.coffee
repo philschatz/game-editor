@@ -135,6 +135,11 @@ module.exports = (SceneManager) ->
       '<left>': 'left'
       '<down>': 'backward'
       '<right>': 'right'
+      I: 'forward'
+      J: 'left'
+      K: 'backward'
+      L: 'right'
+
       '<mouse 1>': 'fire'
       '<mouse 2>': 'firealt'
       '<space>': 'jump'
