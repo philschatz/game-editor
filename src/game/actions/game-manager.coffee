@@ -18,6 +18,7 @@ GameManager = new class GameManager
         for a in [-@_loadMax..@_loadMax]
           wallDepth = null
           wallOrientation = null
+          ladderDepth = null
           type = null
           collideStart = null
           collideEnd = null
@@ -30,7 +31,13 @@ GameManager = new class GameManager
 
             {color, orientation} = @_map.getInfo(pos[0], pos[1], pos[2])
             myColor = color
-            if not wallDepth? and myColor
+            type = PaletteManager.collisionFor(myColor)
+
+            if not ladderDepth? and type in ['ladder'] and not wallDepth?
+              # The ladder doesn't count if it's behind a wall
+              ladderDepth = B
+
+            if not wallDepth? and myColor and type not in ['ladder', 'none']
               wallDepth = B
               wallType = PaletteManager.collisionFor(myColor)
               wallOrientation = orientation
@@ -41,7 +48,6 @@ GameManager = new class GameManager
             aboveColor = @_map.getColor(pos[0], pos[1], pos[2])
 
             if myColor and not collideStart? and not aboveColor
-              type = PaletteManager.collisionFor(myColor)
               if type in ['top', 'all']
                 collideStart = B
 
@@ -67,7 +73,7 @@ GameManager = new class GameManager
             #   break
 
           # Add the wallDepth and the range of belowCollidables
-          if wallDepth?
+          if wallDepth? or ladderDepth?
 
             unless (collideStart? and collideEnd?) or (not collideStart? and not collideEnd?)
               throw new Error('BUG: collideStart should always have a matching collideEnd')
@@ -80,6 +86,7 @@ GameManager = new class GameManager
               wallDepth
               wallType
               wallOrientation
+              ladderDepth
               collideStart
               collideEnd
             }

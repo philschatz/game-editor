@@ -111,6 +111,16 @@ proto.tick = (dt) ->
     else desired.z = (velocity.z / abs(velocity.z)) * terminal.z  if velocity.z isnt 0
   else
     acceleration.z = velocity.z = 0
+
+  # Make sure we never fall/move too fast for the collision detector
+  desired.x = 1 if desired.x > 1
+  desired.x = -1 if desired.x < -1
+  desired.y = 1 if desired.y > 1
+  desired.y = -1 if desired.y < -1
+  desired.z = 1 if desired.z > 1
+  desired.z = -1 if desired.z < -1
+
+
   START.copy @avatar.position
   @avatar.translateX desired.x
   @avatar.translateY desired.y

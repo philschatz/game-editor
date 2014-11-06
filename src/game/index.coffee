@@ -20,7 +20,8 @@ VoxelPhysical = require('./customized/voxel-physical')
 Collision3DTilemap = require './customized/collision-3d-tilemap'
 # Change up arrow to be up in the Y axis (not Z)
 VoxelControlTick = require './customized/voxel-control-tick'
-CollideTerrain = require('./collisions/terrain')
+CollideTerrain = require './collisions/terrain'
+depthAdjuster = require './collisions/depth-adjuster'
 GameManager = require './actions/game-manager'
 window.MainCamera = MainCamera = require '../main-camera'
 
@@ -56,6 +57,12 @@ module.exports = (SceneManager) ->
     @spatial.emit "position", playerPos, playerPos
     return
 
+
+  createGame::potentialCollisionSet = ->
+    [
+      { collide: depthAdjuster.bind(@) }
+      { collide: @collideTerrain.bind(@) }
+    ]
 
   THREE = createGame.THREE
   view = new voxelView THREE,

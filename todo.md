@@ -1,6 +1,7 @@
 TODO:
 
-- [ ] collision detector should test all voxels in the direction vector
+- [x] simplify collision detector by adding a depthAdjuster that runs before
+- [x] collision detector should test all voxels in the direction vector
 - [x] async fetch palette info
 - [x] async fetch level info (maybe from hash)
 - [x] generate JSON for level

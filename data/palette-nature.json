@@ -66,6 +66,7 @@
   {
     "id": "bridge-post",
     "type": "texture",
+    "collision": "none",
     "front_href": "./textures/bridge-post-1.png",
     "back_href": "./textures/bridge-post-2.png",
     "top_href": "./textures/grass.png",

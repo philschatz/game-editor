@@ -39,5 +39,5 @@ module.exports = new class MovementHelper
   isClimbing: ->
     state = @getControlState()
     if state.forward or state.backward
-      {wallType} = @playerFlattenedBlock()
-      return wallType in ['ladder']
+      {ladderDepth} = @playerFlattenedBlock()
+      return ladderDepth?
