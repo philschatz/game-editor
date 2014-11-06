@@ -274,6 +274,10 @@ module.exports = (SceneManager) ->
         GameManager.invalidateCache()
         game.pausedPhysics = false
 
+        # Check if the player has rotated themselves behind a wall
+        isPlayerBehind = GameManager.isPlayerBehind()
+        GameManager.setPlayerRotatedBehindWall(isPlayerBehind)
+
       rotateCamera()
     else
       MainCamera.updateCamera() # Update the position when the player moves

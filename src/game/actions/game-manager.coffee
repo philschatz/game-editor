@@ -6,6 +6,7 @@ GameManager = new class GameManager
 
   _loadMax: 50
   _cachedInfo: null
+  _playerRotatedBehindWall: false
 
   _getGame: -> window.game
 
@@ -169,6 +170,25 @@ GameManager = new class GameManager
     # End debug voxels. Return info
     @_cachedInfo
 
+  isPlayerBehind: (depth=null, playerDepth=null) ->
+    {multiplier, axis} = @get2DInfo()
+
+    unless depth?
+      {x, y, z} = @_getGame().controlling.position
+      {wallDepth} = @getFlattenedInfoCoords(x, y, z, false)
+      depth = wallDepth
+
+    unless playerDepth?
+      playerPosition = @_getGame().controlling.position
+      switch axis
+        when 0 then playerDepth = playerPosition.x
+        when 2 then playerDepth = playerPosition.z
+        else throw new Error('BUG: Invalid axis')
+
+    return false unless depth?
+    multiplier * (playerDepth - depth) <= 0
+
+  setPlayerRotatedBehindWall: (@_playerRotatedBehindWall) ->
 
   getFlattenedInfo: (coords, isReversed) ->
     [x, y, z] = coords
